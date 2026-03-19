@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.17] - 2026-03-19
+
+### Fixed
+- Fix poll interval: filter out disabled guilds when calculating interval (disabled guild's default 10min was overriding configured 30min)
+
 ## [1.0.16] - 2026-03-19
 
 ### Fixed

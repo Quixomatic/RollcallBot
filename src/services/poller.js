@@ -303,10 +303,10 @@ function getShortestQuickInterval() {
 async function startPolling(client) {
   console.log('[poller] Starting polling loops');
 
-  // Run first full poll + quick poll immediately
-  const allSettings = queries.getAllGuildSettings().all();
+  // Run first full poll + quick poll immediately (enabled guilds only)
+  const allSettings = queries.getAllGuildSettings().all().filter((s) => s.enabled);
   if (allSettings.length === 0) {
-    console.log('[poller] No guilds configured yet. Use /config to set up.');
+    console.log('[poller] No enabled guilds configured yet. Use /config to set up.');
   }
   for (const settings of allSettings) {
     await pollGuild(client, settings.guild_id, settings);
@@ -323,7 +323,7 @@ async function startPolling(client) {
 function scheduleFullPoll(client) {
   if (fullPollTimer) clearTimeout(fullPollTimer);
 
-  const allSettings = queries.getAllGuildSettings().all();
+  const allSettings = queries.getAllGuildSettings().all().filter((s) => s.enabled);
   const baseInterval = allSettings.reduce(
     (min, s) => Math.min(min, s.poll_interval_minutes || 10),
     parseInt(process.env.DEFAULT_POLL_INTERVAL_MINUTES, 10) || 10
