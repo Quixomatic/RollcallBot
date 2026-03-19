@@ -1,0 +1,13 @@
+services:
+  rollcall:
+    image: ghcr.io/quixomatic/rollcallbot:latest
+    container_name: rollcall
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - CLIENT_ID=${CLIENT_ID}
+    volumes:
+      - /mnt/Main/Main/docker/data/rollcall/data:/app/data
+    # Uncomment to expose Chromium remote debugging for login-server.js
+    # ports:
+    #   - "9222:9222"

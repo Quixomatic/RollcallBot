@@ -1,0 +1,8 @@
+node_modules/
+.env
+data/*.db
+data/browser-state/
+.docs/
+.plans/
+.pnpm-store/
+.claude/
