@@ -2,6 +2,11 @@ FROM mcr.microsoft.com/playwright:v1.50.0-noble
 
 WORKDIR /app
 
+# Install noVNC for web-based browser access during login
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xvfb x11vnc novnc websockify && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml ./

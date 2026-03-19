@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-19
+
+### Added
+- noVNC-based remote login for Docker — access a headed browser at `http://<host>:6080` to solve CAPTCHAs
+- Xvfb + x11vnc + noVNC installed in Docker image for web-accessible browser sessions
+
+### Fixed
+- Dockerfile: replaced corepack with `npm install -g pnpm` (corepack fails in Playwright image)
+- Dockerfile: default UID/GID set to 1000:1000 for NAS volume compatibility
+
 ## [1.0.0] - 2026-03-19
 
 ### Added

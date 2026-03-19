@@ -1,24 +1,20 @@
 /**
  * Remote login helper for Docker environments.
  *
- * Launches Chromium with remote debugging enabled so you can connect
- * from your local machine to solve CAPTCHAs and establish a session.
+ * Launches a headed Chromium browser inside a virtual display and exposes it
+ * via noVNC so you can access it from your browser at http://<NAS-IP>:6080
  *
  * Usage:
- *   node src/login-server.js <email> <password> [port]
+ *   docker exec -it rollcall node src/login-server.js <email> <password>
  *
- * Then on your local machine, open Chrome and go to:
- *   chrome://inspect/#devices
- *   Click "Configure" and add: <NAS-IP>:<port> (default 9222)
- *   Click "inspect" on the Meetup page to see and interact with it.
- *
- * Once you've solved the CAPTCHA and logged in, press Enter in the
- * terminal to save the session and exit.
+ * Then open http://<NAS-IP>:6080 in your browser.
+ * Solve the CAPTCHA, then press Enter in the terminal to save the session.
  */
 
 require('dotenv').config();
 const { chromium } = require('playwright-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { execSync, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
@@ -26,13 +22,16 @@ const readline = require('readline');
 chromium.use(StealthPlugin());
 
 const BROWSER_STATE_DIR = path.join(__dirname, '..', 'data', 'browser-state');
-const [,, email, password, portArg] = process.argv;
-const PORT = parseInt(portArg, 10) || 9222;
+const [,, email, password] = process.argv;
+const VNC_PORT = 5900;
+const NOVNC_PORT = parseInt(process.env.NOVNC_PORT, 10) || 6080;
+const DISPLAY = ':99';
 
 async function run() {
   if (!email || !password) {
-    console.log('Usage: node src/login-server.js <email> <password> [port]');
-    console.log('Default port: 9222');
+    console.log('Usage: node src/login-server.js <email> <password>');
+    console.log('');
+    console.log('Then open http://<your-host>:6080 in your browser.');
     process.exit(1);
   }
 
@@ -40,23 +39,35 @@ async function run() {
     fs.mkdirSync(BROWSER_STATE_DIR, { recursive: true });
   }
 
-  console.log(`Launching Chromium with remote debugging on port ${PORT}...`);
+  // Start Xvfb (virtual display)
+  console.log('Starting virtual display...');
+  const xvfb = spawn('Xvfb', [DISPLAY, '-screen', '0', '1280x720x24'], { stdio: 'ignore' });
+  process.env.DISPLAY = DISPLAY;
 
-  const browser = await chromium.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      `--remote-debugging-port=${PORT}`,
-      '--remote-debugging-address=0.0.0.0',
-    ],
-  });
+  // Wait for Xvfb to start
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
+  // Start x11vnc
+  console.log('Starting VNC server...');
+  const vnc = spawn('x11vnc', ['-display', DISPLAY, '-nopw', '-forever', '-shared', '-rfbport', String(VNC_PORT)], { stdio: 'ignore' });
+
+  // Start noVNC websocket proxy
+  console.log(`Starting noVNC on port ${NOVNC_PORT}...`);
+  const novnc = spawn('websockify', [
+    '--web', '/usr/share/novnc',
+    String(NOVNC_PORT),
+    `localhost:${VNC_PORT}`,
+  ], { stdio: 'ignore' });
+
+  // Wait for services to start
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // Launch browser in headed mode on the virtual display
+  console.log('Launching Chromium...');
   const stateFile = path.join(BROWSER_STATE_DIR, 'state.json');
   const contextOptions = {
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    viewport: { width: 1920, height: 1080 },
+    viewport: { width: 1280, height: 720 },
     locale: 'en-US',
   };
 
@@ -64,6 +75,16 @@ async function run() {
     contextOptions.storageState = stateFile;
     console.log('Restoring previous session...');
   }
+
+  const browser = await chromium.launch({
+    headless: false,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--start-maximized',
+    ],
+  });
 
   const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
@@ -82,12 +103,13 @@ async function run() {
   }
 
   console.log('');
-  console.log('=== Remote Login Ready ===');
-  console.log(`Connect from your local Chrome: chrome://inspect/#devices`);
-  console.log(`Add target: <your-NAS-IP>:${PORT}`);
+  console.log('============================================');
+  console.log(`  Open http://<your-NAS-IP>:${NOVNC_PORT}`);
+  console.log('  in your browser to see the login page.');
   console.log('');
-  console.log('Solve the CAPTCHA in the remote browser if prompted.');
-  console.log('Once logged in, press ENTER here to save the session.');
+  console.log('  Solve the CAPTCHA if prompted.');
+  console.log('  Then press ENTER here to save the session.');
+  console.log('============================================');
   console.log('');
 
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -96,10 +118,14 @@ async function run() {
 
   // Save session
   await context.storageState({ path: stateFile });
-  console.log('Session saved to', stateFile);
+  console.log('Session saved!');
 
+  // Cleanup
   await browser.close();
-  console.log('Done. The bot will use this session on next start.');
+  novnc.kill();
+  vnc.kill();
+  xvfb.kill();
+  console.log('Done. Restart the bot to use the new session.');
 }
 
 run().catch((err) => {

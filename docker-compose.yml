@@ -8,6 +8,6 @@ services:
       - CLIENT_ID=${CLIENT_ID}
     volumes:
       - /mnt/Main/Main/docker/data/rollcall/data:/app/data
-    # Uncomment to expose Chromium remote debugging for login-server.js
+    # Uncomment to expose noVNC for remote Meetup login (port 6080)
     # ports:
-    #   - "9222:9222"
+    #   - "6080:6080"
