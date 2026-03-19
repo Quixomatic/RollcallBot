@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.14] - 2026-03-19
+
+### Added
+- Graceful session expiry handling: stops polling with clear error message instead of retrying every cycle
+- `/poll` command clears session dead flag so polling resumes after re-login
+
 ## [1.0.13] - 2026-03-19
 
 ### Fixed

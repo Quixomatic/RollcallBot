@@ -1,6 +1,6 @@
 {
   "name": "rollcall",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Discord bot that monitors Meetup.com groups and posts event updates, RSVP changes, and comments",
   "main": "src/index.js",
   "scripts": {

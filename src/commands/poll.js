@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { pollGuild } = require('../services/poller');
+const { clearSessionDead } = require('../services/scraper');
 const { queries } = require('../database');
 
 module.exports = {
@@ -22,6 +23,7 @@ module.exports = {
     await interaction.editReply({ content: 'Polling now...' });
 
     try {
+      clearSessionDead(); // Reset session flag in case it was marked dead
       await pollGuild(client, guildId, settings);
       await interaction.editReply({ content: 'Poll cycle complete.' });
     } catch (err) {

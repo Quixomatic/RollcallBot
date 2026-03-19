@@ -108,12 +108,25 @@ async function isLoggedIn() {
   }
 }
 
+let sessionDead = false;
+
 async function ensureLoggedIn(email, password) {
+  if (sessionDead) {
+    throw new Error('Session expired — run login-server.js to re-authenticate');
+  }
+
   const loggedIn = await isLoggedIn();
   if (!loggedIn) {
-    console.log('[scraper] Session expired or not logged in, re-authenticating...');
-    await login(email, password);
+    console.error('[scraper] ⚠ Session expired! Auto-login will likely fail due to CAPTCHA.');
+    console.error('[scraper] Run: docker exec -it rollcall node src/login-server.js <email> <password>');
+    console.error('[scraper] Polling paused until session is restored.');
+    sessionDead = true;
+    throw new Error('Session expired — run login-server.js to re-authenticate');
   }
+}
+
+function clearSessionDead() {
+  sessionDead = false;
 }
 
 async function getPage() {
@@ -141,6 +154,7 @@ module.exports = {
   login,
   isLoggedIn,
   ensureLoggedIn,
+  clearSessionDead,
   saveSession,
   closeBrowser,
 };
