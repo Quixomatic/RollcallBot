@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-03-19
+
+### Fixed
+- Fix Docker: symlink node binary to /usr/local/bin for custom UID user PATH access
+
 ## [1.0.4] - 2026-03-19
 
 ### Fixed
