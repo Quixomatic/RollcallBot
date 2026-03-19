@@ -226,7 +226,11 @@ async function notifyReminder(client, guildId, event, reminderType) {
 
   let label;
   if (reminderType === 'day_before') {
-    label = 'Tomorrow';
+    // Check if event is actually today or tomorrow
+    const now = new Date();
+    const eventDate = new Date(event.date_time);
+    const isToday = now.toDateString() === eventDate.toDateString();
+    label = isToday ? 'Today' : 'Tomorrow';
   } else {
     label = `Starting in ${reminderType}`;
   }
