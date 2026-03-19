@@ -34,6 +34,7 @@ function initialize() {
       reminder_day_before INTEGER DEFAULT 1,
       reminder_hours_before TEXT DEFAULT '2',
       bot_meetup_name TEXT,
+      rsvp_edit_threshold_minutes INTEGER DEFAULT 15,
       enabled INTEGER DEFAULT 1,
       updated_at TEXT DEFAULT (datetime('now'))
     );
@@ -108,6 +109,12 @@ function initialize() {
       PRIMARY KEY (event_id, guild_id, reminder_type)
     );
   `);
+
+  // Migrations for existing databases
+  const guildCols = db.pragma('table_info(guild_settings)').map((c) => c.name);
+  if (!guildCols.includes('rsvp_edit_threshold_minutes')) {
+    db.exec('ALTER TABLE guild_settings ADD COLUMN rsvp_edit_threshold_minutes INTEGER DEFAULT 15');
+  }
 }
 
 const queries = {
@@ -171,6 +178,12 @@ const queries = {
     INSERT INTO guild_settings (guild_id, reminder_hours_before) VALUES (?, ?)
     ON CONFLICT (guild_id) DO UPDATE SET
       reminder_hours_before = excluded.reminder_hours_before,
+      updated_at = datetime('now')
+  `),
+  setRsvpEditThreshold: () => getDb().prepare(`
+    INSERT INTO guild_settings (guild_id, rsvp_edit_threshold_minutes) VALUES (?, ?)
+    ON CONFLICT (guild_id) DO UPDATE SET
+      rsvp_edit_threshold_minutes = excluded.rsvp_edit_threshold_minutes,
       updated_at = datetime('now')
   `),
   setEnabled: () => getDb().prepare(`

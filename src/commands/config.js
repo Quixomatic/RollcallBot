@@ -94,6 +94,14 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('rsvpthreshold')
+        .setDescription('Minutes before RSVP message is deleted and reposted instead of edited (default 15)')
+        .addIntegerOption((opt) =>
+          opt.setName('minutes').setDescription('Minutes (0 = always repost)').setRequired(true).setMinValue(0).setMaxValue(60)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('enable')
         .setDescription('Enable polling for this server')
     )
@@ -189,6 +197,13 @@ module.exports = {
         }
         break;
       }
+      case 'rsvpthreshold': {
+        const minutes = interaction.options.getInteger('minutes');
+        queries.setRsvpEditThreshold().run(guildId, minutes);
+        console.log(`[config] ${guildName}: RSVP edit threshold → ${minutes}min`);
+        await interaction.reply({ content: `RSVP edit threshold set to ${minutes} minutes.${minutes === 0 ? ' (always delete and repost)' : ''}`, flags: MessageFlags.Ephemeral });
+        break;
+      }
       case 'enable': {
         queries.setEnabled().run(guildId, 1);
         console.log(`[config] ${guildName}: polling enabled`);
@@ -227,6 +242,7 @@ module.exports = {
           `**Day-before Reminder:** ${settings.reminder_day_before ? 'Yes' : 'No'}`,
           `**Hours-before Reminders:** ${settings.reminder_hours_before || 'None'}`,
           `**Bot Meetup Name:** ${settings.bot_meetup_name || 'Not set (use /config botname)'}`,
+          `**RSVP Edit Threshold:** ${settings.rsvp_edit_threshold_minutes || 15} min`,
           `**Polling:** ${settings.enabled ? 'Enabled' : 'Disabled'}`,
         ];
         await interaction.reply({ content: lines.join('\n'), flags: MessageFlags.Ephemeral });

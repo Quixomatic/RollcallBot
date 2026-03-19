@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.19] - 2026-03-19
+
+### Added
+- RSVP edit-vs-repost: edit message in place if within threshold, delete and repost if past it (`/config rsvpthreshold`)
+- 🆕 emoji badge on newly added RSVP members
+- DB migration for `rsvp_edit_threshold_minutes` column (no DB reset needed)
+
 ## [1.0.18] - 2026-03-19
 
 ### Fixed

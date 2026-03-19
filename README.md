@@ -63,10 +63,12 @@ Use the `/config` slash command in your Discord server:
 5. `/config rsvpchannel <#channel>` — where to post RSVP changes
 6. `/config commentschannel <#channel>` — where to post new comments
 7. `/config reminderschannel <#channel>` — where to post reminders
-8. `/config pollrate <minutes>` — base polling interval (min 5, default 10)
+8. `/config pollrate <minutes>` — base full poll interval (min 5, default 10)
 9. `/config horizon <days>` — how far out to track events (default 30)
 10. `/config reminders` — configure day-before and hours-before reminders
-11. `/config view` — view current configuration
+11. `/config rsvpthreshold <minutes>` — minutes before RSVP message is reposted vs edited in place (default 15, 0 = always repost)
+12. `/config enable` / `/config disable` — toggle polling for this server
+13. `/config view` — view current configuration
 
 ### Running
 
@@ -91,11 +93,11 @@ docker compose up -d
 
 When running in Docker, use the remote login helper to establish the Meetup session:
 
-1. Uncomment the `ports` line in `docker-compose.yml` to expose port 9222
+1. Expose port 6080 in your docker-compose
 2. Run: `docker exec -it rollcall node src/login-server.js email password`
-3. On your local machine, open `chrome://inspect/#devices` and add `<NAS-IP>:9222`
-4. Solve the CAPTCHA in the remote browser, then press Enter to save the session
-5. Re-comment the ports line and restart the container
+3. Open `http://<NAS-IP>:6080/vnc_lite.html` in your browser
+4. Solve the CAPTCHA in the remote browser, then press Enter in the terminal to save the session
+5. Remove the port mapping and restart the container
 
 ### Running with GHCR Image
 
@@ -122,6 +124,7 @@ services:
 | `/events` | Everyone | List upcoming events |
 | `/rsvps <event>` | Everyone | Show RSVP list for an event |
 | `/status` | Moderate Members | Bot health and scrape status |
+| `/poll` | Administrator | Manually trigger a scrape cycle |
 | `/test-rsvps <url>` | Administrator | Test: scrape and post RSVP embed for any event |
 | `/test-comments <url>` | Administrator | Test: scrape and post comment embeds for any event |
 

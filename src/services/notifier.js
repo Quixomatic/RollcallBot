@@ -108,8 +108,9 @@ async function notifyEventCancelled(client, guildId, event) {
 }
 
 /**
- * Post or update the RSVP summary for an event.
- * Deletes the old summary message and posts a new one.
+ * Post, edit, or repost the RSVP summary for an event.
+ * If the previous message was posted within the edit threshold, edits it in place.
+ * Otherwise, deletes the old message and posts a new one.
  */
 async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
   const settings = queries.getGuildSettings().get(guildId);
@@ -118,19 +119,36 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
   const channel = await client.channels.fetch(settings.rsvp_channel_id).catch(() => null);
   if (!channel) return;
 
-  // Delete the previous RSVP summary message
+  const threshold = settings.rsvp_edit_threshold_minutes || 15;
+
+  // Check if we should edit or repost
   const prevMsg = queries.getRsvpMessage().get(event.event_id, guildId);
+  let shouldEdit = false;
+  let existingMsg = null;
+
   if (prevMsg) {
-    try {
-      const oldMsg = await channel.messages.fetch(prevMsg.message_id);
-      await oldMsg.delete();
-    } catch {
-      // Message may already be deleted
+    const lastUpdate = new Date(prevMsg.updated_at + 'Z'); // SQLite stores UTC without Z
+    const minutesAgo = (Date.now() - lastUpdate.getTime()) / (1000 * 60);
+    shouldEdit = threshold > 0 && minutesAgo < threshold;
+
+    if (shouldEdit) {
+      try {
+        existingMsg = await channel.messages.fetch(prevMsg.message_id);
+      } catch {
+        shouldEdit = false; // Message was deleted, repost instead
+      }
+    } else {
+      // Delete the old message for repost
+      try {
+        const oldMsg = await channel.messages.fetch(prevMsg.message_id);
+        await oldMsg.delete();
+      } catch {
+        // Already deleted
+      }
     }
   }
 
   // Build sets of names that are new to each list
-  // "added" = brand new RSVPs, "changed" = moved between lists
   const newToList = new Set([
     ...rsvpChanges.added.map((r) => r.member_name),
     ...rsvpChanges.changed.map((r) => r.member.member_name),
@@ -145,8 +163,10 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
     if (list.length === 0) return '*None*';
     return list.map((r) => {
       const guestNote = r.guests > 0 ? `  \`+${r.guests} guest${r.guests > 1 ? 's' : ''}\`` : '';
-      const prefix = newToList.has(r.member_name) ? '+' : '•';
-      return `${prefix} ${r.member_name}${guestNote}`;
+      const isNew = newToList.has(r.member_name);
+      const prefix = isNew ? '+' : '•';
+      const newBadge = isNew ? ' 🆕' : '';
+      return `${prefix} ${r.member_name}${guestNote}${newBadge}`;
     }).join('\n');
   };
 
@@ -160,7 +180,6 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
     .setColor(0x00AE86)
     .setTimestamp();
 
-  // Use inline fields for column layout
   embed.addFields({
     name: `✅ Going (${goingTotal})`,
     value: formatList(going),
@@ -183,11 +202,15 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
     });
   }
 
-  const msg = await channel.send({ embeds: [embed] });
-
-  // Save the message ID for future delete-and-repost
-  queries.upsertRsvpMessage().run(event.event_id, channel.id, msg.id, guildId);
-  console.log(`[notifier] Posted RSVP summary for: ${event.title}`);
+  if (shouldEdit && existingMsg) {
+    await existingMsg.edit({ embeds: [embed] });
+    queries.upsertRsvpMessage().run(event.event_id, channel.id, existingMsg.id, guildId);
+    console.log(`[notifier] Edited RSVP summary for: ${event.title}`);
+  } else {
+    const msg = await channel.send({ embeds: [embed] });
+    queries.upsertRsvpMessage().run(event.event_id, channel.id, msg.id, guildId);
+    console.log(`[notifier] Posted RSVP summary for: ${event.title}`);
+  }
 }
 
 /**
