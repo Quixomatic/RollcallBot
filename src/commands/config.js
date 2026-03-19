@@ -109,11 +109,13 @@ module.exports = {
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
     const guildId = interaction.guildId;
+    const guildName = interaction.guild?.name || guildId;
 
     switch (sub) {
       case 'meetup': {
         const url = interaction.options.getString('url');
         queries.setMeetupGroupUrl().run(guildId, url);
+        console.log(`[config] ${guildName}: meetup URL → ${url}`);
         await interaction.reply({ content: `Meetup group URL set to: ${url}`, flags: MessageFlags.Ephemeral });
         break;
       }
@@ -121,42 +123,49 @@ module.exports = {
         const email = interaction.options.getString('email');
         const password = interaction.options.getString('password');
         queries.setMeetupCredentials().run(guildId, email, password);
+        console.log(`[config] ${guildName}: credentials → ${email}`);
         await interaction.reply({ content: `Meetup credentials saved for \`${email}\`.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'eventschannel': {
         const channel = interaction.options.getChannel('channel');
         queries.setEventsChannel().run(guildId, channel.id);
+        console.log(`[config] ${guildName}: events channel → #${channel.name}`);
         await interaction.reply({ content: `Events channel set to ${channel}.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'rsvpchannel': {
         const channel = interaction.options.getChannel('channel');
         queries.setRsvpChannel().run(guildId, channel.id);
+        console.log(`[config] ${guildName}: RSVP channel → #${channel.name}`);
         await interaction.reply({ content: `RSVP channel set to ${channel}.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'commentschannel': {
         const channel = interaction.options.getChannel('channel');
         queries.setCommentsChannel().run(guildId, channel.id);
+        console.log(`[config] ${guildName}: comments channel → #${channel.name}`);
         await interaction.reply({ content: `Comments channel set to ${channel}.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'reminderschannel': {
         const channel = interaction.options.getChannel('channel');
         queries.setRemindersChannel().run(guildId, channel.id);
+        console.log(`[config] ${guildName}: reminders channel → #${channel.name}`);
         await interaction.reply({ content: `Reminders channel set to ${channel}.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'pollrate': {
         const minutes = interaction.options.getInteger('minutes');
         queries.setPollInterval().run(guildId, minutes);
+        console.log(`[config] ${guildName}: poll interval → ${minutes}min`);
         await interaction.reply({ content: `Base poll interval set to ${minutes} minutes.`, flags: MessageFlags.Ephemeral });
         break;
       }
       case 'horizon': {
         const days = interaction.options.getInteger('days');
         queries.setEventHorizon().run(guildId, days);
+        console.log(`[config] ${guildName}: event horizon → ${days} days`);
         await interaction.reply({ content: `Event horizon set to ${days} days.`, flags: MessageFlags.Ephemeral });
         break;
       }
@@ -175,23 +184,27 @@ module.exports = {
         if (parts.length === 0) {
           await interaction.reply({ content: 'No reminder settings changed. Use the options to configure.', flags: MessageFlags.Ephemeral });
         } else {
+          console.log(`[config] ${guildName}: reminders → ${parts.join(', ')}`);
           await interaction.reply({ content: parts.join('\n'), flags: MessageFlags.Ephemeral });
         }
         break;
       }
       case 'enable': {
         queries.setEnabled().run(guildId, 1);
+        console.log(`[config] ${guildName}: polling enabled`);
         await interaction.reply({ content: 'Polling enabled for this server.', flags: MessageFlags.Ephemeral });
         break;
       }
       case 'disable': {
         queries.setEnabled().run(guildId, 0);
+        console.log(`[config] ${guildName}: polling disabled`);
         await interaction.reply({ content: 'Polling disabled for this server.', flags: MessageFlags.Ephemeral });
         break;
       }
       case 'botname': {
         const name = interaction.options.getString('name');
         queries.setBotMeetupName().run(guildId, name);
+        console.log(`[config] ${guildName}: bot meetup name → ${name}`);
         await interaction.reply({ content: `Bot Meetup name set to "${name}" — this account will be filtered from RSVPs.`, flags: MessageFlags.Ephemeral });
         break;
       }

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.15] - 2026-03-19
+
+### Added
+- Log all `/config` commands to terminal with guild name and setting values
+
 ## [1.0.14] - 2026-03-19
 
 ### Added
