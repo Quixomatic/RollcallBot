@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-03-19
+
+### Fixed
+- Fix Docker build: pin pnpm version and relax lockfile check for cross-platform compatibility
+
 ## [1.0.2] - 2026-03-19
 
 ### Fixed
