@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.16] - 2026-03-19
+
+### Fixed
+- Full poll interval now re-reads from DB each cycle — `/config pollrate` takes effect without restart
+
 ## [1.0.15] - 2026-03-19
 
 ### Added

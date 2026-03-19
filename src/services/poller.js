@@ -312,16 +312,28 @@ async function startPolling(client) {
     await pollGuild(client, settings.guild_id, settings);
   }
 
-  // Full poll on base interval (checks for new/changed events)
+  // Start both polling loops with dynamic intervals
+  scheduleFullPoll(client);
+  scheduleQuickPoll(client);
+}
+
+/**
+ * Schedule the next full poll, re-reading interval from DB each time.
+ */
+function scheduleFullPoll(client) {
+  if (fullPollTimer) clearTimeout(fullPollTimer);
+
+  const allSettings = queries.getAllGuildSettings().all();
   const baseInterval = allSettings.reduce(
     (min, s) => Math.min(min, s.poll_interval_minutes || 10),
     parseInt(process.env.DEFAULT_POLL_INTERVAL_MINUTES, 10) || 10
   );
   console.log(`[poller] Full poll every ${baseInterval} minute(s)`);
-  fullPollTimer = setInterval(() => fullPollAll(client), baseInterval * 60 * 1000);
 
-  // Quick poll on adaptive interval (RSVPs + comments for imminent events)
-  scheduleQuickPoll(client);
+  fullPollTimer = setTimeout(async () => {
+    await fullPollAll(client);
+    scheduleFullPoll(client); // Reschedule with potentially updated interval
+  }, baseInterval * 60 * 1000);
 }
 
 /**
