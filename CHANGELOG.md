@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.18] - 2026-03-19
+
+### Fixed
+- Fix poll interval: reduce() initial value of 10 was always winning over configured value
+
 ## [1.0.17] - 2026-03-19
 
 ### Fixed

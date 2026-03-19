@@ -324,10 +324,10 @@ function scheduleFullPoll(client) {
   if (fullPollTimer) clearTimeout(fullPollTimer);
 
   const allSettings = queries.getAllGuildSettings().all().filter((s) => s.enabled);
-  const baseInterval = allSettings.reduce(
-    (min, s) => Math.min(min, s.poll_interval_minutes || 10),
-    parseInt(process.env.DEFAULT_POLL_INTERVAL_MINUTES, 10) || 10
-  );
+  const defaultInterval = parseInt(process.env.DEFAULT_POLL_INTERVAL_MINUTES, 10) || 10;
+  const baseInterval = allSettings.length > 0
+    ? Math.min(...allSettings.map((s) => s.poll_interval_minutes || defaultInterval))
+    : defaultInterval;
   console.log(`[poller] Full poll every ${baseInterval} minute(s)`);
 
   fullPollTimer = setTimeout(async () => {
