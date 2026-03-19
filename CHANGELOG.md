@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-03-19
+
+### Changed
+- Two-tier polling: full event listing scrape on base interval, quick poll (RSVPs, comments, event changes) only for the next imminent event
+- Adaptive quick poll intervals: 15min within 24h, 5min within 8h, 2min within 2h
+- Quick poll checks event detail page for time/location/title changes
+
 ## [1.0.10] - 2026-03-19
 
 ### Added
