@@ -69,6 +69,10 @@ async function pollGuild(client, guildId, settings) {
   const startTime = Date.now();
   const creds = queries.getMeetupCredentials().get(guildId);
 
+  if (!settings.enabled) {
+    console.log(`[poller] Guild ${guildId}: polling disabled, skipping`);
+    return;
+  }
   if (!settings.meetup_group_url) {
     console.log(`[poller] Guild ${guildId}: no Meetup group URL configured, skipping`);
     return;

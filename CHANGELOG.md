@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-03-19
+
+### Added
+- `/config enable` and `/config disable` commands to toggle polling per server
+
+### Fixed
+- Fix events table primary key to support multiple guilds monitoring the same Meetup group
+
 ## [1.0.9] - 2026-03-19
 
 ### Added

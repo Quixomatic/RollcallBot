@@ -93,6 +93,16 @@ module.exports = {
         )
     )
     .addSubcommand((sub) =>
+      sub
+        .setName('enable')
+        .setDescription('Enable polling for this server')
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('disable')
+        .setDescription('Disable polling for this server')
+    )
+    .addSubcommand((sub) =>
       sub.setName('view').setDescription('View current configuration')
     ),
 
@@ -169,6 +179,16 @@ module.exports = {
         }
         break;
       }
+      case 'enable': {
+        queries.setEnabled().run(guildId, 1);
+        await interaction.reply({ content: 'Polling enabled for this server.', flags: MessageFlags.Ephemeral });
+        break;
+      }
+      case 'disable': {
+        queries.setEnabled().run(guildId, 0);
+        await interaction.reply({ content: 'Polling disabled for this server.', flags: MessageFlags.Ephemeral });
+        break;
+      }
       case 'botname': {
         const name = interaction.options.getString('name');
         queries.setBotMeetupName().run(guildId, name);
@@ -194,6 +214,7 @@ module.exports = {
           `**Day-before Reminder:** ${settings.reminder_day_before ? 'Yes' : 'No'}`,
           `**Hours-before Reminders:** ${settings.reminder_hours_before || 'None'}`,
           `**Bot Meetup Name:** ${settings.bot_meetup_name || 'Not set (use /config botname)'}`,
+          `**Polling:** ${settings.enabled ? 'Enabled' : 'Disabled'}`,
         ];
         await interaction.reply({ content: lines.join('\n'), flags: MessageFlags.Ephemeral });
         break;

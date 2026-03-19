@@ -34,6 +34,7 @@ function initialize() {
       reminder_day_before INTEGER DEFAULT 1,
       reminder_hours_before TEXT DEFAULT '2',
       bot_meetup_name TEXT,
+      enabled INTEGER DEFAULT 1,
       updated_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -45,7 +46,7 @@ function initialize() {
     );
 
     CREATE TABLE IF NOT EXISTS events (
-      event_id TEXT PRIMARY KEY,
+      event_id TEXT NOT NULL,
       guild_id TEXT NOT NULL,
       title TEXT,
       url TEXT,
@@ -56,7 +57,8 @@ function initialize() {
       waitlist_count INTEGER DEFAULT 0,
       is_cancelled INTEGER DEFAULT 0,
       first_seen_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
+      updated_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (event_id, guild_id)
     );
 
     CREATE TABLE IF NOT EXISTS rsvps (
@@ -171,6 +173,12 @@ const queries = {
       reminder_hours_before = excluded.reminder_hours_before,
       updated_at = datetime('now')
   `),
+  setEnabled: () => getDb().prepare(`
+    INSERT INTO guild_settings (guild_id, enabled) VALUES (?, ?)
+    ON CONFLICT (guild_id) DO UPDATE SET
+      enabled = excluded.enabled,
+      updated_at = datetime('now')
+  `),
   setBotMeetupName: () => getDb().prepare(`
     INSERT INTO guild_settings (guild_id, bot_meetup_name) VALUES (?, ?)
     ON CONFLICT (guild_id) DO UPDATE SET
@@ -208,7 +216,7 @@ const queries = {
   upsertEvent: () => getDb().prepare(`
     INSERT INTO events (event_id, guild_id, title, url, date_time, location, description, rsvp_count, waitlist_count)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT (event_id) DO UPDATE SET
+    ON CONFLICT (event_id, guild_id) DO UPDATE SET
       title = excluded.title,
       url = excluded.url,
       date_time = excluded.date_time,
