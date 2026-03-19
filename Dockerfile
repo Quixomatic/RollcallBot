@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --no-frozen-lockfile --prod && \
-    apt-get purge -y python3 make g++ && apt-get autoremove -y && \
+    apt-get purge -y python3 make g++ && \
+    apt-mark manual nodejs && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
 COPY src/ ./src/
