@@ -7,10 +7,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb x11vnc novnc websockify && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g pnpm@10.11.0
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && \
+    npm install -g pnpm@10.11.0
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --no-frozen-lockfile --prod
+RUN pnpm install --no-frozen-lockfile --prod && \
+    apt-get purge -y python3 make g++ && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY src/ ./src/
 
