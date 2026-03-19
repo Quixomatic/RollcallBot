@@ -12,12 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
     npm install -g pnpm@10.11.0
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --no-frozen-lockfile --prod && \
-    apt-get purge -y python3 make g++ && \
-    rm -rf /var/lib/apt/lists/*
-
-# Verify node survived the cleanup
-RUN node --version
+RUN pnpm install --no-frozen-lockfile --prod
 
 COPY src/ ./src/
 
