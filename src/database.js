@@ -210,7 +210,7 @@ const queries = {
   ),
   getUpcomingEventsForGuild: () => getDb().prepare(`
     SELECT * FROM events
-    WHERE guild_id = ? AND is_cancelled = 0 AND date_time > datetime('now')
+    WHERE guild_id = ? AND is_cancelled = 0 AND date_time > datetime('now', '-3 hours')
     ORDER BY date_time ASC
   `),
   upsertEvent: () => getDb().prepare(`

@@ -19,7 +19,8 @@ async function scrapeComments(eventUrl) {
     const extracted = await extractComments(page);
 
     for (const c of extracted) {
-      const commentId = crypto.createHash('md5').update(`${c.author_name}:${c.content}:${c.posted_at || ''}`).digest('hex');
+      // Hash on author + content only — timestamp is relative ("3 minutes ago") and changes every scrape
+      const commentId = crypto.createHash('md5').update(`${c.author_name}:${c.content}`).digest('hex');
       comments.push({ comment_id: commentId, ...c });
     }
 

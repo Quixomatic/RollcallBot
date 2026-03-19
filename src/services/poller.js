@@ -21,7 +21,10 @@ function getQuickPollInterval(eventDateTime) {
   const eventDate = new Date(eventDateTime);
   const hoursUntil = (eventDate - now) / (1000 * 60 * 60);
 
-  if (hoursUntil <= 0) return null;   // Event has passed
+  const GRACE_PERIOD_HOURS = 3;       // Keep polling for 3 hours after event start
+
+  if (hoursUntil <= -GRACE_PERIOD_HOURS) return null; // Event ended (past grace period)
+  if (hoursUntil <= 0) return 5;      // Event in progress — every 5 minutes
   if (hoursUntil <= 2) return 2;      // Every 2 minutes within 2 hours
   if (hoursUntil <= 8) return 5;      // Every 5 minutes within 8 hours
   if (hoursUntil <= 24) return 15;    // Every 15 minutes within 24 hours
