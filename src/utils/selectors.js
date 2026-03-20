@@ -400,19 +400,14 @@ async function extractComments(page) {
   // Each top-level comment thread is a direct child div.flex.flex-col.gap-ds2-24
   const topLevelWrappers = await threadsContainer.locator(':scope > div.flex.flex-col.gap-ds2-24').all();
 
-  let topLevelIndex = 0;
+  // Collect comment groups (parent + replies) so we can reverse the order
+  // Meetup shows newest first, but we want oldest first (chronological)
+  const groups = [];
   for (const wrapper of topLevelWrappers) {
     const parsed = await parseComment(wrapper);
     if (!parsed) continue;
 
-    const currentIndex = topLevelIndex;
-    topLevelIndex++;
-
-    comments.push({
-      ...parsed,
-      is_reply: false,
-      parent_index: null,
-    });
+    const group = [{ ...parsed, is_reply: false, parent_index: null }];
 
     // Check for replies inside this wrapper's .pl-ds2-60 container
     const repliesContainer = wrapper.locator(':scope > div.pl-ds2-60');
@@ -421,13 +416,29 @@ async function extractComments(page) {
       for (const replyWrapper of replyWrappers) {
         const replyParsed = await parseComment(replyWrapper);
         if (!replyParsed) continue;
-
-        comments.push({
-          ...replyParsed,
-          is_reply: true,
-          parent_index: currentIndex,
-        });
+        group.push({ ...replyParsed, is_reply: true, parent_index: null });
       }
+    }
+
+    groups.push(group);
+  }
+
+  // Reverse so oldest comments are first
+  groups.reverse();
+
+  // Flatten and assign parent_index
+  let topLevelIndex = 0;
+  for (const group of groups) {
+    const currentIndex = topLevelIndex;
+    topLevelIndex++;
+
+    for (let i = 0; i < group.length; i++) {
+      if (i === 0) {
+        group[i].parent_index = null;
+      } else {
+        group[i].parent_index = currentIndex;
+      }
+      comments.push(group[i]);
     }
   }
 

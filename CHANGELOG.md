@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.25] - 2026-03-20
+
+### Fixed
+- Comments now display in chronological order (oldest first)
+
 ## [1.0.24] - 2026-03-20
 
 ### Changed
