@@ -256,7 +256,7 @@ async function notifyNewComments(channel, event, comments, allComments) {
   let isFirstTopLevel = true;
   for (const comment of comments) {
     let line = '';
-    const likeSuffix = comment.likes > 0 ? ` ❤️ ${comment.likes}` : '';
+    const likeSuffix = comment.likes > 0 ? `\u00A0\u00A0\u00A0 \`Likes: ${comment.likes}\`` : '';
 
     if (comment.is_reply || comment.parent_comment_id) {
       // It's a reply — check if parent is in this batch
