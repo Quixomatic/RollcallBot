@@ -100,8 +100,16 @@ function detectEventChanges(scrapedEvents, guildId) {
   }
 
   // Detect cancelled/removed events (in DB but not on page)
+  // Only flag as cancelled if the event hasn't started yet — past events
+  // naturally disappear from the listing page and aren't cancelled
+  const now = new Date();
   for (const stored of storedEvents) {
     if (!scrapedIds.has(stored.event_id) && !stored.is_cancelled) {
+      const eventDate = stored.date_time ? new Date(stored.date_time) : null;
+      if (eventDate && eventDate < now) {
+        // Event already started/passed — just clean it up silently
+        continue;
+      }
       changes.cancelledEvents.push(stored);
       queries.cancelEvent().run(stored.event_id);
     }

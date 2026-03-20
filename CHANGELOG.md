@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.20] - 2026-03-20
+
+### Fixed
+- Fix false cancellation alerts: past events naturally disappearing from the listing page are no longer flagged as cancelled
+
 ## [1.0.19] - 2026-03-19
 
 ### Added
