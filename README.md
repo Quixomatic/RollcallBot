@@ -67,8 +67,9 @@ Use the `/config` slash command in your Discord server:
 9. `/config horizon <days>` — how far out to track events (default 30)
 10. `/config reminders` — configure day-before and hours-before reminders
 11. `/config rsvpthreshold <minutes>` — minutes before RSVP message is reposted vs edited in place (default 15, 0 = always repost)
-12. `/config enable` / `/config disable` — toggle polling for this server
-13. `/config view` — view current configuration
+12. `/config timezone <tz>` — IANA timezone for date formatting (default America/New_York)
+13. `/config enable` / `/config disable` — toggle polling for this server
+14. `/config view` — view current configuration
 
 ### Running
 
@@ -125,8 +126,9 @@ services:
 | `/rsvps <event>` | Everyone | Show RSVP list for an event |
 | `/status` | Moderate Members | Bot health and scrape status |
 | `/poll` | Administrator | Manually trigger a scrape cycle |
-| `/test-rsvps <url>` | Administrator | Test: scrape and post RSVP embed for any event |
-| `/test-comments <url>` | Administrator | Test: scrape and post comment embeds for any event |
+| `/test-rsvps <url>` | Administrator | Test: scrape and post RSVP embed to current channel |
+| `/test-comments <url>` | Administrator | Test: scrape and post comments embed to current channel |
+| `/test-reminder` | Administrator | Test: post reminder for next event to current channel |
 
 ## Development
 

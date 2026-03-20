@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.21] - 2026-03-20
+
+### Added
+- Per-guild timezone config (`/config timezone`) — defaults to America/New_York
+- All date formatting now uses the guild's configured timezone
+- Combined comment notifications — multiple new comments posted as one embed
+- Nested reply support — replies shown indented with `↳`, parent context for replies to older comments
+- Like counts scraped and displayed (❤️ N) on comments
+- "More comments" button auto-clicked to load full comment history
+- `/test-reminder` command — posts reminder for next event to the current channel
+- `/test-comments` now posts to current channel instead of configured channel
+- DB migrations for timezone, likes, and parent_comment_id columns (no reset needed)
+
 ## [1.0.20] - 2026-03-20
 
 ### Fixed

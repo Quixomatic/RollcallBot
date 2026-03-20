@@ -288,16 +288,23 @@ async function scrollToLoadAll(page, selector) {
 
 /**
  * Extract comments from the event detail page.
- * Scrolls to load lazy-loaded comments.
+ * Clicks "More comments" to load all, then extracts top-level comments and replies.
  *
  * Comment DOM structure:
- *   div.flex.gap-ds2-12 (comment block)
- *     a[data-testid="avatar-link-wrapper"] (author avatar/link)
- *     div (comment body)
- *       a (author name link, e.g., "Juan")
- *       p.ds2-r14.text-ds2-text-fill-tertiary-enabled (timestamp, e.g., "yesterday")
- *       p.mb-ds2-10 (comment text)
- *       [data-testid="comment-actions-wrapper"] (like/reply buttons)
+ *   div.flex.flex-col.gap-ds2-24 (comment wrapper, has absolute div for vertical line)
+ *     div.flex.gap-ds2-12 (comment content)
+ *       a[data-testid="avatar-link-wrapper"] (avatar)
+ *       div.flex.flex-1.flex-col (body)
+ *         a (author name)
+ *         p.ds2-r14 (timestamp)
+ *         p.mb-ds2-10 (content text)
+ *         [data-testid="likeButton"] (like button with text "Like" or "Like · N")
+ *         [data-testid="replyButton"] (reply button)
+ *     div.pl-ds2-60 (replies container)
+ *       div.flex.flex-col.gap-ds2-24 (reply wrapper)
+ *         ... same structure as top-level comment
+ *
+ * Returns flat array of { author_name, content, posted_at, likes, is_reply, parent_index }
  */
 async function extractComments(page) {
   await dismissMeetupPlusPopup(page);
@@ -311,47 +318,97 @@ async function extractComments(page) {
     // Comment section might not exist
   }
 
-  // Scroll down to load more comments
-  const COMMENT_SELECTOR = '[data-testid="comment-actions-wrapper"]';
-  let previousCount = 0;
-  for (let i = 0; i < 10; i++) {
+  // Click "More comments" button until it disappears to load all comments
+  for (let i = 0; i < 50; i++) {
+    const moreBtn = page.locator('[data-testid="showMoreCommentsButton"]');
+    if (await moreBtn.count() === 0) break;
+    try {
+      await moreBtn.click();
+      await page.waitForTimeout(1500);
+      await dismissMeetupPlusPopup(page);
+    } catch {
+      break;
+    }
+  }
+
+  // Scroll down to ensure all comments are rendered
+  for (let i = 0; i < 5; i++) {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(1500);
-    const currentCount = await page.locator(COMMENT_SELECTOR).count();
-    if (currentCount === previousCount && i > 0) break;
-    previousCount = currentCount;
+    await page.waitForTimeout(1000);
     await dismissMeetupPlusPopup(page);
+  }
+
+  /**
+   * Extract a single comment's data from a comment block element.
+   */
+  async function parseComment(block) {
+    try {
+      const contentDiv = block.locator(':scope > div.flex.gap-ds2-12').first();
+      const bodyDiv = contentDiv.locator('div.flex.flex-1.flex-col').first();
+
+      const authorLink = bodyDiv.locator('a').first();
+      const author = await authorLink.textContent().catch(() => null);
+
+      const time = await bodyDiv.locator('p.ds2-r14').first().textContent().catch(() => null);
+      const content = await bodyDiv.locator('p.mb-ds2-10').first().textContent().catch(() => null);
+
+      // Extract like count from the like button text ("Like" = 0, "Like · 3" = 3)
+      let likes = 0;
+      try {
+        const likeBtn = bodyDiv.locator('[data-testid="likeButton"]').first();
+        if (await likeBtn.count() > 0) {
+          const likeText = await likeBtn.textContent();
+          const likeMatch = likeText.match(/Like\s*·\s*(\d+)/);
+          if (likeMatch) likes = parseInt(likeMatch[1], 10);
+        }
+      } catch { /* no like button */ }
+
+      if (author && content) {
+        return {
+          author_name: author.trim(),
+          content: content.trim(),
+          posted_at: time?.trim() || null,
+          likes,
+        };
+      }
+    } catch { /* skip */ }
+    return null;
   }
 
   const comments = [];
 
-  // Each comment has a comment-actions-wrapper — walk up to the comment container
-  const actionWrappers = await page.locator(COMMENT_SELECTOR).all();
+  // Find top-level comment wrappers: div.flex.flex-col.gap-ds2-24 that are NOT inside a .pl-ds2-60 container
+  // Top-level comments are direct children of the comments section, not nested inside reply containers
+  const topLevelWrappers = await page.locator('div.flex.flex-col.gap-ds2-24:not(.pl-ds2-60 div.flex.flex-col.gap-ds2-24)').all();
 
-  for (const wrapper of actionWrappers) {
-    try {
-      // The comment block is an ancestor div containing the author, time, and content
-      const commentBlock = wrapper.locator('xpath=ancestor::div[contains(@class, "flex-col")][1]');
+  let topLevelIndex = 0;
+  for (const wrapper of topLevelWrappers) {
+    const parsed = await parseComment(wrapper);
+    if (!parsed) continue;
 
-      // Author — the first <a> link that's not the avatar wrapper
-      const authorLink = commentBlock.locator('a:not([data-testid="avatar-link-wrapper"])').first();
-      const author = await authorLink.textContent().catch(() => null);
+    const currentIndex = topLevelIndex;
+    topLevelIndex++;
 
-      // Timestamp — p tag with tertiary text styling
-      const time = await commentBlock.locator('p.ds2-r14').first().textContent().catch(() => null);
+    comments.push({
+      ...parsed,
+      is_reply: false,
+      parent_index: null,
+    });
 
-      // Content — p tag with mb-ds2-10 class
-      const content = await commentBlock.locator('p.mb-ds2-10').first().textContent().catch(() => null);
+    // Check for replies inside this wrapper's .pl-ds2-60 container
+    const repliesContainer = wrapper.locator(':scope > div.pl-ds2-60');
+    if (await repliesContainer.count() > 0) {
+      const replyWrappers = await repliesContainer.locator('div.flex.flex-col.gap-ds2-24').all();
+      for (const replyWrapper of replyWrappers) {
+        const replyParsed = await parseComment(replyWrapper);
+        if (!replyParsed) continue;
 
-      if (author && content) {
         comments.push({
-          author_name: author.trim(),
-          content: content.trim(),
-          posted_at: time?.trim() || null,
+          ...replyParsed,
+          is_reply: true,
+          parent_index: currentIndex,
         });
       }
-    } catch {
-      continue;
     }
   }
 

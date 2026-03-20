@@ -35,6 +35,7 @@ function initialize() {
       reminder_hours_before TEXT DEFAULT '2',
       bot_meetup_name TEXT,
       rsvp_edit_threshold_minutes INTEGER DEFAULT 15,
+      timezone TEXT DEFAULT 'America/New_York',
       enabled INTEGER DEFAULT 1,
       updated_at TEXT DEFAULT (datetime('now'))
     );
@@ -79,6 +80,8 @@ function initialize() {
       author_name TEXT,
       content TEXT,
       posted_at TEXT,
+      likes INTEGER DEFAULT 0,
+      parent_comment_id TEXT,
       first_seen_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -114,6 +117,18 @@ function initialize() {
   const guildCols = db.pragma('table_info(guild_settings)').map((c) => c.name);
   if (!guildCols.includes('rsvp_edit_threshold_minutes')) {
     db.exec('ALTER TABLE guild_settings ADD COLUMN rsvp_edit_threshold_minutes INTEGER DEFAULT 15');
+  }
+  if (!guildCols.includes('timezone')) {
+    db.exec("ALTER TABLE guild_settings ADD COLUMN timezone TEXT DEFAULT 'America/New_York'");
+  }
+
+  // Migrations for comments table
+  const commentCols = db.pragma('table_info(comments)').map((c) => c.name);
+  if (!commentCols.includes('likes')) {
+    db.exec('ALTER TABLE comments ADD COLUMN likes INTEGER DEFAULT 0');
+  }
+  if (!commentCols.includes('parent_comment_id')) {
+    db.exec('ALTER TABLE comments ADD COLUMN parent_comment_id TEXT');
   }
 }
 
@@ -178,6 +193,12 @@ const queries = {
     INSERT INTO guild_settings (guild_id, reminder_hours_before) VALUES (?, ?)
     ON CONFLICT (guild_id) DO UPDATE SET
       reminder_hours_before = excluded.reminder_hours_before,
+      updated_at = datetime('now')
+  `),
+  setTimezone: () => getDb().prepare(`
+    INSERT INTO guild_settings (guild_id, timezone) VALUES (?, ?)
+    ON CONFLICT (guild_id) DO UPDATE SET
+      timezone = excluded.timezone,
       updated_at = datetime('now')
   `),
   setRsvpEditThreshold: () => getDb().prepare(`
@@ -271,8 +292,8 @@ const queries = {
     'SELECT * FROM comments WHERE event_id = ? ORDER BY posted_at ASC'
   ),
   insertComment: () => getDb().prepare(`
-    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `),
 
   // RSVP messages (for delete-and-repost)

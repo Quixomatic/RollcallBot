@@ -14,10 +14,13 @@ module.exports = {
       return;
     }
 
+    const settings = queries.getGuildSettings().get(interaction.guildId);
+    const timezone = settings?.timezone || 'America/New_York';
+
     const embeds = events.slice(0, 10).map((event) => {
       const date = event.date_time ? new Date(event.date_time) : null;
       const dateStr = date
-        ? date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+        ? date.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: timezone })
         : 'TBD';
 
       return new EmbedBuilder()

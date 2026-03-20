@@ -161,8 +161,12 @@ async function quickPollGuild(client, guildId, settings) {
       const commentStart = Date.now();
       const scrapedComments = await scrapeComments(nextEvent.url);
       const newComments = detectNewComments(nextEvent.event_id, scrapedComments);
-      for (const comment of newComments) {
-        await notifier.notifyNewComment(client, guildId, nextEvent, comment);
+      if (newComments.length > 0) {
+        const settings_ = queries.getGuildSettings().get(guildId);
+        if (settings_?.comments_channel_id) {
+          const commentsChannel = await client.channels.fetch(settings_.comments_channel_id).catch(() => null);
+          await notifier.notifyNewComments(commentsChannel, nextEvent, newComments, scrapedComments);
+        }
       }
       queries.insertScrapeLog().run(guildId, 'comments', 'success', null, Date.now() - commentStart);
     } catch (err) {

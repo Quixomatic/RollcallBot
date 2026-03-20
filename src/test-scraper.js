@@ -264,8 +264,11 @@ async function run() {
           break;
         }
 
-        for (const comment of newComments) {
-          await notifier2.notifyNewComment(testClient2, settings2.guild_id, ev, comment);
+        const commentsChannel = await testClient2.channels.fetch(settings2.comments_channel_id).catch(() => null);
+        if (commentsChannel) {
+          await notifier2.notifyNewComments(commentsChannel, ev, newComments, comments);
+        } else {
+          console.log('No comments channel configured or accessible.');
         }
         console.log('Posted!');
         testClient2.destroy();

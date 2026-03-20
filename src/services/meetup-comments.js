@@ -18,10 +18,25 @@ async function scrapeComments(eventUrl) {
 
     const extracted = await extractComments(page);
 
+    // First pass: assign comment_id hashes to all comments
+    // Build a list of top-level comment hashes indexed by parent_index
+    const topLevelHashes = {};
     for (const c of extracted) {
       // Hash on author + content only — timestamp is relative ("3 minutes ago") and changes every scrape
       const commentId = crypto.createHash('md5').update(`${c.author_name}:${c.content}`).digest('hex');
-      comments.push({ comment_id: commentId, ...c });
+      if (!c.is_reply) {
+        topLevelHashes[comments.length] = commentId;
+      }
+      // Compute parent_comment_id for replies
+      let parentCommentId = null;
+      if (c.is_reply && c.parent_index != null) {
+        // Find the parent comment in extracted array and hash its author+content
+        const parentComment = extracted.filter((p) => !p.is_reply)[c.parent_index];
+        if (parentComment) {
+          parentCommentId = crypto.createHash('md5').update(`${parentComment.author_name}:${parentComment.content}`).digest('hex');
+        }
+      }
+      comments.push({ comment_id: commentId, ...c, parent_comment_id: parentCommentId });
     }
 
     console.log(`[meetup-comments] Found ${comments.length} comment(s)`);
@@ -50,7 +65,8 @@ function detectNewComments(eventId, scrapedComments) {
     if (!exists) {
       newComments.push(comment);
       queries.insertComment().run(
-        comment.comment_id, eventId, comment.author_name, comment.content, comment.posted_at
+        comment.comment_id, eventId, comment.author_name, comment.content, comment.posted_at,
+        comment.likes || 0, comment.parent_comment_id || null
       );
     }
   }

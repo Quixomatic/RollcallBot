@@ -94,6 +94,14 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('timezone')
+        .setDescription('Set timezone for date formatting (default America/New_York)')
+        .addStringOption((opt) =>
+          opt.setName('tz').setDescription('IANA timezone (e.g., America/New_York, America/Chicago)').setRequired(true)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('rsvpthreshold')
         .setDescription('Minutes before RSVP message is deleted and reposted instead of edited (default 15)')
         .addIntegerOption((opt) =>
@@ -197,6 +205,20 @@ module.exports = {
         }
         break;
       }
+      case 'timezone': {
+        const tz = interaction.options.getString('tz');
+        // Validate the timezone
+        try {
+          Intl.DateTimeFormat('en-US', { timeZone: tz });
+        } catch {
+          await interaction.reply({ content: `Invalid timezone: "${tz}". Use IANA format like America/New_York, America/Chicago, etc.`, flags: MessageFlags.Ephemeral });
+          break;
+        }
+        queries.setTimezone().run(guildId, tz);
+        console.log(`[config] ${guildName}: timezone → ${tz}`);
+        await interaction.reply({ content: `Timezone set to ${tz}.`, flags: MessageFlags.Ephemeral });
+        break;
+      }
       case 'rsvpthreshold': {
         const minutes = interaction.options.getInteger('minutes');
         queries.setRsvpEditThreshold().run(guildId, minutes);
@@ -242,6 +264,7 @@ module.exports = {
           `**Day-before Reminder:** ${settings.reminder_day_before ? 'Yes' : 'No'}`,
           `**Hours-before Reminders:** ${settings.reminder_hours_before || 'None'}`,
           `**Bot Meetup Name:** ${settings.bot_meetup_name || 'Not set (use /config botname)'}`,
+          `**Timezone:** ${settings.timezone || 'America/New_York'}`,
           `**RSVP Edit Threshold:** ${settings.rsvp_edit_threshold_minutes || 15} min`,
           `**Polling:** ${settings.enabled ? 'Enabled' : 'Disabled'}`,
         ];

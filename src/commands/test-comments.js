@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { queries } = require('../database');
-const { scrapeComments, detectNewComments } = require('../services/meetup-comments');
+const { scrapeComments } = require('../services/meetup-comments');
 const { extractEventDetails, dismissMeetupPlusPopup } = require('../utils/selectors');
 const { getPage } = require('../services/scraper');
 const notifier = require('../services/notifier');
@@ -18,7 +17,6 @@ module.exports = {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const eventUrl = interaction.options.getString('url');
-    const guildId = interaction.guildId;
 
     try {
       // Get event details
@@ -28,29 +26,26 @@ module.exports = {
       const details = await extractEventDetails(page);
       await page.close();
 
-      // Get comments
+      // Get comments — treat ALL as new (don't check DB)
       const comments = await scrapeComments(eventUrl);
-      const eventId = eventUrl.match(/events\/(\d+)/)?.[1] || 'test';
-      const newComments = detectNewComments(eventId, comments);
 
       const event = {
-        event_id: eventId,
+        event_id: eventUrl.match(/events\/(\d+)/)?.[1] || 'test',
         title: details.title || 'Test Event',
         url: eventUrl,
         date_time: details.date_time,
         location: details.location,
       };
 
-      if (newComments.length === 0) {
+      if (comments.length === 0) {
         await interaction.editReply({ content: `No comments found on "${event.title}"` });
         return;
       }
 
-      for (const comment of newComments) {
-        await notifier.notifyNewComment(client, guildId, event, comment);
-      }
+      // Post to the current channel (not the configured comments channel)
+      await notifier.notifyNewComments(interaction.channel, event, comments, comments);
 
-      await interaction.editReply({ content: `Posted ${newComments.length} comment(s) from "${event.title}"` });
+      await interaction.editReply({ content: `Posted ${comments.length} comment(s) from "${event.title}"` });
     } catch (err) {
       console.error('[test-comments] Error:', err.message);
       await interaction.editReply({ content: `Error: ${err.message}` });
