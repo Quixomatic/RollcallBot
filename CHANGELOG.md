@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.22] - 2026-03-20
+
+### Fixed
+- Fix comment scraping hanging: scope comment selectors to the Comments section instead of matching page-wide
+- Handle events with no comments gracefully (returns immediately)
+
 ## [1.0.21] - 2026-03-20
 
 ### Added

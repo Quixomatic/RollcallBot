@@ -377,9 +377,28 @@ async function extractComments(page) {
 
   const comments = [];
 
-  // Find top-level comment wrappers: div.flex.flex-col.gap-ds2-24 that are NOT inside a .pl-ds2-60 container
-  // Top-level comments are direct children of the comments section, not nested inside reply containers
-  const topLevelWrappers = await page.locator('div.flex.flex-col.gap-ds2-24:not(.pl-ds2-60 div.flex.flex-col.gap-ds2-24)').all();
+  // First, find the comments section by looking for the "Comments" heading
+  // Then scope all comment searching to the section that contains it
+  const commentsHeading = page.getByRole('heading', { name: 'Comments' });
+  if (await commentsHeading.count() === 0) {
+    return comments; // No comments section on this page
+  }
+
+  // The comments live in the section containing the heading
+  const commentsSection = commentsHeading.locator('xpath=ancestor::section[1]');
+  if (await commentsSection.count() === 0) {
+    return comments;
+  }
+
+  // Find the container that holds the actual comment threads
+  // It's a div.flex.flex-col.gap-ds2-36 inside the section
+  const threadsContainer = commentsSection.locator('div.flex.flex-col.gap-ds2-36');
+  if (await threadsContainer.count() === 0) {
+    return comments;
+  }
+
+  // Each top-level comment thread is a direct child div.flex.flex-col.gap-ds2-24
+  const topLevelWrappers = await threadsContainer.locator(':scope > div.flex.flex-col.gap-ds2-24').all();
 
   let topLevelIndex = 0;
   for (const wrapper of topLevelWrappers) {
