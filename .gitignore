@@ -1,7 +1,6 @@
 node_modules/
 .env
-data/*.db
-data/browser-state/
+data/
 .docs/
 .plans/
 .pnpm-store/
