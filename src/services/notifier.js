@@ -253,6 +253,7 @@ async function notifyNewComments(channel, event, comments, allComments) {
   }
 
   const lines = [];
+  let isFirstTopLevel = true;
   for (const comment of comments) {
     let line = '';
     const likeSuffix = comment.likes > 0 ? ` ❤️ ${comment.likes}` : '';
@@ -268,6 +269,11 @@ async function notifyNewComments(channel, event, comments, allComments) {
       }
       line = `↳ **${comment.author_name}** — ${comment.content}${likeSuffix}`;
     } else {
+      // Top-level comment — add blank line before it (except the first)
+      if (!isFirstTopLevel) {
+        lines.push('');
+      }
+      isFirstTopLevel = false;
       line = `**${comment.author_name}** — ${comment.content}${likeSuffix}`;
     }
     lines.push(line);
