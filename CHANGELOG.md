@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.27] - 2026-03-20
+
+### Fixed
+- `/test-rsvps` now posts to the current channel instead of the configured RSVP channel
+
 ## [1.0.26] - 2026-03-20
 
 ### Added

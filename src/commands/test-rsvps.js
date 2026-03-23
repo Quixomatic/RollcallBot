@@ -1,9 +1,8 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder } = require('discord.js');
 const { queries } = require('../database');
 const { scrapeRsvps, detectRsvpChanges } = require('../services/meetup-rsvps');
 const { extractEventDetails, dismissMeetupPlusPopup } = require('../utils/selectors');
 const { getPage } = require('../services/scraper');
-const notifier = require('../services/notifier');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,12 +13,13 @@ module.exports = {
       opt.setName('url').setDescription('Meetup event URL').setRequired(true)
     ),
 
-  async execute(interaction, client) {
+  async execute(interaction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const eventUrl = interaction.options.getString('url');
     const guildId = interaction.guildId;
     const settings = queries.getGuildSettings().get(guildId);
+    const timezone = settings?.timezone || 'America/New_York';
 
     try {
       // Get event details
@@ -35,27 +35,53 @@ module.exports = {
         rsvps = rsvps.filter((r) => r.member_name !== settings.bot_meetup_name);
       }
 
-      const eventId = eventUrl.match(/events\/(\d+)/)?.[1] || 'test';
+      const going = rsvps.filter((r) => r.rsvp_status === 'going');
+      const waitlist = rsvps.filter((r) => r.rsvp_status === 'waitlist');
+      const notGoing = rsvps.filter((r) => r.rsvp_status === 'not_going');
 
-      // Clear existing RSVPs for this event so they all appear
-      try { queries.deleteRsvpsForEvent().run(eventId); } catch {}
-
-      const rsvpChanges = detectRsvpChanges(eventId, rsvps);
-      // Clean summary — no change markers
-      rsvpChanges.added = [];
-      rsvpChanges.removed = [];
-      rsvpChanges.changed = [];
-
-      const event = {
-        event_id: eventId,
-        title: details.title || 'Test Event',
-        url: eventUrl,
-        date_time: details.date_time,
-        location: details.location,
+      const formatList = (list) => {
+        if (list.length === 0) return '*None*';
+        return list.map((r) => {
+          const guestNote = r.guests > 0 ? `  \`+${r.guests} guest${r.guests > 1 ? 's' : ''}\`` : '';
+          return `• ${r.member_name}${guestNote}`;
+        }).join('\n');
       };
 
-      await notifier.notifyRsvpUpdate(client, guildId, event, rsvpChanges);
-      await interaction.editReply({ content: `Posted RSVP summary for "${event.title}" (${rsvps.length} attendees)` });
+      const goingTotal = going.reduce((sum, r) => sum + 1 + (r.guests || 0), 0);
+      const waitlistTotal = waitlist.reduce((sum, r) => sum + 1 + (r.guests || 0), 0);
+
+      function formatDate(dateStr) {
+        if (!dateStr) return 'TBD';
+        try {
+          const date = new Date(dateStr);
+          if (isNaN(date.getTime())) return dateStr;
+          return date.toLocaleString('en-US', {
+            weekday: 'long', month: 'short', day: 'numeric',
+            hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+            timeZone: timezone,
+          });
+        } catch { return dateStr; }
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle(`RSVPs: ${details.title || 'Test Event'}`)
+        .setURL(eventUrl)
+        .setDescription(formatDate(details.date_time))
+        .setFooter({ text: '📋 RSVP on Meetup.com' })
+        .setColor(0x00AE86)
+        .setTimestamp();
+
+      embed.addFields({ name: `✅ Going (${goingTotal})`, value: formatList(going), inline: true });
+      if (waitlist.length > 0) {
+        embed.addFields({ name: `⏳ Waitlist (${waitlistTotal})`, value: formatList(waitlist), inline: true });
+      }
+      if (notGoing.length > 0) {
+        embed.addFields({ name: `❌ Not Going (${notGoing.length})`, value: formatList(notGoing), inline: true });
+      }
+
+      // Post to current channel
+      await interaction.channel.send({ embeds: [embed] });
+      await interaction.editReply({ content: `Posted RSVP summary for "${details.title}" (${rsvps.length} attendees)` });
     } catch (err) {
       console.error('[test-rsvps] Error:', err.message);
       await interaction.editReply({ content: `Error: ${err.message}` });
