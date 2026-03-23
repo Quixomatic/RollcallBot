@@ -186,6 +186,7 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
     .setTitle(`RSVPs: ${event.title}`)
     .setURL(event.url)
     .setDescription(formatDate(event.date_time, getTimezone(guildId)))
+    .setFooter({ text: '📋 RSVP on Meetup.com' })
     .setColor(0x00AE86)
     .setTimestamp();
 
@@ -283,6 +284,7 @@ async function notifyNewComments(channel, event, comments, allComments) {
     .setTitle(`Comments: ${event.title}`)
     .setURL(event.url)
     .setDescription(lines.join('\n'))
+    .setFooter({ text: '💬 Reply on Meetup.com' })
     .setColor(0x7289DA)
     .setTimestamp();
 
