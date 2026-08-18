@@ -65,15 +65,28 @@ async function run() {
   // Launch browser in headed mode on the virtual display
   console.log('Launching Chromium...');
   const stateFile = path.join(BROWSER_STATE_DIR, 'state.json');
+
+  // No userAgent override here on purpose. The stealth plugin's
+  // user-agent-override evasion sets the UA, navigator.platform and the
+  // Sec-CH-UA client hints together, using the browser's real version and
+  // masking Linux as Windows. Pinning a UA string here fights that: the image
+  // ships Chromium 145, so a hardcoded "Chrome/131" contradicts the client
+  // hints, which is exactly the kind of inconsistency hCaptcha scores against.
   const contextOptions = {
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     viewport: { width: 1280, height: 720 },
     locale: 'en-US',
   };
 
+  // Deliberately NOT restoring state.json. Meetup's captcha is hCaptcha, and
+  // the saved state carries its reputation cookies (hmt_id, __cf_bm) plus
+  // MEETUP_BROWSER_ID. Once that browser identity is flagged, restoring it here
+  // replays the flag into every retry, so the captcha fails every time instead
+  // of intermittently. Logging in has to start from a clean context.
   if (fs.existsSync(stateFile)) {
-    contextOptions.storageState = stateFile;
-    console.log('Restoring previous session...');
+    const backup = `${stateFile}.${Date.now()}.bak`;
+    fs.copyFileSync(stateFile, backup);
+    console.log(`Existing session backed up to ${path.basename(backup)}`);
+    console.log('Starting login from a CLEAN browser context (not restoring it).');
   }
 
   const browser = await chromium.launch({
@@ -116,9 +129,28 @@ async function run() {
   await new Promise((resolve) => rl.question('Press ENTER to save session and exit...', resolve));
   rl.close();
 
-  // Save session
-  await context.storageState({ path: stateFile });
-  console.log('Session saved!');
+  // Save session, but only if the login actually succeeded. Without this a
+  // failed captcha still overwrites a working state.json with a logged-out one.
+  const REQUIRED = ['MEETUP_SESSION', '__meetup_auth_access_token', '__meetup_auth_refresh_token'];
+  const state = await context.storageState();
+  const names = new Set(state.cookies.map((c) => c.name));
+  const missing = REQUIRED.filter((n) => !names.has(n));
+
+  if (missing.length) {
+    console.error('');
+    console.error(`LOGIN FAILED — missing auth cookies: ${missing.join(', ')}`);
+    console.error('Refusing to overwrite state.json with a logged-out session.');
+    console.error('The existing session file (if any) is untouched.');
+    await browser.close();
+    novnc.kill();
+    vnc.kill();
+    xvfb.kill();
+    process.exit(1);
+  }
+
+  fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
+  console.log('');
+  console.log(`Session saved! ${state.cookies.length} cookies, all auth cookies present.`);
 
   // Cleanup
   await browser.close();

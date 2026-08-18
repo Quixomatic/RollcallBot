@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.28] - 2026-08-18
+
+### Added
+- `src/export-session.js` — export a Playwright `storageState` from a real, human-driven Chrome window over the DevTools protocol. The Meetup auth cookies are `httpOnly` and therefore invisible to `document.cookie`, so CDP is the only way to capture them from a normal browser. Log in with real Chrome (where the captcha behaves), dump the session, copy the file to the host. Validates that the required auth cookies are present before writing, and leaves the Chrome window open on exit.
+
+### Fixed
+- `login-server.js` no longer restores the existing `state.json` before logging in. Meetup uses hCaptcha, and the saved state carries its reputation cookies (`hmt_id`, `__cf_bm`) along with `MEETUP_BROWSER_ID`. Once that browser identity was flagged, restoring it replayed the flag into every retry, so the captcha failed consistently rather than intermittently. Login now starts from a clean context, backing up any existing session first.
+- `login-server.js` no longer overwrites a working `state.json` when the login fails. It verifies `MEETUP_SESSION`, `__meetup_auth_access_token` and `__meetup_auth_refresh_token` are present before saving, and exits non-zero otherwise.
+
+### Changed
+- Removed the hardcoded `Chrome/131.0.0.0` user agent from `login-server.js`. The image ships Chromium 145, so the pinned string contradicted the `Sec-CH-UA` client hints on every request. The stealth plugin's `user-agent-override` evasion now owns the UA, platform and client hints, keeping them consistent and masking Linux as Windows.
+
 ## [1.0.27] - 2026-03-20
 
 ### Fixed
