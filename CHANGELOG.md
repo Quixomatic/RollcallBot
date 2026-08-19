@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.29] - 2026-08-18
+## [1.0.29] - 2026-08-19
 
 ### Fixed
 - Events wrongly marked cancelled can now recover. `upsertEvent` clears `is_cancelled` when an event reappears in a scrape. Previously the flag was permanent: an event only reaches the upsert because it was present in the scrape, but nothing ever reset the flag, so a wrongly cancelled event stayed hidden from every query forever and the only recovery was wiping the database.
