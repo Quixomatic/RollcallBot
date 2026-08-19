@@ -99,6 +99,20 @@ function detectEventChanges(scrapedEvents, guildId) {
     );
   }
 
+  // A scrape that returns nothing is almost always a broken scrape — a selector
+  // miss, a popup covering the listing, or a session that is half-expired but
+  // still passes isLoggedIn(). Treating it as "every event was cancelled" flags
+  // the entire table in one pass, so bail out instead and let the next poll
+  // decide. A genuinely empty group is indistinguishable here, but it costs
+  // nothing to wait for a scrape that actually returned data.
+  if (scrapedEvents.length === 0 && storedEvents.length > 0) {
+    console.warn(
+      `[meetup-events] Scrape returned 0 events but ${storedEvents.length} are stored — ` +
+      'skipping cancellation detection (likely a failed scrape, not mass cancellation)'
+    );
+    return changes;
+  }
+
   // Detect cancelled/removed events (in DB but not on page)
   // Only flag as cancelled if the event hasn't started yet — past events
   // naturally disappear from the listing page and aren't cancelled
@@ -113,6 +127,14 @@ function detectEventChanges(scrapedEvents, guildId) {
       changes.cancelledEvents.push(stored);
       queries.cancelEvent().run(stored.event_id);
     }
+  }
+
+  if (changes.cancelledEvents.length > 0) {
+    console.warn(
+      `[meetup-events] Flagged ${changes.cancelledEvents.length} of ${storedEvents.length} ` +
+      `stored event(s) as cancelled (scrape returned ${scrapedEvents.length}): ` +
+      changes.cancelledEvents.map((e) => `${e.event_id} "${e.title}"`).join(', ')
+    );
   }
 
   return changes;

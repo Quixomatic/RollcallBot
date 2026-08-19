@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.29] - 2026-08-18
+
+### Fixed
+- Events wrongly marked cancelled can now recover. `upsertEvent` clears `is_cancelled` when an event reappears in a scrape. Previously the flag was permanent: an event only reaches the upsert because it was present in the scrape, but nothing ever reset the flag, so a wrongly cancelled event stayed hidden from every query forever and the only recovery was wiping the database.
+- A scrape that returns zero events no longer cancels the entire events table. `detectEventChanges` treats an empty result as a failed scrape (selector miss, popup over the listing, half-expired session that still passes `isLoggedIn()`) and skips cancellation detection instead of flagging every stored event at once.
+
+### Changed
+- Cancellation detection now logs what it flagged and why, including the scrape count it based the decision on, so a mass cancellation is visible in the logs instead of silent.
+
 ## [1.0.28] - 2026-08-18
 
 ### Added

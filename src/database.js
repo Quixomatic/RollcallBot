@@ -258,6 +258,11 @@ const queries = {
       description = excluded.description,
       rsvp_count = excluded.rsvp_count,
       waitlist_count = excluded.waitlist_count,
+      -- An event only reaches this upsert because it was present in the scrape,
+      -- so it is demonstrably live. Clearing the flag here gives a wrongly
+      -- cancelled event a way back: without it, is_cancelled = 1 was permanent
+      -- and the only recovery was wiping the database.
+      is_cancelled = 0,
       updated_at = datetime('now')
   `),
   cancelEvent: () => getDb().prepare(`
