@@ -31,6 +31,7 @@ A Discord bot that monitors Meetup.com groups and posts updates to Discord when 
 4. Copy the bot token
 5. Go to **Installation** and set up Guild Install with scopes `bot` + `applications.commands` and permissions integer `93184` (View Channels, Send Messages, Manage Messages, Embed Links, Read Message History)
 6. Use the generated install link to invite the bot to your server
+7. *(Optional, for `/silence`)* In **Server Settings → Roles → the bot's role → Permissions**, also grant **Manage Roles** and every permission the silence role denies. Discord only lets a bot deny permissions it holds itself: Send Messages, Send Messages in Threads, Create Public Threads, Create Private Threads, Send Text-to-Speech Messages, Send Voice Messages, Create Polls, Add Reactions, Attach Files, Embed Links, Use External Emoji, Use External Stickers, Mention @everyone/@here/All Roles, Use Application Commands, Use External Apps, Use Activities, Create Invite, Connect, Speak, Video, Use Soundboard, Use External Sounds, Request to Speak. The bot also needs View Channel on any private channel the silence should cover.
 
 ### Installation
 
@@ -51,6 +52,29 @@ node src/test-scraper.js login your@email.com yourpassword
 ```
 
 The session is saved to `data/browser-state/state.json` and refreshed automatically on every scrape cycle.
+
+### Refreshing an Expired Session
+
+When the session dies (the bot stops polling and logs a session-expired error), log in again with real Chrome on a dev machine, where the hCaptcha behaves, and export the session with `src/export-session.js`.
+
+1. Launch Chrome with a throwaway profile and remote debugging. The separate `--user-data-dir` keeps it isolated from your normal Chrome, like an incognito window, and your normal Chrome can stay open:
+
+   ```powershell
+   Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$env:TEMP\meetup-login", "--no-first-run", "https://www.meetup.com/login/"
+   ```
+
+2. Log in to Meetup with the bot's account in that window and solve the CAPTCHA.
+3. Back up the local session and export the new one:
+
+   ```powershell
+   Copy-Item data\browser-state\state.json data\browser-state\state.json.bak
+   node src/export-session.js
+   ```
+
+   The script refuses to succeed unless `MEETUP_SESSION`, `__meetup_auth_access_token` and `__meetup_auth_refresh_token` are all present.
+4. Copy `data/browser-state/state.json` to the host at `/mnt/Main/Main/docker/data/rollcall/data/browser-state/state.json`.
+5. Run `/poll` in Discord to clear the session-dead flag, or restart the container.
+6. Close the Chrome window. **Do not log out**, which would invalidate the exported session.
 
 ### Discord Bot Configuration
 
@@ -126,6 +150,10 @@ services:
 | `/rsvps <event>` | Everyone | Show RSVP list for an event |
 | `/status` | Moderate Members | Bot health and scrape status |
 | `/poll` | Administrator | Manually trigger a scrape cycle |
+| `/silence setup` | Administrator | Create the `rollcall-silenced` role and deny it everything but reading on every channel (re-runnable) |
+| `/silence user <member>` | Administrator | Make a member read-only; reports channels where another role still lets them act |
+| `/silence remove <member>` | Administrator | Unsilence a member |
+| `/silence list` | Administrator | List silenced members |
 | `/test-rsvps <url>` | Administrator | Test: scrape and post RSVP embed to current channel |
 | `/test-comments <url>` | Administrator | Test: scrape and post comments embed to current channel |
 | `/test-reminder` | Administrator | Test: post reminder for next event to current channel |

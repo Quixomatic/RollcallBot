@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.30] - 2026-09-30
+
+### Added
+- `/silence` command to make a member read-only without a visible timeout. `/silence setup` creates a `rollcall-silenced` role and denies it every send, react, thread, voice, invite and app permission on every category and channel, leaving View Channel and Read Message History untouched. It is safe to re-run and reports any channels it could not update. `/silence user`, `/silence remove` and `/silence list` assign, remove and list the role. After silencing, the bot reports any channel where another role's allow overwrite still lets the member post, react or join voice, and it refuses to silence administrators, since they bypass channel permissions.
+- New channels automatically get the silence role's deny overwrite when created.
+- README section on refreshing an expired Meetup session with `src/export-session.js`.
+
+### Notes
+- `/silence` needs the bot to have **Manage Roles** plus every permission it denies, because Discord only lets a bot deny permissions it holds itself. See the README for the full list.
+
 ## [1.0.29] - 2026-08-19
 
 ### Fixed
