@@ -66,9 +66,12 @@ or `src/login-server.js`.
 
 | Cookie | What | Lifetime |
 |---|---|---|
-| `__meetup_auth_access_token` | JWT, sent with every request | **1 hour** |
-| `__meetup_auth_refresh_token` | JWT, exchanged for a new access token | **1 year** |
+| `__meetup_auth_access_token` | JWT, sent with every request; the one that authenticates | JWT `exp` says **1 hour**, but **not enforced** (see below) |
+| `__meetup_auth_refresh_token` | JWT, exchanged for a new access token | JWT `exp` 1 year |
 | `MEETUP_SESSION` | Session cookie | 1 year |
+
+**In practice a session lasts until Meetup ends it server-side** (about a month between forced
+re-logins in Sep–Nov 2026), regardless of the access token's `exp`.
 
 ### Token refresh
 
@@ -89,21 +92,21 @@ Verified behaviour of `/refresh-token`:
 - Can be called at any time. While the access token is still valid it returns the **same** token.
 - `data.refreshTokens.error { code message }` is set when the refresh token itself is rejected.
 
-Observed on 2026-11-17 with a fresh session (checked every 10 minutes after the JWT's `exp`):
+Observed 2026-11-17:
 
 - The access token is what authenticates: a request with *only* `__meetup_auth_access_token`
   is logged in; the same cookies *without* it are treated as logged out.
-- Meetup kept **accepting the expired access token** (no `access_token_expired` error), and
-  `/refresh-token` kept returning that same token. Expiry is evidently enforced later than the
-  JWT's `exp` claims.
+- **Meetup does not enforce the JWT's `exp`.** A fresh session was still accepted every
+  10 minutes after its `exp`, and the production session — whose access token was issued at a
+  login three weeks earlier and never replaced — kept working throughout. No
+  `access_token_expired` error was ever returned.
+- `/refresh-token` returns the **same** token, before and after `exp`.
 
-So Rollcall:
-
-- refreshes proactively once the JWT's `exp` has passed, and if Meetup hands back the same
-  token, waits 5 minutes before trying proactively again (so it doesn't call `/refresh-token`
-  before every request);
-- always refreshes and retries once on an actual `access_token_expired` error;
-- shares one in-flight refresh between concurrent requests.
+So Rollcall does **not** refresh on a timer. It refreshes (and retries once) only when Meetup
+actually answers `access_token_expired`, exactly as meetup.com's own client does, so it keeps
+working if Meetup starts enforcing expiry. Concurrent requests share a single refresh. A session
+ends when Meetup returns `access_token_invalid` (or `self` comes back null): polling pauses and
+the dashboard's **Meetup session** page asks for a new upload.
 
 ## Operations Rollcall uses
 

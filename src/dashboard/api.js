@@ -57,27 +57,34 @@ function eventSummary(e) {
   };
 }
 
-// The logged-in account, cached so dashboard refreshes don't hit Meetup each time.
-let selfCache = { at: 0, value: null };
-const SELF_TTL_MS = 60 * 1000;
-
+/**
+ * Session status for the dashboard. The logged-in account comes from the
+ * poller's own most recent session check, so viewing the dashboard never
+ * sends anything to Meetup. Only `fresh` (the "Re-read session" button), or
+ * no check having run yet, makes a request.
+ */
 async function sessionStatus({ fresh = false } = {}) {
   const backend = getBackend();
   const meetup = require('../services/meetup-api/client');
-  const status = { backend: backend.name, dead: false, self: null, tokenMinutesLeft: null, stateFileUpdatedAt: null };
+  const status = {
+    backend: backend.name, dead: false, self: null, checkedAt: null,
+    tokenMinutesLeft: null, tokenIssuedAt: null, stateFileUpdatedAt: null,
+  };
   try {
     status.stateFileUpdatedAt = fs.statSync(meetup.STATE_FILE).mtime.toISOString();
-    const left = meetup.accessTokenSecondsLeft();
-    status.tokenMinutesLeft = left === null ? null : Math.round(left / 60);
+    // Informational only: Meetup doesn't enforce the token's own expiry.
+    const claims = meetup.accessTokenClaims();
+    if (claims?.iat) status.tokenIssuedAt = new Date(claims.iat * 1000).toISOString();
+    if (claims?.exp) status.tokenMinutesLeft = Math.round((claims.exp - Date.now() / 1000) / 60);
   } catch { /* no session file yet */ }
 
   if (backend.name === 'graphql') {
     status.dead = meetup.isSessionDead();
     if (!status.dead) {
-      if (fresh || Date.now() - selfCache.at > SELF_TTL_MS) {
-        selfCache = { at: Date.now(), value: await meetup.getSelf().catch(() => null) };
-      }
-      status.self = selfCache.value;
+      if (fresh || !meetup.getLastSelf().at) await meetup.getSelf().catch(() => null);
+      const last = meetup.getLastSelf();
+      status.self = last.value;
+      status.checkedAt = last.at;
       status.dead = meetup.isSessionDead();
     }
   }
@@ -217,6 +224,28 @@ function createApi(client, { outbox = null } = {}) {
     res.json({ ok: true });
   }));
 
+  // Uptime-Kuma-style monitors: recent checks per scrape type, oldest first,
+  // plus success rate and average duration over 24h and 7d.
+  router.get('/guilds/:guildId/heartbeats', wrap(async (req, res) => {
+    const { guildId } = req.params;
+    const limit = Math.min(Number(req.query.limit) || 60, 200);
+    const uptime = (type, window) => {
+      const u = queries.getScrapeUptime().get(guildId, type, window);
+      return { total: u.total, ok: u.ok || 0, pct: u.total ? (100 * (u.ok || 0)) / u.total : null, avgMs: u.avg_ms == null ? null : Math.round(u.avg_ms) };
+    };
+    const monitors = [
+      { type: 'events', label: 'Event listing' },
+      { type: 'rsvps', label: 'RSVPs' },
+      { type: 'comments', label: 'Comments' },
+    ].map((m) => ({
+      ...m,
+      beats: queries.getScrapeLogByType().all(guildId, m.type, limit).reverse(),
+      day: uptime(m.type, '-1 day'),
+      week: uptime(m.type, '-7 days'),
+    }));
+    res.json(monitors);
+  }));
+
   router.get('/guilds/:guildId/scrape-log', wrap(async (req, res) => {
     res.json(queries.getScrapeLog().all(req.params.guildId, Math.min(Number(req.query.limit) || 100, 500)));
   }));
@@ -248,11 +277,11 @@ function createApi(client, { outbox = null } = {}) {
   router.post('/session/refresh', wrap(async (req, res) => {
     if (getBackend().name !== 'graphql') throw httpError(400, 'Token refresh is handled by the browser in the browser backend');
     const client_ = require('../services/meetup-api/client');
-    const before = client_.accessTokenSecondsLeft();
+    const before = client_.accessTokenClaims()?.iat;
     const ok = await client_.refreshTokens();
     if (!ok) throw httpError(502, 'Meetup rejected the refresh token — upload a new session');
-    const after = client_.accessTokenSecondsLeft();
-    res.json({ ok, renewed: Math.round(after) > Math.round(before), tokenMinutesLeft: Math.round(after / 60) });
+    const after = client_.accessTokenClaims()?.iat;
+    res.json({ ok, renewed: !!after && after !== before });
   }));
 
   router.post('/session/upload', wrap(async (req, res) => {
@@ -261,7 +290,7 @@ function createApi(client, { outbox = null } = {}) {
     if (!result.ok) throw httpError(400, result.reason);
     const { backup } = client_.installSession(result.state);
     await getBackend().reloadSession();
-    selfCache = { at: Date.now(), value: result.self };
+    await client_.getSelf().catch(() => null); // record the new account for the status display
     console.log(`[dashboard] New Meetup session installed (${result.self.name}); previous saved to ${backup || 'nothing (no previous session)'}`);
     res.json({ ok: true, self: result.self, backup });
   }));

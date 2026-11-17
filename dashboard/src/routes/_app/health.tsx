@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrentGuildId } from '@/components/app-shell'
 import { Empty, LoadingBlock, PageHeader, ResultIcon } from '@/components/common'
+import { Heartbeats } from '@/components/heartbeats'
 import { api, scrapeLogQuery, type HealthResult } from '@/lib/api'
 import { duration, formatDateTime } from '@/lib/format'
 
@@ -33,6 +34,8 @@ function HealthPage() {
   return (
     <>
       <PageHeader title="API health" description="Runs every Meetup GraphQL query Rollcall depends on and checks each field and value it reads. If Meetup changes something, the failing check names the exact operation and field." />
+
+      {guildId && <div className="mb-6"><Heartbeats guildId={guildId} slots={90} /></div>}
 
       <Card>
         <CardHeader>

@@ -18,8 +18,8 @@ function SessionPage() {
   const invalidate = useInvalidateData()
 
   const refresh = useMutation({
-    mutationFn: () => api<{ renewed: boolean; tokenMinutesLeft: number }>('/session/refresh', { method: 'POST' }),
-    onSuccess: (r) => toast.success(r.renewed ? `New access token issued (${r.tokenMinutesLeft} min)` : `Token still valid (${r.tokenMinutesLeft} min left) — Meetup returns the same token until it expires`),
+    mutationFn: () => api<{ renewed: boolean }>('/session/refresh', { method: 'POST' }),
+    onSuccess: (r) => toast.success(r.renewed ? 'Meetup issued a new access token' : 'Meetup returned the current token — the session is fine as it is'),
     onError: (e) => toast.error(e.message),
     onSettled: invalidate,
   })
@@ -31,7 +31,7 @@ function SessionPage() {
 
   return (
     <>
-      <PageHeader title="Meetup session" description="The logged-in Meetup account Rollcall reads data as. Access tokens last an hour and renew automatically; a new login is only needed if Meetup rejects the refresh token." />
+      <PageHeader title="Meetup session" description="The logged-in Meetup account Rollcall reads data as. A session keeps working until Meetup ends it on their side (typically weeks); when that happens, polling pauses and you upload a new one below." />
 
       {isLoading || !session ? <LoadingBlock /> : (
         <>
@@ -44,8 +44,17 @@ function SessionPage() {
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Logged in as" value={session.self?.name || (session.backend === 'browser' ? 'n/a (browser)' : '—')} hint={session.self ? `Member ${session.self.id}` : undefined} tone={session.self ? 'ok' : session.backend === 'graphql' ? 'bad' : undefined} />
-            <Stat label="Access token" value={session.tokenMinutesLeft == null ? '—' : session.tokenMinutesLeft > 0 ? `${session.tokenMinutesLeft} min` : 'Expired'} hint="Renews automatically when it expires" />
-            <Stat label="Session file" value={<span className="text-base">{relative(session.stateFileUpdatedAt)}</span>} hint={formatDateTime(session.stateFileUpdatedAt)} />
+            <Stat
+              label="Status"
+              value={session.dead ? 'Needs login' : session.self ? 'Working' : session.backend === 'browser' ? 'n/a' : 'Not logged in'}
+              tone={session.dead || (session.backend === 'graphql' && !session.self) ? 'bad' : session.self ? 'ok' : undefined}
+              hint={session.checkedAt ? `Verified with Meetup ${relative(session.checkedAt)}` : undefined}
+            />
+            <Stat
+              label="Logged in"
+              value={<span className="text-base">{relative(session.tokenIssuedAt || session.stateFileUpdatedAt)}</span>}
+              hint={`Token issued ${formatDateTime(session.tokenIssuedAt)} · file saved ${relative(session.stateFileUpdatedAt)}`}
+            />
             <Stat label="Backend" value={session.backend === 'graphql' ? 'GraphQL' : 'Browser'} />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">

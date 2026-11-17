@@ -8,11 +8,14 @@
  *
  * Token lifecycle (from meetup.com's own Apollo client, see
  * docs/meetup-api/README.md):
- *   - __meetup_auth_access_token  JWT, valid 1 hour
- *   - __meetup_auth_refresh_token JWT, valid 1 year
- *   - A request with an expired access token fails with a GraphQL error whose
- *     extensions.classification is "access_token_expired". The site then
- *     POSTs refreshTokensMutation to /refresh-token and retries.
+ *   - __meetup_auth_access_token  JWT whose `exp` says 1 hour — but Meetup does
+ *     NOT enforce it: tokens weeks past `exp` are still accepted, and
+ *     /refresh-token just returns the same token. What actually ends a
+ *     session is Meetup's server side.
+ *   - __meetup_auth_refresh_token JWT, `exp` 1 year
+ *   - If Meetup ever does reject an expired token, it answers with a GraphQL
+ *     error whose extensions.classification is "access_token_expired"; the site
+ *     then POSTs refreshTokensMutation to /refresh-token and retries. So do we.
  *   - "access_token_invalid" means the session is gone: log in again.
  * /refresh-token returns the tokens both as Set-Cookie headers and in the
  * response body; we apply both.
@@ -31,11 +34,6 @@ const ACCESS_COOKIE = '__meetup_auth_access_token';
 const REFRESH_COOKIE = '__meetup_auth_refresh_token';
 const REQUEST_TIMEOUT_MS = 30000;
 
-// Renew once the JWT has expired. Meetup returns the *same* token from
-// /refresh-token while it is still valid, so renewing early achieves nothing;
-// a request that races the expiry is caught by the access_token_expired retry.
-const EXPIRY_SKEW_SECONDS = 0;
-
 const SESSION_DEAD_MESSAGE = 'Session expired — run login-server.js or export-session.js to re-authenticate';
 
 class MeetupApiError extends Error {
@@ -52,8 +50,6 @@ let state = null;
 let stateMtimeMs = 0;
 let sessionDead = false;
 let refreshInFlight = null;
-let proactiveRefreshAfter = 0;
-const PROACTIVE_BACKOFF_MS = 5 * 60 * 1000;
 
 /**
  * Load cookies from disk, re-reading whenever the file changed underneath us
@@ -131,16 +127,21 @@ function applySetCookies(res) {
   return changed;
 }
 
-/** Seconds until the access token's JWT `exp`, or null if it can't be read. */
-function accessTokenSecondsLeft() {
+/** The access token's JWT claims ({ iat, exp } in seconds), or null if unreadable. */
+function accessTokenClaims() {
   const token = getCookie(ACCESS_COOKIE)?.value;
   if (!token) return null;
   try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
-    return payload.exp - Date.now() / 1000;
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
   } catch {
     return null;
   }
+}
+
+/** Seconds until the access token's JWT `exp` (informational: Meetup doesn't enforce it). */
+function accessTokenSecondsLeft() {
+  const claims = accessTokenClaims();
+  return claims?.exp ? claims.exp - Date.now() / 1000 : null;
 }
 
 function markSessionDead(reason) {
@@ -153,7 +154,6 @@ function markSessionDead(reason) {
 
 function clearSessionDead() {
   sessionDead = false;
-  proactiveRefreshAfter = 0;
   state = null; // force a re-read of state.json on the next request
 }
 
@@ -223,16 +223,9 @@ async function refreshTokens() {
     if (result.session.refreshToken) setCookie(REFRESH_COOKIE, result.session.refreshToken);
     saveState();
     const left = accessTokenSecondsLeft();
-    if (left !== null && left <= 0) {
-      // Observed Nov 2026: shortly after expiry Meetup hands back the same
-      // token and still accepts it. Don't hammer /refresh-token before every
-      // request; try again later, or immediately on access_token_expired.
-      proactiveRefreshAfter = Date.now() + PROACTIVE_BACKOFF_MS;
-      console.log('[meetup-api] Refresh returned the current token (Meetup still accepts it) — next proactive refresh in 5 min');
-    } else {
-      proactiveRefreshAfter = 0;
-      console.log(`[meetup-api] Access token refreshed${left !== null ? ` (valid ${Math.round(left / 60)} min)` : ''}`);
-    }
+    console.log(left !== null && left <= 0
+      ? '[meetup-api] Token refresh: Meetup returned the current token'
+      : `[meetup-api] Access token refreshed${left !== null ? ` (exp in ${Math.round(left / 60)} min)` : ''}`);
     return true;
   })().finally(() => {
     refreshInFlight = null;
@@ -241,20 +234,16 @@ async function refreshTokens() {
 }
 
 /**
- * Run a GraphQL query. Refreshes the access token when it has expired (or is
- * about to) and retries once. Throws MeetupApiError on any GraphQL error, with
- * the operation name and Meetup's error messages, so schema drift shows up as
- * a precise message rather than empty data.
+ * Run a GraphQL query. If Meetup reports the access token expired, refresh it
+ * and retry once (it doesn't enforce the JWT's own `exp`, so there's no point
+ * refreshing on a timer). Throws MeetupApiError on any GraphQL error, with the
+ * operation name and Meetup's error messages, so schema drift shows up as a
+ * precise message rather than empty data.
  */
 async function gql(query, variables = {}, { retried = false } = {}) {
   if (sessionDead) throw new MeetupApiError(SESSION_DEAD_MESSAGE);
 
   const operation = query.match(/(?:query|mutation)\s+(\w+)/)?.[1] || 'anonymous';
-
-  const left = accessTokenSecondsLeft();
-  if (!retried && left !== null && left < EXPIRY_SKEW_SECONDS && Date.now() >= proactiveRefreshAfter) {
-    if (!(await refreshTokens())) throw new MeetupApiError(SESSION_DEAD_MESSAGE, { operation });
-  }
 
   const json = await post(GQL_URL, { operationName: operation, variables, query }, operation);
 
@@ -275,15 +264,29 @@ async function gql(query, variables = {}, { retried = false } = {}) {
   return json.data;
 }
 
+// Result of the most recent session check (every poll does one), so the
+// dashboard can show session status without making requests of its own.
+let lastSelf = { value: null, at: null };
+
 /** The logged-in member ({ id, name }), or null if the session isn't authenticated. */
 async function getSelf() {
   try {
     const data = await gql(SELF);
-    return data?.self?.id ? data.self : null;
+    const self = data?.self?.id ? data.self : null;
+    lastSelf = { value: self, at: new Date().toISOString() };
+    return self;
   } catch (err) {
-    if (sessionDead) return null;
+    if (sessionDead) {
+      lastSelf = { value: null, at: new Date().toISOString() };
+      return null;
+    }
     throw err;
   }
+}
+
+/** The last session check's result ({ value, at }); no request is made. */
+function getLastSelf() {
+  return lastSelf;
 }
 
 /** Throws (and pauses polling) if the session isn't logged in. Same contract as scraper.ensureLoggedIn. */
@@ -356,6 +359,7 @@ function installSession(state) {
 module.exports = {
   gql,
   getSelf,
+  getLastSelf,
   ensureLoggedIn,
   refreshTokens,
   verifySession,
@@ -363,6 +367,7 @@ module.exports = {
   clearSessionDead,
   isSessionDead,
   accessTokenSecondsLeft,
+  accessTokenClaims,
   MeetupApiError,
   STATE_FILE,
 };

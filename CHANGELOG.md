@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-11-17
+
+### Added
+- Uptime Kuma-style **monitors** on the dashboard's Overview and API health pages: one row of heartbeat ticks per check type (event listing, RSVPs, comments), green or red, newest on the right, with a tooltip per tick (time, duration, error), 24-hour and 7-day success rates, and average response time.
+
+### Fixed
+- The dashboard showed a working Meetup session as "Expired". Meetup's access token claims a 1-hour lifetime but Meetup doesn't enforce it (the production session's token was three weeks past its `exp` and still worked), so the dashboard now shows whether the session actually works, verified live against Meetup, and when it was logged in.
+- Having the dashboard open no longer sends anything to Meetup. The session badge used to re-check the logged-in account against Meetup up to once a minute; it now shows the result of the poller's own session check from its last scheduled poll.
+- Stopped calling `/refresh-token` every 5 minutes. Since Meetup returns the same token anyway, the client now only refreshes when Meetup actually reports `access_token_expired`, like meetup.com's own client.
+
 ## [2.0.0] - 2026-11-17
 
 ### Added

@@ -259,6 +259,16 @@ const queries = {
   getScrapeLog: () => getDb().prepare(
     'SELECT * FROM scrape_log WHERE guild_id = ? ORDER BY id DESC LIMIT ?'
   ),
+  getScrapeLogByType: () => getDb().prepare(
+    'SELECT id, status, error_message, duration_ms, scraped_at FROM scrape_log WHERE guild_id = ? AND scrape_type = ? ORDER BY id DESC LIMIT ?'
+  ),
+  getScrapeUptime: () => getDb().prepare(`
+    SELECT COUNT(*) AS total,
+           SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) AS ok,
+           AVG(CASE WHEN status = 'success' THEN duration_ms END) AS avg_ms
+    FROM scrape_log
+    WHERE guild_id = ? AND scrape_type = ? AND scraped_at >= datetime('now', ?)
+  `),
   getEventsForGuild: () => getDb().prepare(
     'SELECT * FROM events WHERE guild_id = ? AND is_cancelled = 0 ORDER BY date_time ASC'
   ),

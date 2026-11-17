@@ -55,20 +55,17 @@ async function runHealthChecks({ groupUrl = null, eventUrl = null, refresh = fal
     const self = await api.getSelf();
     if (!self) return fail('not logged in — upload a new session or run export-session.js');
     ok(`logged in as ${self.name} (member ${self.id})`);
-    const left = client.accessTokenSecondsLeft();
-    if (left === null) warn('access token cookie missing or not a JWT');
-    else ok(`access token ${left > 0 ? `valid for ${Math.round(left / 60)} more min` : `expired ${Math.round(-left / 60)} min ago (renews on next request)`}`);
+    const claims = client.accessTokenClaims();
+    if (!claims?.iat) warn('access token cookie missing or not a JWT');
+    else ok(`session token issued ${new Date(claims.iat * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC (Meetup doesn't enforce its 1-hour exp)`);
   });
 
   if (refresh) {
     await check('Token refresh', async () => {
-      const before = client.accessTokenSecondsLeft();
+      const before = client.accessTokenClaims()?.iat;
       if (!(await client.refreshTokens())) return fail('refresh failed — see logs');
-      const after = client.accessTokenSecondsLeft();
-      ok(`refresh accepted; access token valid ${Math.round(after / 60)} min (was ${Math.round(before / 60)})`);
-      if (Math.round(after) <= Math.round(before)) {
-        warn('token not renewed — Meetup returns the current token while it is still valid; a new one is issued after it expires');
-      }
+      const after = client.accessTokenClaims()?.iat;
+      ok(after && after !== before ? 'refresh accepted; Meetup issued a new access token' : 'refresh accepted; Meetup returned the current token (normal — it does not enforce the token expiry)');
       const self = await api.getSelf();
       if (self) ok(`token works (self = ${self.name})`); else fail('self query failed after refresh');
     });

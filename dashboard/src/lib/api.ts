@@ -86,7 +86,11 @@ export interface SessionStatus {
   backend: 'graphql' | 'browser'
   dead: boolean
   self: { id: string; name: string } | null
+  /** When `self` was last confirmed live against Meetup. */
+  checkedAt: string | null
+  /** From the token's JWT. Informational: Meetup doesn't enforce this expiry. */
   tokenMinutesLeft: number | null
+  tokenIssuedAt: string | null
   stateFileUpdatedAt: string | null
 }
 
@@ -173,6 +177,29 @@ export interface PollEventSummary {
   comments: { total: number; new: number } | null
   errors: string[]
   durationMs: number
+}
+
+export interface Heartbeat {
+  id: number
+  status: 'success' | 'error'
+  error_message: string | null
+  duration_ms: number
+  scraped_at: string
+}
+
+export interface UptimeWindow {
+  total: number
+  ok: number
+  pct: number | null
+  avgMs: number | null
+}
+
+export interface Monitor {
+  type: 'events' | 'rsvps' | 'comments'
+  label: string
+  beats: Heartbeat[]
+  day: UptimeWindow
+  week: UptimeWindow
 }
 
 export interface HealthResult {
@@ -284,6 +311,12 @@ export const scrapeLogQuery = (guildId: string) => queryOptions({
   refetchInterval: 15_000,
 })
 
+export const heartbeatsQuery = (guildId: string, limit = 60) => queryOptions({
+  queryKey: ['heartbeats', guildId, limit] as const,
+  queryFn: () => api<Monitor[]>(`/guilds/${guildId}/heartbeats?limit=${limit}`),
+  refetchInterval: 15_000,
+})
+
 export const sessionQuery = queryOptions({
   queryKey: qk.session,
   queryFn: () => api<SessionStatus>('/session'),
@@ -301,7 +334,7 @@ export const outboxQuery = queryOptions({
 /** Invalidate everything that a poll could have changed. */
 export function useInvalidateData() {
   const qc = useQueryClient()
-  return () => Promise.all(['overview', 'events', 'event', 'scrape-log', 'outbox', 'session'].map((k) => qc.invalidateQueries({ queryKey: [k] })))
+  return () => Promise.all(['overview', 'events', 'event', 'scrape-log', 'heartbeats', 'outbox', 'session'].map((k) => qc.invalidateQueries({ queryKey: [k] })))
 }
 
 export function usePollGuild(guildId: string) {

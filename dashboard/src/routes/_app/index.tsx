@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { EventStatusBadge, ErrorBlock, LoadingBlock, PageHeader, Stat } from '@/components/common'
+import { Heartbeats } from '@/components/heartbeats'
 import { overviewQuery, usePollGuild, type Overview } from '@/lib/api'
 import { duration, formatDateTime, formatEventDate, relative } from '@/lib/format'
 
@@ -32,9 +33,9 @@ function OverviewPage() {
           icon={<KeyRound className="size-4" />}
           tone={sessionOk ? 'ok' : 'bad'}
           value={sessionOk ? session.self?.name || 'Connected' : 'Needs login'}
-          hint={session.tokenMinutesLeft != null
-            ? session.tokenMinutesLeft > 0 ? `Access token: ${session.tokenMinutesLeft} min left (auto-renews)` : 'Access token expired — renews on next request'
-            : 'No session file'}
+          hint={sessionOk
+            ? session.checkedAt ? `Working · verified with Meetup ${relative(session.checkedAt)}` : 'Working'
+            : session.stateFileUpdatedAt ? 'Upload a new session on the Meetup session page' : 'No session file'}
         />
         <Stat label="Backend" icon={<Server className="size-4" />} value={session.backend === 'graphql' ? 'GraphQL' : 'Browser'} hint={session.backend === 'graphql' ? 'Meetup API (v2)' : 'Playwright scraper (v1)'} />
         <Stat
@@ -53,7 +54,12 @@ function OverviewPage() {
       </div>
 
       <div className="mt-8 space-y-6">
-        {data.guilds.map((g) => <GuildCard key={g.id} guild={g} />)}
+        {data.guilds.map((g) => (
+          <div key={g.id} className="space-y-6">
+            <GuildCard guild={g} />
+            <Heartbeats guildId={g.id} title={data.guilds.length > 1 ? `Monitors · ${g.name}` : 'Monitors'} />
+          </div>
+        ))}
         {data.guilds.length === 0 && (
           <Card><CardContent className="text-sm text-muted-foreground">No Discord server is configured yet. Run <code>/config meetup</code> in your server.</CardContent></Card>
         )}
