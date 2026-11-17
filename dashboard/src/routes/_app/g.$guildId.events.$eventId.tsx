@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, CalendarDays, ExternalLink, Loader2, MapPin, MessageSquare, RefreshCw, Send, UserCheck, UserMinus, UserX, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ExternalLink, Loader2, MapPin, MessageSquare, RefreshCw, Reply, Send, Trash2, UserCheck, UserMinus, UserX, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Empty, ErrorBlock, EventStatusBadge, LikesTag, LoadingBlock, PageHeader, PinnedTag, Stat } from '@/components/common'
-import { eventQuery, liveEventQuery, usePostRsvps, useRescanEvent, type LiveComment, type LiveRsvp, type PollEventSummary, type StoredComment, type StoredRsvp } from '@/lib/api'
+import { eventQuery, liveEventQuery, overviewQuery, useDeleteComment, usePostComment, usePostRsvps, useRescanEvent, type LiveComment, type LiveRsvp, type PollEventSummary, type StoredComment, type StoredRsvp } from '@/lib/api'
+import { Input } from '@/components/ui/input'
 import { formatDateTime, formatEventDate, relative } from '@/lib/format'
 
 export const Route = createFileRoute('/_app/g/$guildId/events/$eventId')({
@@ -101,8 +102,13 @@ function EventPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="comments" className="mt-4">
-          {comments.length === 0 ? <Empty>No comments stored for this event.</Empty> : <StoredComments comments={comments} />}
+        <TabsContent value="comments" className="mt-4 space-y-4">
+          <Card className="py-4">
+            <CardContent className="px-4">
+              <CommentComposer guildId={guildId} eventId={eventId} />
+            </CardContent>
+          </Card>
+          {comments.length === 0 ? <Empty>No comments stored for this event.</Empty> : <StoredComments guildId={guildId} eventId={eventId} comments={comments} />}
         </TabsContent>
 
         <TabsContent value="live" className="mt-4">
@@ -195,7 +201,56 @@ function StoredRsvpColumn({ label, icon: Icon, tone, rows }: { label: string; ic
   )
 }
 
-function StoredComments({ comments }: { comments: StoredComment[] }) {
+const NAME_KEY = 'rollcall-comment-name'
+const MAX_COMMENT = 700
+
+/** Write a comment (or reply) that the bot account posts on Meetup, signed "Name: text". */
+function CommentComposer({ guildId, eventId, replyTo, onDone, autoFocus }: { guildId: string; eventId: string; replyTo?: string; onDone?: () => void; autoFocus?: boolean }) {
+  const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || '' } catch { return '' } })
+  const [text, setText] = useState('')
+  const post = usePostComment(guildId, eventId)
+  const full = `${name.trim()}: ${text.trim()}`
+  const tooLong = full.length > MAX_COMMENT
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault()
+    try { localStorage.setItem(NAME_KEY, name.trim()) } catch { /* storage blocked */ }
+    post.mutate({ authorName: name.trim(), text, replyTo }, {
+      onSuccess: () => {
+        toast.success(`${replyTo ? 'Reply' : 'Comment'} posted on Meetup. It shows up in Discord on the next poll.`)
+        setText('')
+        onDone?.()
+      },
+      onError: (err) => toast.error(err.message),
+    })
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input className="sm:w-48" placeholder="Sign as (your name)" value={name} onChange={(e) => setName(e.target.value)} aria-label="Sign as" />
+        <textarea
+          autoFocus={autoFocus}
+          className="min-h-20 flex-1 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          placeholder={replyTo ? 'Write a reply…' : 'Write a comment for the Meetup event…'}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        {name.trim() && text.trim() ? <span className="min-w-0 flex-1 truncate">On Meetup as the bot account: <b className="text-foreground">{full}</b></span> : <span className="flex-1">Your name goes in front so members know who wrote it.</span>}
+        <span className={tooLong ? 'font-medium text-destructive' : ''}>{full.length}/{MAX_COMMENT}</span>
+        {onDone && <Button type="button" variant="ghost" size="sm" onClick={onDone}>Cancel</Button>}
+        <Button type="submit" size="sm" disabled={!name.trim() || !text.trim() || tooLong || post.isPending}>
+          {post.isPending ? <Loader2 className="animate-spin" /> : <Send />} {replyTo ? 'Post reply' : 'Post comment'}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function StoredComments({ guildId, eventId, comments }: { guildId: string; eventId: string; comments: StoredComment[] }) {
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const threads = useMemo(() => {
     const top = comments.filter((c) => !c.parent_comment_id)
     return top.map((t) => ({ top: t, replies: comments.filter((c) => c.parent_comment_id === t.comment_id) }))
@@ -210,6 +265,15 @@ function StoredComments({ comments }: { comments: StoredComment[] }) {
               <div key={r.comment_id} className="ml-6 border-l-2 pl-4">
                 <CommentLine author={r.author_name} text={r.content} likes={r.likes} when={r.posted_at} seen={r.first_seen_at} />
               </div>
+            ))}
+            {top.meetup_comment_id && (replyingTo === top.meetup_comment_id ? (
+              <div className="ml-6 border-l-2 pl-4">
+                <CommentComposer guildId={guildId} eventId={eventId} replyTo={top.meetup_comment_id} onDone={() => setReplyingTo(null)} autoFocus />
+              </div>
+            ) : (
+              <Button variant="ghost" size="sm" className="ml-4 h-7 text-muted-foreground" onClick={() => setReplyingTo(top.meetup_comment_id)}>
+                <Reply /> Reply
+              </Button>
             ))}
           </CardContent>
         </Card>
@@ -236,6 +300,14 @@ function CommentLine({ author, text, likes, when, seen, pinned }: { author: stri
 
 function LiveTab({ guildId, eventId, storedRsvps, storedComments }: { guildId: string; eventId: string; storedRsvps: StoredRsvp[]; storedComments: StoredComment[] }) {
   const { data, error, isFetching, refetch } = useQuery(liveEventQuery(guildId, eventId))
+  const { data: overview } = useQuery(overviewQuery)
+  const selfId = overview?.session.self?.id
+  const del = useDeleteComment(guildId, eventId)
+
+  function remove(c: LiveComment) {
+    if (!confirm(`Delete this comment from Meetup?\n\n${c.content}`)) return
+    toast.promise(del.mutateAsync(c.meetup_comment_id), { loading: 'Deleting…', success: 'Deleted from Meetup', error: (e) => e.message })
+  }
   if (!data && isFetching) return <LoadingBlock rows={6} />
   if (error) return <ErrorBlock error={error} />
   if (!data) return null
@@ -275,8 +347,15 @@ function LiveTab({ guildId, eventId, storedRsvps, storedComments }: { guildId: s
         </CardHeader>
         <CardContent className="space-y-3">
           {data.comments.length === 0 ? <div className="text-sm text-muted-foreground">No comments.</div> : data.comments.map((c: LiveComment) => (
-            <div key={c.comment_id} className={`${c.is_reply ? 'ml-6 border-l-2 pl-4' : ''} ${!storedIds.has(c.comment_id) ? 'rounded-md bg-warning/10 p-2' : ''}`}>
-              <CommentLine author={c.author_name} text={c.content} likes={c.likes} when={c.created} pinned={c.is_pinned} />
+            <div key={c.comment_id} className={`flex items-start gap-2 ${c.is_reply ? 'ml-6 border-l-2 pl-4' : ''} ${!storedIds.has(c.comment_id) ? 'rounded-md bg-warning/10 p-2' : ''}`}>
+              <div className="min-w-0 flex-1">
+                <CommentLine author={c.author_name} text={c.content} likes={c.likes} when={c.created} pinned={c.is_pinned} />
+              </div>
+              {selfId && c.author_id === selfId && (
+                <Button variant="ghost" size="icon" className="size-7 shrink-0 text-muted-foreground hover:text-destructive" title="Delete (bot account's own comment)" onClick={() => remove(c)} disabled={del.isPending}>
+                  <Trash2 />
+                </Button>
+              )}
             </div>
           ))}
         </CardContent>

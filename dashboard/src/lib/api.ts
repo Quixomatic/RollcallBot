@@ -129,6 +129,7 @@ export interface LiveComment {
   comment_id: string
   meetup_comment_id: string
   author_name: string
+  author_id: string | null
   content: string
   created: string
   likes: number
@@ -358,5 +359,23 @@ export function usePostRsvps(guildId: string, eventId: string) {
   return useMutation({
     mutationFn: () => api<{ ok: true }>(`/guilds/${guildId}/events/${eventId}/post-rsvps`, { method: 'POST' }),
     onSettled: invalidate,
+  })
+}
+
+export function usePostComment(guildId: string, eventId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: { authorName: string; text: string; replyTo?: string | null }) =>
+      api<{ ok: true; text: string; meetupCommentId: string | null }>(`/guilds/${guildId}/events/${eventId}/comments`, { method: 'POST', json: body }),
+    onSettled: () => qc.invalidateQueries({ queryKey: qk.live(guildId, eventId) }),
+  })
+}
+
+export function useDeleteComment(guildId: string, eventId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (meetupCommentId: string) =>
+      api<{ ok: true }>(`/guilds/${guildId}/events/${eventId}/comments/${meetupCommentId}`, { method: 'DELETE' }),
+    onSettled: () => qc.invalidateQueries({ queryKey: qk.live(guildId, eventId) }),
   })
 }

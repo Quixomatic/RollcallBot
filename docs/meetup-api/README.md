@@ -199,6 +199,29 @@ so switching backends never re-posts comments. On top of that, the GraphQL backe
 on `meetup_comment_id` (an edited comment isn't re-posted) and records silently any comment
 created before the last one already stored for the event.
 
+## Writing: comments
+
+The only write operations Rollcall uses. Verbatim site mutations
+([`addComment`](site-queries/addComment.graphql), [`addCommentReply`](site-queries/addCommentReply.graphql),
+[`deleteComment`](site-queries/deleteComment.graphql), [`deleteCommentReply`](site-queries/deleteCommentReply.graphql));
+the input shapes come from how meetup.com's bundles call them:
+
+| Mutation | Input | Notes |
+|---|---|---|
+| `addComment` | `{ eventId, text, isPrivate? }` | |
+| `addCommentReply` | `{ eventId, text, commentId }` | `commentId` = the top-level comment |
+| `deleteComment` | `{ eventId, commentId }` | |
+| `deleteCommentReply` | `{ eventId, replyId }` | note: `replyId`, not `commentId` |
+
+- Text is limited to **700 characters** (the site's limit for both). Rollcall prefixes the
+  admin's name (`James: …`), and the limit includes it.
+- They return only `errors { code message field }`, **not the new comment's ID**; Rollcall finds
+  it by re-reading the comments (newest by the bot account with that exact text).
+- Verified live 2026-11-17 on a past event: comment and reply posted, threaded correctly, then
+  both deleted.
+- The dashboard only deletes comments whose author is the bot account (checked against Meetup
+  first), even though an organizer account could delete members' comments.
+
 ## Cancellations
 
 With the GraphQL backend an event is **only** marked cancelled when Meetup itself reports

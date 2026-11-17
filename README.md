@@ -114,7 +114,7 @@ pnpm run reset-data
 Set `DASHBOARD_PASSWORD` and the bot serves a dashboard on port 3000 (`DASHBOARD_PORT`):
 
 - **Overview** — Meetup session, backend, poller state and next polls, the next event per server, recent errors
-- **Events** — every tracked event; click one for its RSVP lists (with guests), comments (pinned, likes), a live read-only comparison against Meetup, and buttons to **Rescan now** or **Post RSVP summary**
+- **Events** — every tracked event; click one for its RSVP lists (with guests), comments (pinned, likes), a live read-only comparison against Meetup, and buttons to **Rescan now** or **Post RSVP summary**. You can also **post comments and replies** on Meetup as the bot account (signed with a name you choose) and delete the bot's own comments
 - **API health** — runs the same checks as `pnpm run api-check`, plus the scrape history
 - **Meetup session** — who the bot is logged in as, token status, manual refresh, and **upload a new `state.json`** (verified against Meetup before it's installed)
 - **Logs** — live tail of the bot's output
@@ -184,6 +184,7 @@ services:
 | `/rsvps <event>` | Everyone | Show RSVP list for an event |
 | `/status` | Moderate Members | Bot health and scrape status |
 | `/poll` | Administrator | Manually trigger a scrape cycle |
+| `/comment <event> <text>` | Administrator | Post a comment on an upcoming Meetup event as the bot account, signed with your server nickname (`James: see you there`). GraphQL backend only |
 | `/silence setup` | Administrator | Create the `rollcall-silenced` role and deny it everything but reading on every channel (re-runnable) |
 | `/silence user <member>` | Administrator | Make a member read-only; reports channels where another role still lets them act |
 | `/silence remove <member>` | Administrator | Unsilence a member |

@@ -12,6 +12,7 @@ const poller = require('../services/poller');
 const notifier = require('../services/notifier');
 const logBuffer = require('../services/log-buffer');
 const { runHealthChecks } = require('../services/api-health');
+const { postAsAdmin } = require('../services/comment-poster');
 const { version } = require('../../package.json');
 
 const startedAt = new Date().toISOString();
@@ -244,6 +245,48 @@ function createApi(client, { outbox = null } = {}) {
       week: uptime(m.type, '-7 days'),
     }));
     res.json(monitors);
+  }));
+
+  // The dry run fakes Discord but its Meetup calls are real, so writes to
+  // Meetup are off there unless explicitly allowed.
+  const assertMeetupWritesAllowed = () => {
+    if (outbox && process.env.DEV_ALLOW_MEETUP_WRITES !== '1') {
+      throw httpError(403, 'Dry run: posting to Meetup is disabled because it would be real. Set DEV_ALLOW_MEETUP_WRITES=1 to allow it.');
+    }
+  };
+
+  // Post a comment (or reply) as the bot account, signed with the admin's name.
+  router.post('/guilds/:guildId/events/:eventId/comments', wrap(async (req, res) => {
+    assertMeetupWritesAllowed();
+    const { guildId, eventId } = req.params;
+    const authorName = String(req.body?.authorName || '').trim();
+    if (!authorName) throw httpError(400, 'Enter the name to sign the comment with');
+    try {
+      const result = await postAsAdmin({
+        guildId, eventId, authorName, text: req.body?.text, replyTo: req.body?.replyTo || null, source: `dashboard (${authorName})`,
+      });
+      res.json({ ok: true, text: result.text, meetupCommentId: result.meetupCommentId });
+    } catch (err) {
+      throw httpError(400, err.message);
+    }
+  }));
+
+  // Delete one of the bot account's own comments. Comments by anyone else are
+  // refused, even if the account has organizer rights on Meetup.
+  router.delete('/guilds/:guildId/events/:eventId/comments/:meetupCommentId', wrap(async (req, res) => {
+    assertMeetupWritesAllowed();
+    const { guildId, eventId, meetupCommentId } = req.params;
+    const event = queries.getEventForGuild().get(eventId, guildId);
+    if (!event) throw httpError(404, 'Event not stored for this server');
+    const backend = getBackend();
+    const meetup = require('../services/meetup-api/client');
+    const self = await meetup.getSelf();
+    const target = (await backend.getComments(event.url)).find((c) => c.meetup_comment_id === meetupCommentId);
+    if (!target) throw httpError(404, 'That comment is no longer on Meetup');
+    if (!self || target.author_id !== self.id) throw httpError(403, 'Only comments posted by the bot account can be deleted here');
+    await backend.deleteComment(event.url, meetupCommentId, { isReply: target.is_reply });
+    console.log(`[dashboard] Deleted the bot's ${target.is_reply ? 'reply' : 'comment'} on "${event.title}": ${JSON.stringify(target.content)}`);
+    res.json({ ok: true });
   }));
 
   router.get('/guilds/:guildId/scrape-log', wrap(async (req, res) => {

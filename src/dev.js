@@ -8,7 +8,9 @@
  *   pnpm --dir dashboard dev           # optional: hot-reloading UI on :5173
  *
  * Env (all optional): DASHBOARD_PASSWORD (default "rollcall"), DEV_GROUP_URL,
- * ROLLCALL_DB_PATH (default data/dev.db), MEETUP_BACKEND, MEETUP_STATE_FILE.
+ * ROLLCALL_DB_PATH (default data/dev.db), MEETUP_BACKEND, MEETUP_STATE_FILE,
+ * DEV_ALLOW_MEETUP_WRITES=1 (let the dashboard post/delete real Meetup comments).
+ * Meetup reads are real; Meetup writes are blocked unless that is set.
  * Uses the Meetup session in data/browser-state/state.json like the bot does.
  */
 

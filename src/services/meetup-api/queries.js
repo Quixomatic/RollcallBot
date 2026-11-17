@@ -183,6 +183,62 @@ const EVENT_PINNED_COMMENTS = `
   }
 `;
 
+// ---- Comment mutations (verbatim from the site; see site-queries/) ----
+// Inputs, from how meetup.com calls them:
+//   addComment         { eventId, text, isPrivate? }
+//   addCommentReply    { eventId, text, commentId }   (commentId = the top-level comment)
+//   deleteComment      { eventId, commentId }
+//   deleteCommentReply { eventId, replyId }
+// The site limits comment and reply text to 700 characters. None of these
+// return the new comment's ID — only `errors`.
+
+const ADD_COMMENT = `
+  mutation addComment($input: AddCommentInput!) {
+    addComment(input: $input) {
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }
+`;
+
+const ADD_COMMENT_REPLY = `
+  mutation addCommentReply($input: AddCommentReplyInput!) {
+    addCommentReply(input: $input) {
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }
+`;
+
+const DELETE_COMMENT = `
+  mutation deleteComment($input: DeleteCommentInput!) {
+    deleteComment(input: $input) {
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }
+`;
+
+const DELETE_COMMENT_REPLY = `
+  mutation deleteCommentReply($input: DeleteCommentReplyInput!) {
+    deleteCommentReply(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }
+`;
+
 // Token refresh. Sent to https://www.meetup.com/refresh-token (not /gql2),
 // exactly as the site's Apollo error link does on `access_token_expired`.
 const REFRESH_TOKENS = `
@@ -207,5 +263,9 @@ module.exports = {
   EVENT_RSVPS,
   EVENT_COMMENTS,
   EVENT_PINNED_COMMENTS,
+  ADD_COMMENT,
+  ADD_COMMENT_REPLY,
+  DELETE_COMMENT,
+  DELETE_COMMENT_REPLY,
   REFRESH_TOKENS,
 };

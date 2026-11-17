@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-11-17
+
+### Added
+- **Post comments to Meetup from Discord.** `/comment <event> <text>` (Administrator) posts a comment on an upcoming event as the bot's Meetup account, signed with the admin's server nickname (`James: see you at Lake Fairfax`). The event option autocompletes from tracked upcoming events. The comment then appears in the comments channel on the next poll like any other.
+- **Comment from the dashboard.** Each event page has a comment box (sign with any name; it's remembered in your browser) with a live preview of exactly how it will read on Meetup and a character counter, a **Reply** button on each comment thread, and **Delete** on the bot account's own comments in the Live tab. The dashboard refuses to delete anyone else's comments.
+- The local dry run (`pnpm run dev`) blocks posting or deleting Meetup comments, since its Meetup calls are real, unless `DEV_ALLOW_MEETUP_WRITES=1` is set.
+- Comment mutations (`addComment`, `addCommentReply`, `deleteComment`, `deleteCommentReply`) documented in `docs/meetup-api/README.md`, including their input shapes and the 700-character limit. Verified live on a past event.
+
 ## [2.0.1] - 2026-11-17
 
 ### Added

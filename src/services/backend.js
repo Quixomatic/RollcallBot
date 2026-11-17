@@ -24,6 +24,8 @@ function graphqlBackend() {
     getEventDetails: (eventUrl) => api.fetchEventDetails(eventUrl),
     getRsvps: (eventUrl) => api.fetchRsvps(eventUrl),
     getComments: (eventUrl) => api.fetchComments(eventUrl),
+    postComment: (eventUrl, text, opts) => api.postComment(eventUrl, text, opts),
+    deleteComment: (eventUrl, meetupCommentId, opts) => api.deleteComment(eventUrl, meetupCommentId, opts),
     clearSessionDead: () => api.clearSessionDead(),
     // Pick up a state.json that was replaced on disk (dashboard upload).
     reloadSession: async () => api.clearSessionDead(),
@@ -56,6 +58,8 @@ function browserBackend() {
     },
     getRsvps: (eventUrl) => scrapeRsvps(eventUrl),
     getComments: (eventUrl) => scrapeComments(eventUrl),
+    postComment: async () => { throw new Error('Posting comments needs the GraphQL backend (MEETUP_BACKEND=graphql)'); },
+    deleteComment: async () => { throw new Error('Deleting comments needs the GraphQL backend (MEETUP_BACKEND=graphql)'); },
     clearSessionDead: () => scraper.clearSessionDead(),
     // The browser context caches cookies and saves them back on close, so
     // discard it WITHOUT saving, then let the next scrape load the new file.

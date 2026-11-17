@@ -215,6 +215,52 @@ async function fetchComments(eventUrl) {
   return comments;
 }
 
+const MAX_COMMENT_LENGTH = 700; // meetup.com's limit for comments and replies
+
+function mutationErrors(result) {
+  const errors = result?.errors || [];
+  return errors.length ? errors.map((e) => e.message || e.code).join('; ') : null;
+}
+
+/**
+ * Post a comment on an event as the logged-in Meetup account, or a reply when
+ * `replyTo` (a top-level comment's Meetup ID) is given. Meetup doesn't return
+ * the new comment's ID, so it's found by re-reading the comments; returns
+ * { meetupCommentId } (null if it couldn't be found).
+ */
+async function postComment(eventUrl, text, { replyTo = null } = {}) {
+  const eventId = eventIdFromUrl(eventUrl);
+  const body = (text || '').trim();
+  if (!body) throw new Error('Comment text is empty');
+  if (body.length > MAX_COMMENT_LENGTH) throw new Error(`Comment is ${body.length} characters; Meetup allows ${MAX_COMMENT_LENGTH}`);
+
+  const data = replyTo
+    ? await client.gql(Q.ADD_COMMENT_REPLY, { input: { eventId, text: body, commentId: replyTo } })
+    : await client.gql(Q.ADD_COMMENT, { input: { eventId, text: body } });
+  const failed = mutationErrors(replyTo ? data.addCommentReply : data.addComment);
+  if (failed) throw new Error(`Meetup rejected the comment: ${failed}`);
+
+  // Find it: the newest comment by this account with exactly this text.
+  const self = await client.getSelf();
+  const comments = await fetchComments(eventUrl);
+  const mine = comments
+    .filter((c) => c.author_id === self?.id && c.content === body)
+    .sort((a, b) => new Date(b.created) - new Date(a.created))[0];
+  console.log(`[meetup-api] Posted ${replyTo ? 'reply' : 'comment'} on event ${eventId}${mine ? ` (comment ${mine.meetup_comment_id})` : ''}`);
+  return { meetupCommentId: mine?.meetup_comment_id || null };
+}
+
+/** Delete a comment (or a reply, with isReply) by its Meetup ID. */
+async function deleteComment(eventUrl, meetupCommentId, { isReply = false } = {}) {
+  const eventId = eventIdFromUrl(eventUrl);
+  const data = isReply
+    ? await client.gql(Q.DELETE_COMMENT_REPLY, { input: { eventId, replyId: meetupCommentId } })
+    : await client.gql(Q.DELETE_COMMENT, { input: { eventId, commentId: meetupCommentId } });
+  const failed = mutationErrors(isReply ? data.deleteCommentReply : data.deleteComment);
+  if (failed) throw new Error(`Meetup refused to delete it: ${failed}`);
+  console.log(`[meetup-api] Deleted ${isReply ? 'reply' : 'comment'} ${meetupCommentId} on event ${eventId}`);
+}
+
 function toComment(node, commentId, parentCommentId) {
   return {
     comment_id: commentId,
@@ -236,6 +282,9 @@ module.exports = {
   fetchEventDetails,
   fetchRsvps,
   fetchComments,
+  postComment,
+  deleteComment,
+  MAX_COMMENT_LENGTH,
   formatLocation,
   displayName,
   eventIdFromUrl,
