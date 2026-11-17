@@ -57,7 +57,11 @@ The session is saved to `data/browser-state/state.json` and kept fresh automatic
 
 ### Refreshing an Expired Session
 
-When the session dies (the bot stops polling and logs a session-expired error), log in again with real Chrome on a dev machine, where the hCaptcha behaves, and export the session with `src/export-session.js`.
+When the session dies, polling pauses and (with `/config alertschannel` set) the bot posts an alert. Sessions typically last about a month.
+
+**From the dashboard (recommended):** open **Meetup session → Remote login → Start**. A real Chrome starts next to the bot and is shown right in the page; log in with the bot's Meetup account (**Type email** / **Type password** fill the stored credentials), solve the captcha, and press **Save session**. The session is verified against Meetup and installed, and polling resumes. Nothing else to expose or copy.
+
+**From a desktop**, if you'd rather log in locally: export the session with `src/export-session.js`, then upload it on the same dashboard page.
 
 1. Launch Chrome with a throwaway profile and remote debugging. The separate `--user-data-dir` keeps it isolated from your normal Chrome, like an incognito window, and your normal Chrome can stay open:
 
@@ -88,6 +92,7 @@ Use the `/config` slash command in your Discord server:
 5. `/config rsvpchannel <#channel>` — where to post RSVP changes
 6. `/config commentschannel <#channel>` — where to post new comments
 7. `/config reminderschannel <#channel>` — where to post reminders
+   - `/config alertschannel <#channel>` — where to post bot alerts: Meetup session expired/restored, daily Meetup API check failures
 8. `/config pollrate <minutes>` — base full poll interval (min 5, default 10)
 9. `/config horizon <days>` — how far out to track events (default 30)
 10. `/config reminders` — configure day-before and hours-before reminders
@@ -115,8 +120,8 @@ Set `DASHBOARD_PASSWORD` and the bot serves a dashboard on port 3000 (`DASHBOARD
 
 - **Overview** — Meetup session, backend, poller state and next polls, the next event per server, recent errors
 - **Events** — every tracked event; click one for its RSVP lists (with guests), comments (pinned, likes), a live read-only comparison against Meetup, and buttons to **Rescan now** or **Post RSVP summary**. You can also **post comments and replies** on Meetup as the bot account (signed with a name you choose) and delete the bot's own comments
-- **API health** — runs the same checks as `pnpm run api-check`, plus the scrape history
-- **Meetup session** — who the bot is logged in as, token status, manual refresh, and **upload a new `state.json`** (verified against Meetup before it's installed)
+- **API health** — Uptime Kuma-style monitors, the daily automatic check, on-demand checks (same as `pnpm run api-check`), and the scrape history
+- **Meetup session** — who the bot is logged in as, **Remote login** (a real Chrome next to the bot, streamed into the page, to log in and solve the captcha), and **upload a new `state.json`** (verified against Meetup before it's installed)
 - **Logs** — live tail of the bot's output
 - **Settings** — everything `/config` does, with channel pickers
 
@@ -145,13 +150,7 @@ docker compose up -d
 
 #### Remote Login for Docker
 
-The easiest way to give a container a new session is the dashboard upload (see [Refreshing an Expired Session](#refreshing-an-expired-session)). Alternatively, log in through a browser running inside the container:
-
-1. Expose port 6080 in your docker-compose
-2. Run: `docker exec -it rollcall node src/login-server.js email password`
-3. Open `http://<NAS-IP>:6080/vnc_lite.html` in your browser
-4. Solve the CAPTCHA in the remote browser, then press Enter in the terminal to save the session
-5. Remove the port mapping and restart the container
+Use the dashboard's **Meetup session → Remote login** (see [Refreshing an Expired Session](#refreshing-an-expired-session)). The image includes Google Chrome (amd64; other architectures fall back to Playwright's Chromium) and Xvfb for it. Chrome runs only while a login is in progress, with its debugging port on localhost, so no extra port is exposed. Earlier versions used noVNC on port 6080 and `login-server.js`; both are gone.
 
 ### Running with GHCR Image
 
@@ -168,9 +167,9 @@ services:
       - CLIENT_ID=${CLIENT_ID}
       - MEETUP_BACKEND=${MEETUP_BACKEND}           # graphql (default) or browser
       - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}   # enables the web dashboard
+      - DASHBOARD_URL=${DASHBOARD_URL}             # optional: link target in alerts
     ports:
-      - 3000:3000   # dashboard
-      - 6080:6080   # noVNC, only needed for login-server.js
+      - 3000:3000   # dashboard (incl. remote Meetup login)
     volumes:
       - /mnt/Main/Main/docker/data/rollcallbot/data:/app/data
 ```
@@ -226,6 +225,15 @@ node src/test-scraper.js debug https://www.meetup.com/your-group/events/12345/
 
 Meetup's DOM can change. All selectors are centralized in `src/utils/selectors.js`. Use the codegen command to discover updated selectors. (Browser backend only.)
 
+### Tests
+
+```bash
+pnpm test        # offline suite: fake Meetup + fake Discord, throwaway database
+pnpm test:live   # read-only checks against the real Meetup API (uses data/browser-state/state.json)
+```
+
+Tests live in `tests/` (Node's built-in test runner). `tests/helpers.js` has the fake Meetup backend and fixtures; the fake Discord client is `src/dev/fake-discord.js`, shared with `pnpm run dev`. CI runs `pnpm test` and the dashboard build on every push.
+
 ### Checking the Meetup API
 
 `pnpm run api-check` (or `docker exec rollcall node src/api-check.js`) runs every GraphQL query the bot uses and reports exactly which operation, field or value changed if Meetup alters its API.
@@ -248,6 +256,8 @@ Everything known about the API (endpoints, auth and token refresh, every field u
 | `MEETUP_BACKEND` | `graphql` or `browser` | `graphql` |
 | `DASHBOARD_PASSWORD` | Enables the web dashboard and sets its login password | *(dashboard off)* |
 | `DASHBOARD_PORT` | Dashboard port | `3000` |
+| `DASHBOARD_URL` | The dashboard's address as you reach it (e.g. `http://192.168.1.10:3000`), used for links in Discord alerts | *(no links)* |
+| `CHROME_PATH` | Browser for remote login, if not in a standard location | *(auto-detected)* |
 | `DASHBOARD_SESSION_SECRET` | Key for signing login cookies (defaults to one derived from the password; changing the password logs everyone out) | *(derived)* |
 | `HEADLESS` | Run browser in headless mode (browser backend and login tools) | `true` |
 | `DEFAULT_POLL_INTERVAL_MINUTES` | Default polling interval | `10` |

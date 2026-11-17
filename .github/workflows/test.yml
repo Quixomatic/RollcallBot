@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            dashboard/pnpm-lock.yaml
+
+      - name: Install bot dependencies
+        run: pnpm install --no-frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Install dashboard dependencies
+        run: pnpm --dir dashboard install --no-frozen-lockfile
+
+      - name: Build and type-check dashboard
+        run: pnpm --dir dashboard build

@@ -55,7 +55,7 @@ function SettingsPage() {
     save.mutate(Object.fromEntries(dirty.map((k) => [k, form[k]])) as Partial<Form>)
   }
 
-  const channelSelect = (key: 'events_channel_id' | 'rsvp_channel_id' | 'comments_channel_id' | 'reminders_channel_id', label: string, hint: string) => (
+  const channelSelect = (key: 'events_channel_id' | 'rsvp_channel_id' | 'comments_channel_id' | 'reminders_channel_id' | 'alerts_channel_id', label: string, hint: string) => (
     <div className="space-y-2">
       <Label>{label}</Label>
       <Select value={form[key] || NONE} onValueChange={(v) => set(key, v === NONE ? null : v)}>
@@ -143,6 +143,7 @@ function SettingsPage() {
             {channelSelect('rsvp_channel_id', 'RSVPs', 'RSVP summaries')}
             {channelSelect('comments_channel_id', 'Comments', 'New comments')}
             {channelSelect('reminders_channel_id', 'Reminders', 'Event reminders')}
+            {channelSelect('alerts_channel_id', 'Alerts', 'Bot problems: Meetup session expired, daily API check failures')}
           </CardContent>
         </Card>
 

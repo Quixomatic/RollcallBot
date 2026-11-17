@@ -59,6 +59,14 @@ module.exports = {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('alertschannel')
+        .setDescription('Set channel for bot alerts (Meetup session expired, API check failures)')
+        .addChannelOption((opt) =>
+          opt.setName('channel').setDescription('Channel').setRequired(true).addChannelTypes(ChannelType.GuildText)
+        )
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('pollrate')
         .setDescription('Set base polling interval in minutes (min 5)')
         .addIntegerOption((opt) =>
@@ -171,6 +179,13 @@ module.exports = {
         await interaction.reply({ content: `Reminders channel set to ${channel}.`, flags: MessageFlags.Ephemeral });
         break;
       }
+      case 'alertschannel': {
+        const channel = interaction.options.getChannel('channel');
+        queries.setAlertsChannel().run(guildId, channel.id);
+        console.log(`[config] ${guildName}: alerts channel → #${channel.name}`);
+        await interaction.reply({ content: `Alerts channel set to ${channel}. Session and Meetup API problems will be posted there.`, flags: MessageFlags.Ephemeral });
+        break;
+      }
       case 'pollrate': {
         const minutes = interaction.options.getInteger('minutes');
         queries.setPollInterval().run(guildId, minutes);
@@ -259,6 +274,7 @@ module.exports = {
           `**RSVP Channel:** ${settings.rsvp_channel_id ? `<#${settings.rsvp_channel_id}>` : 'Not set'}`,
           `**Comments Channel:** ${settings.comments_channel_id ? `<#${settings.comments_channel_id}>` : 'Not set'}`,
           `**Reminders Channel:** ${settings.reminders_channel_id ? `<#${settings.reminders_channel_id}>` : 'Not set'}`,
+          `**Alerts Channel:** ${settings.alerts_channel_id ? `<#${settings.alerts_channel_id}>` : 'Not set'}`,
           `**Poll Interval:** ${settings.poll_interval_minutes} min`,
           `**Event Horizon:** ${settings.event_horizon_days} days`,
           `**Day-before Reminder:** ${settings.reminder_day_before ? 'Yes' : 'No'}`,

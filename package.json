@@ -1,6 +1,6 @@
 {
   "name": "rollcall",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Discord bot that monitors Meetup.com groups and posts event updates, RSVP changes, and comments",
   "main": "src/index.js",
   "scripts": {
@@ -8,7 +8,9 @@
     "deploy-commands": "node src/deploy-commands.js",
     "reset-data": "node src/reset-data.js",
     "api-check": "node src/api-check.js",
-    "dev": "node src/dev.js"
+    "dev": "node src/dev.js",
+    "test": "node --test \"tests/*.test.js\"",
+    "test:live": "node tests/live/run.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
@@ -18,7 +20,8 @@
     "express": "^5.3.0",
     "playwright": "^1.58.2",
     "playwright-extra": "^4.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "ws": "^8.19.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

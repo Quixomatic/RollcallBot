@@ -112,16 +112,16 @@ let sessionDead = false;
 
 async function ensureLoggedIn(email, password) {
   if (sessionDead) {
-    throw new Error('Session expired — run login-server.js to re-authenticate');
+    throw new Error('Session expired — log in again from the dashboard (Meetup session → Remote login)');
   }
 
   const loggedIn = await isLoggedIn();
   if (!loggedIn) {
     console.error('[scraper] ⚠ Session expired! Auto-login will likely fail due to CAPTCHA.');
-    console.error('[scraper] Run: docker exec -it rollcall node src/login-server.js <email> <password>');
+    console.error('[scraper] Log in again from the dashboard: Meetup session → Remote login.');
     console.error('[scraper] Polling paused until session is restored.');
     sessionDead = true;
-    throw new Error('Session expired — run login-server.js to re-authenticate');
+    throw new Error('Session expired — log in again from the dashboard (Meetup session → Remote login)');
   }
 }
 

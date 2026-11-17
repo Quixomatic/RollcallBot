@@ -79,12 +79,13 @@ function detectNewComments(eventId, scrapedComments) {
 
   const insert = (comment) => queries.insertComment().run(
     comment.comment_id, eventId, comment.author_name, comment.content, comment.posted_at,
-    comment.likes || 0, comment.parent_comment_id || null, comment.meetup_comment_id || null
+    comment.likes || 0, comment.parent_comment_id || null, comment.meetup_comment_id || null,
+    comment.is_pinned ? 1 : 0
   );
 
   for (const comment of scrapedComments) {
     if (storedIds.has(comment.comment_id)) {
-      if (comment.meetup_comment_id) queries.setCommentMeetupId().run(comment.meetup_comment_id, comment.comment_id);
+      if (comment.meetup_comment_id) queries.setCommentMeetupId().run(comment.meetup_comment_id, comment.comment_id, eventId);
       continue;
     }
 
@@ -106,4 +107,31 @@ function detectNewComments(eventId, scrapedComments) {
   return newComments;
 }
 
-module.exports = { scrapeComments, detectNewComments };
+/**
+ * Find stored comments whose like count or pinned state changed since they
+ * were last seen, update them, and return the Discord messages that need
+ * re-rendering: [{ messageId, channelId }]. Only comments the bot has already
+ * posted to Discord (discord_message_id set) produce an edit. The pinned flag
+ * is only compared when the backend reports it (GraphQL), so the browser
+ * backend never "unpins" anything.
+ */
+function detectCommentUpdates(eventId, scrapedComments) {
+  const stored = new Map(queries.getCommentsForEvent().all(eventId).map((c) => [c.comment_id, c]));
+  const messages = new Map();
+
+  for (const c of scrapedComments) {
+    const row = stored.get(c.comment_id);
+    if (!row) continue;
+    const likes = c.likes || 0;
+    const pinned = 'is_pinned' in c ? (c.is_pinned ? 1 : 0) : row.is_pinned || 0;
+    if (likes === (row.likes || 0) && pinned === (row.is_pinned || 0)) continue;
+
+    queries.updateCommentMeta().run(likes, pinned, c.comment_id, eventId);
+    if (row.discord_message_id) {
+      messages.set(row.discord_message_id, { messageId: row.discord_message_id, channelId: row.discord_channel_id });
+    }
+  }
+  return [...messages.values()];
+}
+
+module.exports = { scrapeComments, detectNewComments, detectCommentUpdates };

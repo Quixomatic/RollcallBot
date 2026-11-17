@@ -76,14 +76,15 @@ function initialize() {
     );
 
     CREATE TABLE IF NOT EXISTS comments (
-      comment_id TEXT PRIMARY KEY,
+      comment_id TEXT NOT NULL,
       event_id TEXT NOT NULL,
       author_name TEXT,
       content TEXT,
       posted_at TEXT,
       likes INTEGER DEFAULT 0,
       parent_comment_id TEXT,
-      first_seen_at TEXT DEFAULT (datetime('now'))
+      first_seen_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (event_id, comment_id)
     );
 
     CREATE TABLE IF NOT EXISTS rsvp_messages (
@@ -111,6 +112,14 @@ function initialize() {
       reminder_type TEXT NOT NULL,
       sent_at TEXT DEFAULT (datetime('now')),
       PRIMARY KEY (event_id, guild_id, reminder_type)
+    );
+
+    -- Small key/value store for bot-wide state that must survive restarts
+    -- (e.g. "already alerted that the session died").
+    CREATE TABLE IF NOT EXISTS bot_state (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updated_at TEXT DEFAULT (datetime('now'))
     );
   `);
 
@@ -140,6 +149,61 @@ function initialize() {
   const rsvpCols = db.pragma('table_info(rsvps)').map((c) => c.name);
   if (!rsvpCols.includes('member_id')) {
     db.exec('ALTER TABLE rsvps ADD COLUMN member_id TEXT');
+  }
+
+  // v2.0.3: alerts channel, capacity tracking, pinned state and the Discord
+  // message each comment was posted in (so likes/pins can be edited in later).
+  if (!guildCols.includes('alerts_channel_id')) {
+    db.exec('ALTER TABLE guild_settings ADD COLUMN alerts_channel_id TEXT');
+  }
+  const eventCols = db.pragma('table_info(events)').map((c) => c.name);
+  if (!eventCols.includes('max_tickets')) {
+    db.exec('ALTER TABLE events ADD COLUMN max_tickets INTEGER');
+  }
+  if (!eventCols.includes('is_full')) {
+    db.exec('ALTER TABLE events ADD COLUMN is_full INTEGER DEFAULT 0');
+  }
+  if (!commentCols.includes('is_pinned')) {
+    db.exec('ALTER TABLE comments ADD COLUMN is_pinned INTEGER DEFAULT 0');
+  }
+  if (!commentCols.includes('discord_message_id')) {
+    db.exec('ALTER TABLE comments ADD COLUMN discord_message_id TEXT');
+  }
+  if (!commentCols.includes('discord_channel_id')) {
+    db.exec('ALTER TABLE comments ADD COLUMN discord_channel_id TEXT');
+  }
+
+  // v2.0.3: comment keys are unique per event, not globally. Before, the same
+  // person posting the same text on two events collided on the primary key, so
+  // the second copy was never stored and got re-posted on every poll. SQLite
+  // can't change a primary key in place, so copy into the new shape (all rows
+  // kept; the browser backend's inserts work unchanged).
+  const commentPk = db.pragma('table_info(comments)').filter((c) => c.pk > 0).map((c) => c.name);
+  if (commentPk.length === 1 && commentPk[0] === 'comment_id') {
+    const cols = 'comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id, first_seen_at, meetup_comment_id, is_pinned, discord_message_id, discord_channel_id';
+    db.exec(`
+      BEGIN;
+      CREATE TABLE comments_v203 (
+        comment_id TEXT NOT NULL,
+        event_id TEXT NOT NULL,
+        author_name TEXT,
+        content TEXT,
+        posted_at TEXT,
+        likes INTEGER DEFAULT 0,
+        parent_comment_id TEXT,
+        first_seen_at TEXT DEFAULT (datetime('now')),
+        meetup_comment_id TEXT,
+        is_pinned INTEGER DEFAULT 0,
+        discord_message_id TEXT,
+        discord_channel_id TEXT,
+        PRIMARY KEY (event_id, comment_id)
+      );
+      INSERT INTO comments_v203 (${cols}) SELECT ${cols} FROM comments;
+      DROP TABLE comments;
+      ALTER TABLE comments_v203 RENAME TO comments;
+      COMMIT;
+    `);
+    console.log('[database] Migrated comments to per-event keys');
   }
 }
 
@@ -230,9 +294,22 @@ const queries = {
       bot_meetup_name = excluded.bot_meetup_name,
       updated_at = datetime('now')
   `),
+  setAlertsChannel: () => getDb().prepare(`
+    INSERT INTO guild_settings (guild_id, alerts_channel_id) VALUES (?, ?)
+    ON CONFLICT (guild_id) DO UPDATE SET
+      alerts_channel_id = excluded.alerts_channel_id,
+      updated_at = datetime('now')
+  `),
   getAllGuildSettings: () => getDb().prepare(
     'SELECT * FROM guild_settings'
   ),
+
+  // Bot-wide key/value state
+  getState: () => getDb().prepare('SELECT value FROM bot_state WHERE key = ?'),
+  setState: () => getDb().prepare(`
+    INSERT INTO bot_state (key, value) VALUES (?, ?)
+    ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+  `),
 
   // Meetup credentials
   getMeetupCredentials: () => getDb().prepare(
@@ -295,6 +372,12 @@ const queries = {
       is_cancelled = 0,
       updated_at = datetime('now')
   `),
+  setEventCapacity: () => getDb().prepare(
+    'UPDATE events SET max_tickets = ? WHERE event_id = ? AND guild_id = ?'
+  ),
+  setEventFull: () => getDb().prepare(
+    'UPDATE events SET is_full = ? WHERE event_id = ? AND guild_id = ?'
+  ),
   cancelEvent: () => getDb().prepare(`
     UPDATE events SET is_cancelled = 1, updated_at = datetime('now') WHERE event_id = ?
   `),
@@ -328,11 +411,20 @@ const queries = {
     'SELECT * FROM comments WHERE event_id = ? ORDER BY posted_at ASC'
   ),
   insertComment: () => getDb().prepare(`
-    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id, meetup_comment_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id, meetup_comment_id, is_pinned)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
+  updateCommentMeta: () => getDb().prepare(
+    'UPDATE comments SET likes = ?, is_pinned = ? WHERE comment_id = ? AND event_id = ?'
+  ),
+  setCommentMessage: () => getDb().prepare(
+    'UPDATE comments SET discord_message_id = ?, discord_channel_id = ? WHERE comment_id = ? AND event_id = ?'
+  ),
+  getCommentsForMessage: () => getDb().prepare(
+    'SELECT * FROM comments WHERE discord_message_id = ? ORDER BY rowid ASC'
+  ),
   setCommentMeetupId: () => getDb().prepare(`
-    UPDATE comments SET meetup_comment_id = ? WHERE comment_id = ? AND meetup_comment_id IS NULL
+    UPDATE comments SET meetup_comment_id = ? WHERE comment_id = ? AND event_id = ? AND meetup_comment_id IS NULL
   `),
 
   // RSVP messages (for delete-and-repost)
@@ -353,6 +445,9 @@ const queries = {
     INSERT INTO scrape_log (guild_id, scrape_type, status, error_message, duration_ms)
     VALUES (?, ?, ?, ?, ?)
   `),
+  deleteOldScrapeLogs: () => getDb().prepare(
+    "DELETE FROM scrape_log WHERE scraped_at < datetime('now', '-30 days')"
+  ),
   getLastScrape: () => getDb().prepare(`
     SELECT * FROM scrape_log WHERE guild_id = ? ORDER BY scraped_at DESC LIMIT 1
   `),

@@ -6,8 +6,10 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - CLIENT_ID=${CLIENT_ID}
+      - MEETUP_BACKEND=${MEETUP_BACKEND}           # graphql (default) or browser
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}   # enables the web dashboard
+      - DASHBOARD_URL=${DASHBOARD_URL}             # optional, e.g. http://192.168.1.10:3000 — used for links in alerts
+    ports:
+      - "3000:3000" # dashboard (incl. remote Meetup login)
     volumes:
-      - /mnt/Main/Main/docker/data/rollcall/data:/app/data
-    # Uncomment to expose noVNC for remote Meetup login (port 6080)
-    # ports:
-    #   - "6080:6080"
+      - /mnt/Main/Main/docker/data/rollcallbot/data:/app/data

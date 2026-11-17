@@ -17,7 +17,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': process.env.ROLLCALL_API || 'http://localhost:3000',
+      '/api': { target: process.env.ROLLCALL_API || 'http://localhost:3000', ws: true },
     },
   },
 })

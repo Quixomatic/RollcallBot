@@ -84,4 +84,9 @@ function getBackend() {
   return backend;
 }
 
-module.exports = { getBackend };
+/** Tests only: replace the backend with a stand-in (pass null to reset). */
+function setBackendForTests(b) {
+  backend = b;
+}
+
+module.exports = { getBackend, setBackendForTests };

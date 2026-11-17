@@ -20,6 +20,8 @@ export interface StoredEvent {
   location: string | null
   description: string | null
   rsvp_count: number
+  max_tickets: number | null
+  is_full: number
   waitlist_count: number
   is_cancelled: number
   first_seen_at: string
@@ -153,6 +155,7 @@ export interface GuildSettings {
   rsvp_channel_id: string | null
   comments_channel_id: string | null
   reminders_channel_id: string | null
+  alerts_channel_id: string | null
   poll_interval_minutes: number
   event_horizon_days: number
   reminder_day_before: number
@@ -175,7 +178,8 @@ export interface PollEventSummary {
   diffs: { field: string; old: string | null; new: string }[]
   cancelled: boolean
   rsvps: { total: number; added: string[]; removed: string[]; changed: string[]; posted: boolean } | null
-  comments: { total: number; new: number } | null
+  comments: { total: number; new: number; updatedPosts?: number } | null
+  capacity: { going: number; max: number; full: boolean } | null
   errors: string[]
   durationMs: number
 }

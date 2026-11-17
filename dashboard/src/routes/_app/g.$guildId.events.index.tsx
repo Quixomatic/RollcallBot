@@ -89,7 +89,8 @@ function EventsPage() {
                   </TableCell>
                   <TableCell className="hidden max-w-64 truncate text-muted-foreground lg:table-cell" title={e.location || ''}>{e.location || '—'}</TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {e.rsvps.tracked ? <><b>{e.rsvps.going}</b>{e.rsvps.guests > 0 && <span className="text-xs text-muted-foreground"> +{e.rsvps.guests}g</span>}</> : <span className="text-muted-foreground" title="RSVPs are fetched when the event is within 24 hours">{e.rsvp_count}</span>}
+                    {e.rsvps.tracked ? <b>{e.rsvps.going}</b> : <span className="text-muted-foreground" title="RSVPs are fetched when the event is within 24 hours">{e.rsvp_count}</span>}
+                    {e.max_tickets ? <span className="text-xs text-muted-foreground">/{e.max_tickets}</span> : null}
                   </TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">{e.rsvps.tracked ? e.rsvps.waitlist : '—'}</TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">{e.rsvps.tracked ? e.rsvps.notGoing : '—'}</TableCell>

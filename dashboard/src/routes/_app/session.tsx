@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { LoadingBlock, PageHeader, Stat } from '@/components/common'
+import { RemoteLogin } from '@/components/remote-login'
 import { api, sessionQuery, useInvalidateData } from '@/lib/api'
 import { formatDateTime, relative } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -68,6 +69,7 @@ function SessionPage() {
         </>
       )}
 
+      <RemoteLogin />
       <UploadCard />
     </>
   )

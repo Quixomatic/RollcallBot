@@ -61,8 +61,9 @@ Headers that matter: `cookie` (the session), `origin: https://www.meetup.com`,
 ## Authentication
 
 Cookie-based, shared with the browser backend through the Playwright storageState file
-`data/browser-state/state.json`, produced by `src/export-session.js` (log in with real Chrome)
-or `src/login-server.js`.
+`data/browser-state/state.json`, produced by the dashboard's **Remote login** (real Chrome next
+to the bot, streamed to the dashboard; see `src/dashboard/remote-browser.js`), a dashboard upload,
+or `src/export-session.js` on a desktop.
 
 | Cookie | What | Lifetime |
 |---|---|---|

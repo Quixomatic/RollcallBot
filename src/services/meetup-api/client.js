@@ -3,7 +3,7 @@
  *
  * Auth is cookie-based and shared with the browser backend: it reads and
  * writes the same Playwright storageState file (data/browser-state/state.json)
- * that export-session.js and login-server.js produce, so either backend can
+ * that the dashboard's remote login, uploads and export-session.js produce, so either backend can
  * pick up a session the other one saved.
  *
  * Token lifecycle (from meetup.com's own Apollo client, see
@@ -34,7 +34,7 @@ const ACCESS_COOKIE = '__meetup_auth_access_token';
 const REFRESH_COOKIE = '__meetup_auth_refresh_token';
 const REQUEST_TIMEOUT_MS = 30000;
 
-const SESSION_DEAD_MESSAGE = 'Session expired — run login-server.js or export-session.js to re-authenticate';
+const SESSION_DEAD_MESSAGE = 'Session expired — log in again from the dashboard (Meetup session → Remote login) or upload a new state.json';
 
 class MeetupApiError extends Error {
   constructor(message, { operation, errors, status } = {}) {
@@ -147,7 +147,7 @@ function accessTokenSecondsLeft() {
 function markSessionDead(reason) {
   if (!sessionDead) {
     console.error(`[meetup-api] ⚠ Session is no longer valid (${reason}).`);
-    console.error('[meetup-api] Log in again with export-session.js or login-server.js. Polling paused until then.');
+    console.error('[meetup-api] Log in again from the dashboard (Meetup session → Remote login). Polling paused until then.');
   }
   sessionDead = true;
 }

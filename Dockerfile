@@ -15,9 +15,8 @@ FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
 WORKDIR /app
 
-# Install noVNC for web-based browser access during login
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    xvfb x11vnc novnc websockify && \
+# Xvfb gives the dashboard's remote-login Chrome a (virtual) display
+RUN apt-get update && apt-get install -y --no-install-recommends xvfb && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install build tools for better-sqlite3 native compilation + pnpm
@@ -26,6 +25,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --no-frozen-lockfile --prod
+
+# Real Google Chrome for the dashboard's remote Meetup login (it passes Meetup's
+# captcha where automation-launched Chromium gets flagged). Google only ships
+# Chrome for amd64; elsewhere remote login falls back to Playwright's Chromium.
+RUN if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
+      npx playwright install --with-deps chrome && rm -rf /var/lib/apt/lists/*; \
+    else echo "Skipping Google Chrome (not amd64)"; fi
 
 COPY src/ ./src/
 COPY --from=dashboard /dashboard/dist ./dashboard/dist
@@ -44,7 +50,7 @@ USER ${UID}:${GID}
 
 VOLUME ["/app/data"]
 
-# Web dashboard (enabled by DASHBOARD_PASSWORD); 6080 is noVNC for login-server.js
-EXPOSE 3000 6080
+# Web dashboard (enabled by DASHBOARD_PASSWORD), including remote Meetup login
+EXPOSE 3000
 
 CMD ["/usr/bin/node", "src/index.js"]

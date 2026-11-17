@@ -181,17 +181,24 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
 
   const goingTotal = going.reduce((sum, r) => sum + 1 + (r.guests || 0), 0);
   const waitlistTotal = waitlist.reduce((sum, r) => sum + 1 + (r.guests || 0), 0);
+  const capacity = event.max_tickets > 0 ? event.max_tickets : null;
+
+  let description = formatDate(event.date_time, getTimezone(guildId));
+  if (capacity) {
+    const left = capacity - goingTotal;
+    description += left > 0 ? `\n**${left}** of ${capacity} spot${capacity > 1 ? 's' : ''} left` : `\n**Full** (${capacity} spots)`;
+  }
 
   const embed = new EmbedBuilder()
     .setTitle(`RSVPs: ${event.title}`)
     .setURL(event.url)
-    .setDescription(formatDate(event.date_time, getTimezone(guildId)))
+    .setDescription(description)
     .setFooter({ text: '📋 RSVP on Meetup.com' })
     .setColor(0x00AE86)
     .setTimestamp();
 
   embed.addFields({
-    name: `✅ Going (${goingTotal})`,
+    name: `✅ Going (${goingTotal}${capacity ? `/${capacity}` : ''})`,
     value: formatList(going),
     inline: true,
   });
@@ -210,6 +217,16 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
       value: formatList(notGoing),
       inline: true,
     });
+  }
+
+  // Status moves since the last post, e.g. someone promoted off the waitlist.
+  const label = { going: 'going', waitlist: 'waitlist', not_going: 'not going' };
+  const moves = rsvpChanges.changed.map((c) => {
+    const promoted = c.old_status === 'waitlist' && c.member.rsvp_status === 'going';
+    return `${promoted ? '⬆️' : '↔️'} **${c.member.member_name}**: ${label[c.old_status] || c.old_status} → ${label[c.member.rsvp_status] || c.member.rsvp_status}`;
+  });
+  if (moves.length > 0) {
+    embed.addFields({ name: 'Changes', value: moves.join('\n').slice(0, 1024), inline: false });
   }
 
   if (shouldEdit && existingMsg) {
@@ -235,9 +252,34 @@ async function notifyRsvpUpdate(client, guildId, event, rsvpChanges) {
  * @param {Array} comments - Array of new comments with parent_comment_id, likes, etc.
  * @param {Array} [allComments] - Optional full list of all comments (for parent context lookup)
  */
-async function notifyNewComments(channel, event, comments, allComments) {
+async function notifyNewComments(channel, event, comments, allComments, { track = true } = {}) {
   if (!channel || comments.length === 0) return;
 
+  const embed = buildCommentsEmbed(event, comments, allComments);
+  const msg = await channel.send({ embeds: [embed] });
+  // Remember where each comment was posted so a later pin or like can edit it
+  // in. Test posts (/test-comments) don't take over that tracking.
+  if (track) for (const c of comments) queries.setCommentMessage().run(msg.id, channel.id, c.comment_id, event.event_id);
+  console.log(`[notifier] Posted ${comments.length} new comment(s) on ${event.title}`);
+  return msg;
+}
+
+/**
+ * Re-render a comments post after likes or pins changed, from the stored
+ * state of the comments it contains. Edits are silent in Discord.
+ */
+async function updateCommentsMessage(client, event, { messageId, channelId }) {
+  const rows = queries.getCommentsForMessage().all(messageId);
+  if (!rows.length) return;
+  const channel = await client.channels.fetch(channelId).catch(() => null);
+  const msg = channel && await channel.messages.fetch(messageId).catch(() => null);
+  if (!msg) return; // deleted in Discord
+  const all = queries.getCommentsForEvent().all(event.event_id);
+  await msg.edit({ embeds: [buildCommentsEmbed(event, rows, all)] });
+  console.log(`[notifier] Updated likes/pins on a comments post for ${event.title}`);
+}
+
+function buildCommentsEmbed(event, comments, allComments) {
   // Build a set of comment_ids in this batch for quick lookup
   const batchIds = new Set(comments.map((c) => c.comment_id));
 
@@ -281,16 +323,39 @@ async function notifyNewComments(channel, event, comments, allComments) {
     lines.push(line);
   }
 
-  const embed = new EmbedBuilder()
+  return new EmbedBuilder()
     .setTitle(`Comments: ${event.title}`)
     .setURL(event.url)
-    .setDescription(lines.join('\n'))
+    .setDescription(lines.join('\n').slice(0, 4096))
     .setFooter({ text: '💬 Reply on Meetup.com' })
     .setColor(0x7289DA)
     .setTimestamp();
+}
+
+/**
+ * Post a capacity change for an event to the RSVP channel: it just filled up,
+ * or a spot opened up again after being full.
+ */
+async function notifyCapacity(client, guildId, event, kind, goingTotal) {
+  const settings = queries.getGuildSettings().get(guildId);
+  if (!settings?.rsvp_channel_id) return;
+  const channel = await client.channels.fetch(settings.rsvp_channel_id).catch(() => null);
+  if (!channel) return;
+
+  const full = kind === 'full';
+  const left = event.max_tickets - goingTotal;
+  const embed = new EmbedBuilder()
+    .setTitle(full ? `🚫 Event full: ${event.title}` : `🎟️ Spot opened: ${event.title}`)
+    .setURL(event.url)
+    .setDescription(full
+      ? `All ${event.max_tickets} spots are taken. New RSVPs go on the waitlist.`
+      : `${left} spot${left > 1 ? 's' : ''} open of ${event.max_tickets}. RSVP on Meetup to grab it.`)
+    .addFields({ name: 'When', value: formatDate(event.date_time, getTimezone(guildId)), inline: true })
+    .setColor(full ? 0xFF6B6B : 0x00AE86)
+    .setTimestamp();
 
   await channel.send({ embeds: [embed] });
-  console.log(`[notifier] Posted ${comments.length} new comment(s) on ${event.title}`);
+  console.log(`[notifier] Posted capacity update (${kind}) for: ${event.title}`);
 }
 
 /**
@@ -336,5 +401,7 @@ module.exports = {
   notifyEventCancelled,
   notifyRsvpUpdate,
   notifyNewComments,
+  updateCommentsMessage,
+  notifyCapacity,
   notifyReminder,
 };

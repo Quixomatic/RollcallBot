@@ -2,8 +2,26 @@ const { queries } = require('../database');
 const { getBackend } = require('./backend');
 const { detectEventChanges } = require('./meetup-events');
 const { detectRsvpChanges } = require('./meetup-rsvps');
-const { detectNewComments } = require('./meetup-comments');
+const { detectNewComments, detectCommentUpdates } = require('./meetup-comments');
 const notifier = require('./notifier');
+const alerts = require('./alerts');
+
+const SESSION_DEAD = /^Session expired/;
+
+/**
+ * Check the Meetup session before polling, and tell the alerts channel when
+ * it dies or comes back (each posted once per change, see alerts.js).
+ */
+async function ensureSession(client, guildId) {
+  const creds = queries.getMeetupCredentials().get(guildId);
+  try {
+    const self = await getBackend().ensureLoggedIn(creds?.email, creds?.password);
+    await alerts.sessionOk(client, self || null).catch(() => {});
+  } catch (err) {
+    if (SESSION_DEAD.test(err.message)) await alerts.sessionDead(client, err.message).catch(() => {});
+    throw err;
+  }
+}
 
 let fullPollTimer = null;
 let quickPollTimer = null;
@@ -73,13 +91,12 @@ async function checkReminders(client, guildId, settings) {
  * dashboard to rescan any event on demand. Returns a summary of what it found.
  */
 async function pollEvent(client, guildId, settings, nextEvent) {
-  const summary = { eventId: nextEvent.event_id, diffs: [], cancelled: false, rsvps: null, comments: null, errors: [] };
-  const creds = queries.getMeetupCredentials().get(guildId);
+  const summary = { eventId: nextEvent.event_id, diffs: [], cancelled: false, rsvps: null, comments: null, capacity: null, errors: [] };
   const startTime = Date.now();
   const backend = getBackend();
 
   try {
-    await backend.ensureLoggedIn(creds?.email, creds?.password);
+    await ensureSession(client, guildId);
 
     // Check event details for changes (time, location, cancellation)
     try {
@@ -110,6 +127,10 @@ async function pollEvent(client, guildId, settings, nextEvent) {
         await notifier.notifyEventUpdate(client, guildId, { ...nextEvent, ...details }, diffs);
         // Refresh event data for RSVP/comment scraping
         Object.assign(nextEvent, details);
+      }
+      if (details.max_tickets !== undefined && details.max_tickets !== nextEvent.max_tickets) {
+        queries.setEventCapacity().run(details.max_tickets, nextEvent.event_id, guildId);
+        nextEvent.max_tickets = details.max_tickets;
       }
       summary.diffs = diffs;
     } catch (err) {
@@ -144,6 +165,20 @@ async function pollEvent(client, guildId, settings, nextEvent) {
         );
         await notifier.notifyRsvpUpdate(client, guildId, nextEvent, rsvpChanges);
       }
+
+      // Capacity: announce when the event fills up, and when a spot opens again.
+      if (nextEvent.max_tickets > 0) {
+        const goingTotal = scrapedRsvps.filter((r) => r.rsvp_status === 'going').reduce((n, r) => n + 1 + (r.guests || 0), 0);
+        const isFull = goingTotal >= nextEvent.max_tickets ? 1 : 0;
+        if (isFull !== (nextEvent.is_full ? 1 : 0)) {
+          queries.setEventFull().run(isFull, nextEvent.event_id, guildId);
+          nextEvent.is_full = isFull;
+          // The first look at an event just records its state.
+          if (!rsvpChanges.isFirstRun) await notifier.notifyCapacity(client, guildId, nextEvent, isFull ? 'full' : 'spot_open', goingTotal);
+        }
+        summary.capacity = { going: goingTotal, max: nextEvent.max_tickets, full: !!isFull };
+      }
+
       summary.rsvps = {
         total: scrapedRsvps.length,
         added: rsvpChanges.added.map((r) => r.member_name),
@@ -171,7 +206,14 @@ async function pollEvent(client, guildId, settings, nextEvent) {
           await notifier.notifyNewComments(commentsChannel, nextEvent, newComments, scrapedComments);
         }
       }
-      summary.comments = { total: scrapedComments.length, new: newComments.length };
+      // Likes or a pin changed on comments already posted: edit those posts.
+      const edits = detectCommentUpdates(nextEvent.event_id, scrapedComments);
+      for (const target of edits) {
+        await notifier.updateCommentsMessage(client, nextEvent, target).catch((err) => {
+          console.error(`[poller] Could not update a comments post for ${nextEvent.title}:`, err.message);
+        });
+      }
+      summary.comments = { total: scrapedComments.length, new: newComments.length, updatedPosts: edits.length };
       queries.insertScrapeLog().run(guildId, 'comments', 'success', null, Date.now() - commentStart);
     } catch (err) {
       console.error(`[poller] Comment scrape error for ${nextEvent.title}:`, err.message);
@@ -236,7 +278,7 @@ async function fullPollGuild(client, guildId, settings) {
   const backend = getBackend();
 
   try {
-    await backend.ensureLoggedIn(creds.email, creds.password);
+    await ensureSession(client, guildId);
 
     // Fetch event listing
     console.log(`[poller] Fetching events (${backend.name})...`);
@@ -279,10 +321,16 @@ async function fullPollGuild(client, guildId, settings) {
       await notifier.notifyEventCancelled(client, guildId, event);
     }
 
+    // Capacity comes with the listing (GraphQL backend); keep it current.
+    for (const e of scrapedEvents) {
+      if (e.max_tickets !== undefined && e.status !== 'CANCELLED') queries.setEventCapacity().run(e.max_tickets, e.event_id, guildId);
+    }
+
     queries.insertScrapeLog().run(guildId, 'events', 'success', null, Date.now() - startTime);
 
-    // Cleanup old events
+    // Cleanup: old events, and scrape history older than 30 days
     queries.deleteOldEvents().run();
+    queries.deleteOldScrapeLogs().run();
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`[poller] Full poll complete in ${elapsed}s`);
@@ -310,6 +358,8 @@ const status = {
   nextQuickPollAt: null,
   fullIntervalMinutes: null,
   quickIntervalMinutes: null,
+  lastApiCheckAt: null,
+  nextApiCheckAt: null,
 };
 
 class PollerBusyError extends Error {}
@@ -432,6 +482,46 @@ async function startPolling(client) {
   // Start both polling loops with dynamic intervals
   scheduleFullPoll(client);
   scheduleQuickPoll(client);
+  scheduleApiHealthCheck(client, API_HEALTH_FIRST_DELAY_MS);
+}
+
+const API_HEALTH_FIRST_DELAY_MS = 10 * 60 * 1000;
+const API_HEALTH_INTERVAL_MS = 24 * 60 * 60 * 1000;
+let apiHealthTimer = null;
+
+/**
+ * Daily Meetup API check (GraphQL backend), reported to the alerts channel
+ * when something fails. Read-only: one round of the same queries a poll runs.
+ */
+function scheduleApiHealthCheck(client, delayMs = API_HEALTH_INTERVAL_MS) {
+  if (apiHealthTimer) clearTimeout(apiHealthTimer);
+  status.nextApiCheckAt = new Date(Date.now() + delayMs).toISOString();
+  apiHealthTimer = setTimeout(async () => {
+    try {
+      await runApiHealthCheck(client);
+    } catch (err) {
+      console.error('[poller] API health check error:', err.message);
+    }
+    scheduleApiHealthCheck(client);
+  }, delayMs);
+}
+
+async function runApiHealthCheck(client) {
+  if (getBackend().name !== 'graphql') return null;
+  const meetup = require('./meetup-api/client');
+  if (meetup.isSessionDead()) {
+    console.log('[poller] Skipping API health check — session is dead (already alerted)');
+    return null;
+  }
+  const groupUrl = queries.getAllGuildSettings().all().find((s) => s.enabled && s.meetup_group_url)?.meetup_group_url;
+  if (!groupUrl) return null;
+
+  const { runHealthChecks } = require('./api-health');
+  const result = await runHealthChecks({ groupUrl });
+  console.log(`[poller] API health check: ${result.failures ? `${result.failures} failure(s)` : 'all passed'}`);
+  status.lastApiCheckAt = new Date().toISOString();
+  await alerts.apiHealthResult(client, result);
+  return result;
 }
 
 /**
@@ -492,6 +582,10 @@ function stopPolling() {
     clearTimeout(quickPollTimer);
     quickPollTimer = null;
   }
+  if (apiHealthTimer) {
+    clearTimeout(apiHealthTimer);
+    apiHealthTimer = null;
+  }
   console.log('[poller] Polling stopped');
 }
 
@@ -503,5 +597,7 @@ module.exports = {
   pollEventNow,
   getStatus,
   getQuickPollInterval,
+  runApiHealthCheck,
+  ensureSession,
   PollerBusyError,
 };

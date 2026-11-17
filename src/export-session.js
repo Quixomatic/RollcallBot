@@ -16,7 +16,7 @@
  *   3. node src/export-session.js [outputPath]
  *
  * Writes data/browser-state/state.json by default — the same file
- * login-server.js and scraper.js read.
+ * the bot (both backends) reads.
  */
 
 const { chromium } = require('playwright');

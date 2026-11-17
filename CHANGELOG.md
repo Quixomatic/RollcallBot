@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-11-17
+
+### Added
+- **Remote Meetup login in the dashboard** (Meetup session → Remote login). Starts a real Google Chrome next to the bot, as a plain process with a fresh profile and no automation flags, and streams it into the page: click, scroll and type into it, with an address bar, Back/Reload, Paste, and **Type email** / **Type password** buttons that fill the stored `/config credentials` into the focused field. **Save session** reads the cookies, verifies them with Meetup and installs them; polling resumes. It talks to Chrome only through the screencast and input parts of the DevTools protocol (never `Runtime.enable`), which is what lets it pass Meetup's hCaptcha where the Playwright/noVNC login got flagged. Chrome only runs while a login is in progress (stops after saving, on Stop, or after 15 idle minutes), its debugging port listens on localhost, and the viewer's WebSocket requires the dashboard login. The Docker image now includes Google Chrome (amd64; elsewhere it falls back to Playwright's Chromium).
+- **Alerts channel** (`/config alertschannel`, or Settings in the dashboard): the bot posts when the Meetup session dies (with a link to the dashboard's login page if `DASHBOARD_URL` is set) and again when it's restored. Each is posted once per change, and the state survives restarts.
+- **Daily Meetup API check**, run 10 minutes after startup and then every 24 hours. Failures are posted to the alerts channel (daily while failing, once when passing again); the last result is shown on the dashboard's API health page.
+- **Capacity**: RSVP posts show `Going (10/24)` and how many spots are left; the bot announces when an event fills up and when a spot opens again (once per change, in the RSVP channel). The dashboard shows capacity and a Full badge.
+- **Waitlist moves**: RSVP posts list status changes since the last post, e.g. `⬆️ Alex: waitlist → going`.
+- **Likes and pins after the fact**: when a comment that was already posted to Discord gets pinned or liked, the bot edits that Discord post instead of leaving it stale.
+- **Test suite** (`pnpm test`, Node's built-in runner, no extra dependencies): 48 offline tests covering the Meetup API mapping, the client's auth/refresh handling, change detection (including the backend-switch guarantees), full polling end to end with a fake Meetup and fake Discord, database upgrades, and the dashboard API. `pnpm test:live` runs read-only checks against the real Meetup API. A new GitHub Actions workflow runs the tests and the dashboard build on every push and pull request.
+
+### Changed
+- The dashboard sidebar footer shows the running bot's version (`Rollcall v2.0.x`), so it's always clear which release is deployed. It moved there from under the logo.
+- Scrape history is kept for 30 days (it grew forever before).
+- `docker-compose.yml` example updated: dashboard port, `DASHBOARD_URL`, and the correct NAS data path.
+
+### Removed
+- noVNC (port 6080) and `src/login-server.js`, replaced by the dashboard's remote login. The image no longer installs x11vnc, novnc or websockify.
+
+### Fixed
+- **A comment with the same text by the same person on two different events was re-posted to Discord on every poll.** Comment keys were unique across all events, so the second event's copy could never be stored. They're now unique per event; existing databases are upgraded automatically on startup with every row kept (found by the new tests).
+- `/test-comments` no longer takes over which Discord post a comment belongs to.
+
 ## [2.0.2] - 2026-11-17
 
 ### Added

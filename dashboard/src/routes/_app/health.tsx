@@ -13,7 +13,7 @@ import { useCurrentGuildId } from '@/components/app-shell'
 import { Empty, LoadingBlock, PageHeader, ResultIcon } from '@/components/common'
 import { Heartbeats } from '@/components/heartbeats'
 import { api, scrapeLogQuery, type HealthResult } from '@/lib/api'
-import { duration, formatDateTime } from '@/lib/format'
+import { duration, formatDateTime, relative } from '@/lib/format'
 
 export const Route = createFileRoute('/_app/health')({ component: HealthPage })
 
@@ -36,6 +36,8 @@ function HealthPage() {
       <PageHeader title="API health" description="Runs every Meetup GraphQL query Rollcall depends on and checks each field and value it reads. If Meetup changes something, the failing check names the exact operation and field." />
 
       {guildId && <div className="mb-6"><Heartbeats guildId={guildId} slots={90} /></div>}
+
+      <LastAutoCheck />
 
       <Card>
         <CardHeader>
@@ -80,6 +82,31 @@ function HealthPage() {
 
       {guildId && <ScrapeLog guildId={guildId} />}
     </>
+  )
+}
+
+/** The daily automatic check (posted to the alerts channel when it fails). */
+function LastAutoCheck() {
+  const { data } = useQuery({
+    queryKey: ['health-last'],
+    queryFn: () => api<{ last: { at: string; failures: number; results: HealthResult[] } | null; nextAt: string | null }>('/health/last'),
+    refetchInterval: 60_000,
+  })
+  if (!data) return null
+  const { last, nextAt } = data
+  return (
+    <Card className="mb-6 py-4">
+      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 text-sm">
+        <span className="font-medium">Daily automatic check</span>
+        {last ? (
+          <>
+            <span className="flex items-center gap-1.5"><ResultIcon level={last.failures ? 'fail' : 'ok'} /> {last.failures ? `${last.failures} failed` : 'all passed'} {relative(last.at)}</span>
+            {last.failures > 0 && <span className="text-destructive">{last.results.filter((r) => r.level === 'fail').map((r) => r.msg).join(' · ')}</span>}
+          </>
+        ) : <span className="text-muted-foreground">hasn't run yet</span>}
+        <span className="ml-auto text-xs text-muted-foreground">{nextAt ? `next ${relative(nextAt)}` : ''} · failures are posted to the alerts channel</span>
+      </CardContent>
+    </Card>
   )
 }
 

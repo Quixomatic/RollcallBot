@@ -61,10 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <ClipboardList className="size-4" />
         </div>
-        <div className="leading-tight">
-          <div className="font-semibold">Rollcall</div>
-          <div className="text-xs text-muted-foreground">{overview ? `v${overview.version}` : ' '}</div>
-        </div>
+        <div className="font-semibold">Rollcall</div>
         <Button variant="ghost" size="icon" className="ml-auto md:hidden" onClick={close}><X /></Button>
       </div>
 
@@ -119,6 +116,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="ghost" className="ml-auto text-muted-foreground" onClick={logout}><LogOut /> Sign out</Button>
+        </div>
+        <div className="border-t pt-3 text-center text-xs text-muted-foreground" title="Version of the running bot">
+          Rollcall {overview ? <span className="font-mono font-medium text-foreground">v{overview.version}</span> : '…'}
         </div>
       </div>
     </div>

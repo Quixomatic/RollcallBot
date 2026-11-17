@@ -78,7 +78,16 @@ function EventPage() {
       {rescan.data && <RescanResult summary={rescan.data} />}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Going" icon={<Users className="size-4" />} value={event.rsvps.tracked ? event.rsvps.going : event.rsvp_count} hint={event.rsvps.tracked ? `${event.rsvps.goingMembers} members + ${event.rsvps.guests} guests` : 'From the event listing'} />
+        <Stat
+          label="Going"
+          icon={<Users className="size-4" />}
+          value={<>{event.rsvps.tracked ? event.rsvps.going : event.rsvp_count}{event.max_tickets ? <span className="text-base font-normal text-muted-foreground"> / {event.max_tickets}</span> : null}</>}
+          tone={event.is_full ? 'warn' : undefined}
+          hint={[
+            event.rsvps.tracked ? `${event.rsvps.goingMembers} members + ${event.rsvps.guests} guests` : 'From the event listing',
+            event.max_tickets ? (event.is_full ? 'full' : `${Math.max(0, event.max_tickets - (event.rsvps.tracked ? event.rsvps.going : event.rsvp_count))} spots left`) : null,
+          ].filter(Boolean).join(' · ')}
+        />
         <Stat label="Waitlist" value={event.rsvps.tracked ? event.rsvps.waitlist : '—'} hint={!event.rsvps.tracked ? 'Not fetched yet — rescan or wait for the 24h window' : undefined} />
         <Stat label="Not going" value={event.rsvps.tracked ? event.rsvps.notGoing : '—'} />
         <Stat label="Comments" icon={<MessageSquare className="size-4" />} value={comments.length} hint={data.rsvpMessage ? `RSVP summary last posted ${relative(data.rsvpMessage.updated_at)}` : 'No RSVP summary posted yet'} />
@@ -166,7 +175,8 @@ function RescanResult({ summary: s }: { summary: PollEventSummary }) {
             {s.rsvps.posted ? ' · summary posted to Discord' : ' · no changes, nothing posted'}
           </div>
         )}
-        {s.comments && <div>Comments: {s.comments.total} total, {s.comments.new} new{s.comments.new ? ' (posted to Discord)' : ''}</div>}
+        {s.capacity && <div>Capacity: {s.capacity.going}/{s.capacity.max}{s.capacity.full ? ' — full' : ''}</div>}
+        {s.comments && <div>Comments: {s.comments.total} total, {s.comments.new} new{s.comments.new ? ' (posted to Discord)' : ''}{s.comments.updatedPosts ? ` · ${s.comments.updatedPosts} post(s) updated for likes/pins` : ''}</div>}
         {s.errors.map((e) => <div key={e} className="text-destructive">{e}</div>)}
       </CardContent>
     </Card>

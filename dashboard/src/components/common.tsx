@@ -35,9 +35,10 @@ export function Stat({ label, value, hint, icon, tone }: { label: string; value:
   )
 }
 
-export function EventStatusBadge({ event }: { event: Pick<StoredEvent, 'is_cancelled' | 'date_time' | 'quickPollMinutes'> }) {
+export function EventStatusBadge({ event }: { event: Pick<StoredEvent, 'is_cancelled' | 'date_time' | 'quickPollMinutes'> & { is_full?: number } }) {
   if (event.is_cancelled) return <Badge variant="destructive">Cancelled</Badge>
   if (isPast(event.date_time) && !event.quickPollMinutes) return <Badge variant="secondary">Past</Badge>
+  if (event.is_full) return <Badge className="bg-warning/20 text-warning hover:bg-warning/20">Full</Badge>
   if (event.quickPollMinutes) return <Badge className="bg-success/15 text-success hover:bg-success/15">Live · every {event.quickPollMinutes}m</Badge>
   return <Badge variant="outline">Upcoming</Badge>
 }

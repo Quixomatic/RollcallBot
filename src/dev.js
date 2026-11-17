@@ -23,79 +23,11 @@ require('./services/log-buffer').install();
 const { queries } = require('./database');
 const { startDashboard } = require('./dashboard/server');
 const { startPolling } = require('./services/poller');
-const { ChannelType } = require('discord.js');
+const { createFakeClient } = require('./dev/fake-discord');
 
 const GUILD_ID = 'dev-guild';
 const GROUP_URL = process.env.DEV_GROUP_URL || 'https://www.meetup.com/reston-pickup-soccer-rps/';
 const outbox = [];
-
-/** A Discord client stand-in with one fake server and a few text channels. */
-function createFakeClient() {
-  const messages = new Map();
-  let nextId = 1;
-  const channels = new Map();
-  const guild = {
-    id: GUILD_ID,
-    name: 'Dry Run Server',
-    iconURL: () => null,
-    channels: { cache: channels },
-  };
-
-  const makeChannel = (id, name, position) => {
-    const channel = {
-      id, name, type: ChannelType.GuildText, rawPosition: position, parent: { name: 'Rollcall (dry run)' }, guild,
-      async send(payload) {
-        const msg = {
-          id: String(nextId++),
-          channelId: id,
-          embeds: (payload.embeds || []).map((e) => (e.toJSON ? e.toJSON() : e)),
-          content: payload.content || null,
-          async edit(p) {
-            this.embeds = (p.embeds || []).map((e) => (e.toJSON ? e.toJSON() : e));
-            outbox.push({ at: new Date().toISOString(), action: 'edit', channel: name, messageId: this.id, embeds: this.embeds });
-            console.log(`[dry-run] Edited message ${this.id} in #${name}`);
-            return this;
-          },
-          async delete() {
-            messages.delete(this.id);
-            outbox.push({ at: new Date().toISOString(), action: 'delete', channel: name, messageId: this.id, embeds: [] });
-            console.log(`[dry-run] Deleted message ${this.id} in #${name}`);
-          },
-        };
-        messages.set(msg.id, msg);
-        outbox.push({ at: new Date().toISOString(), action: 'send', channel: name, messageId: msg.id, embeds: msg.embeds, content: msg.content });
-        console.log(`[dry-run] Would post to #${name}: ${msg.embeds.map((e) => e.title).join(', ') || msg.content}`);
-        return msg;
-      },
-      messages: {
-        fetch: async (msgId) => {
-          const m = messages.get(msgId);
-          if (!m) throw new Error('Unknown Message');
-          return m;
-        },
-      },
-    };
-    channels.set(id, channel);
-    return channel;
-  };
-
-  makeChannel('100', 'events', 1);
-  makeChannel('101', 'rsvps', 2);
-  makeChannel('102', 'comments', 3);
-  makeChannel('103', 'reminders', 4);
-
-  return {
-    user: { tag: 'Rollcall (dry run)' },
-    guilds: { cache: new Map([[GUILD_ID, guild]]) },
-    channels: {
-      fetch: async (id) => {
-        const c = channels.get(id);
-        if (!c) throw new Error(`Unknown channel ${id}`);
-        return c;
-      },
-    },
-  };
-}
 
 async function main() {
   console.log('[dev] Dry run — Discord posts are recorded, not sent');
@@ -110,9 +42,13 @@ async function main() {
     queries.setCommentsChannel().run(GUILD_ID, '102');
     queries.setRemindersChannel().run(GUILD_ID, '103');
     queries.setBotMeetupName().run(GUILD_ID, 'Eventer');
+    queries.setAlertsChannel().run(GUILD_ID, '104');
   }
 
-  const client = createFakeClient();
+  // Dev databases seeded before alerts existed get the fake #alerts channel too.
+  if (!queries.getGuildSettings().get(GUILD_ID).alerts_channel_id) queries.setAlertsChannel().run(GUILD_ID, '104');
+
+  const client = createFakeClient({ guildId: GUILD_ID, outbox });
   startDashboard(client, { outbox });
   console.log(`[dev] Dashboard password: ${process.env.DASHBOARD_PASSWORD}`);
   await startPolling(client);

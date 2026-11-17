@@ -115,6 +115,7 @@ function applySettings(client, guildId, body) {
   if (body.rsvp_channel_id !== undefined) { queries.setRsvpChannel().run(guildId, channel(body.rsvp_channel_id, 'RSVP channel')); changes.push('RSVP channel'); }
   if (body.comments_channel_id !== undefined) { queries.setCommentsChannel().run(guildId, channel(body.comments_channel_id, 'Comments channel')); changes.push('comments channel'); }
   if (body.reminders_channel_id !== undefined) { queries.setRemindersChannel().run(guildId, channel(body.reminders_channel_id, 'Reminders channel')); changes.push('reminders channel'); }
+  if (body.alerts_channel_id !== undefined) { queries.setAlertsChannel().run(guildId, channel(body.alerts_channel_id, 'Alerts channel')); changes.push('alerts channel'); }
   if (body.poll_interval_minutes !== undefined) { queries.setPollInterval().run(guildId, intIn(body.poll_interval_minutes, 5, 60, 'Poll interval')); changes.push('poll interval'); }
   if (body.event_horizon_days !== undefined) { queries.setEventHorizon().run(guildId, intIn(body.event_horizon_days, 7, 90, 'Event horizon')); changes.push('horizon'); }
   if (body.rsvp_edit_threshold_minutes !== undefined) { queries.setRsvpEditThreshold().run(guildId, intIn(body.rsvp_edit_threshold_minutes, 0, 60, 'RSVP edit threshold')); changes.push('RSVP threshold'); }
@@ -346,6 +347,56 @@ function createApi(client, { outbox = null } = {}) {
   router.post('/health/check', wrap(async (req, res) => {
     const groupUrl = req.body?.groupUrl || queries.getAllGuildSettings().all().find((s) => s.meetup_group_url)?.meetup_group_url;
     res.json(await runHealthChecks({ groupUrl, eventUrl: req.body?.eventUrl || null, refresh: !!req.body?.refresh }));
+  }));
+
+  // ---- Remote login (real Chrome next to the bot, streamed to the dashboard) ----
+  const remote = require('./remote-browser');
+
+  router.get('/remote-login', wrap(async (req, res) => res.json(remote.status())));
+
+  router.post('/remote-login/start', wrap(async (req, res) => {
+    try {
+      res.json(await remote.start());
+    } catch (err) {
+      throw httpError(500, `Could not start the browser: ${err.message}`);
+    }
+  }));
+
+  router.post('/remote-login/stop', wrap(async (req, res) => {
+    await remote.stop();
+    res.json(remote.status());
+  }));
+
+  // Type the stored Meetup email or password into the focused field.
+  router.post('/remote-login/type', wrap(async (req, res) => {
+    const field = req.body?.field;
+    if (!['email', 'password'].includes(field)) throw httpError(400, 'field must be email or password');
+    const creds = queries.getMeetupCredentials().get(req.body?.guildId)
+      || queries.getAllGuildSettings().all().map((s) => queries.getMeetupCredentials().get(s.guild_id)).find(Boolean);
+    if (!creds) throw httpError(400, 'No Meetup credentials stored — set them with /config credentials');
+    await remote.typeText(creds[field]);
+    res.json({ ok: true });
+  }));
+
+  // Take the remote browser's cookies, verify them with Meetup, install them.
+  router.post('/remote-login/save', wrap(async (req, res) => {
+    const meetup = require('../services/meetup-api/client');
+    const state = await remote.storageState();
+    const result = await meetup.verifySession(state);
+    if (!result.ok) throw httpError(400, `${result.reason}. Finish logging in, then save again.`);
+    const { backup } = meetup.installSession(result.state);
+    await getBackend().reloadSession();
+    await meetup.getSelf().catch(() => null);
+    console.log(`[remote-login] New Meetup session installed (${result.self.name}); previous saved to ${backup || 'nothing'}`);
+    await remote.stop();
+    res.json({ ok: true, self: result.self, backup });
+  }));
+
+  // Result of the last scheduled (daily) API check, and when the next one runs.
+  router.get('/health/last', wrap(async (req, res) => {
+    const { lastApiHealth } = require('../services/alerts');
+    const s = poller.getStatus();
+    res.json({ last: lastApiHealth(), nextAt: s.nextApiCheckAt });
   }));
 
   router.get('/logs', wrap(async (req, res) => {

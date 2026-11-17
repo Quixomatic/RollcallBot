@@ -37,7 +37,7 @@ module.exports = {
       }
 
       // Post to the current channel (not the configured comments channel)
-      await notifier.notifyNewComments(interaction.channel, event, comments, comments);
+      await notifier.notifyNewComments(interaction.channel, event, comments, comments, { track: false });
 
       await interaction.editReply({ content: `Posted ${comments.length} comment(s) from "${event.title}"` });
     } catch (err) {

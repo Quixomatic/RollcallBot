@@ -64,6 +64,7 @@ function toEvent(node, guildId = null) {
     description: node.description || null,
     rsvp_count: node.going?.totalCount ?? 0,
     waitlist_count: 0,
+    max_tickets: node.maxTickets > 0 ? node.maxTickets : null, // capacity; null = unlimited
     status: node.status, // ACTIVE | CANCELLED | ...
   };
 }
@@ -117,6 +118,7 @@ async function fetchEventDetails(eventUrl) {
     location: e.location,
     description: e.description,
     rsvp_count: e.rsvp_count,
+    max_tickets: e.max_tickets,
     status: e.status,
   };
 }
