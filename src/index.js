@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./services/log-buffer').install(); // keep recent output for the dashboard's Logs page
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -70,15 +71,18 @@ client.once('clientReady', async () => {
 async function shutdown() {
   console.log('Shutting down...');
   const { stopPolling } = require('./services/poller');
-  const { closeBrowser } = require('./services/scraper');
+  const { getBackend } = require('./services/backend');
   stopPolling();
-  await closeBrowser();
+  await getBackend().close();
   client.destroy();
   process.exit(0);
 }
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Web dashboard (only if DASHBOARD_PASSWORD is set)
+require('./dashboard/server').startDashboard(client);
 
 // Deploy slash commands then start the bot
 deployCommands()

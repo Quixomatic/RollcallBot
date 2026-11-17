@@ -1,0 +1,34 @@
+  fragment LandingPageEvent on Event {
+    id
+    title
+    description
+    eventUrl
+    eventType
+    dateTime
+    endTime
+    displayPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    group {
+      id
+      urlname
+      groupPhoto {
+        id
+        baseUrl
+      }
+      timezone
+    }
+    venue {
+      id
+      name
+      address
+      city
+      state
+      country
+      lat
+      lon
+      postalCode
+    }
+  }

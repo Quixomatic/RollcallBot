@@ -1,0 +1,28 @@
+  query getYourEventsPastEvents($first: Int, $after: String, $endDate: String, $startDate: String) {
+    self {
+      id
+      pastEvents: rsvps(
+        first: $first
+        after: $after
+        sort: { sortField: DATETIME, sortOrder: DESC }
+        filter: { endDate: $endDate, startDate: $startDate, eventStatus: [PAST] }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            id
+            rsvpState: status
+            event {
+              ...EventDetails
+            }
+          }
+        }
+      }
+    }
+  }
+  ${c.n6}

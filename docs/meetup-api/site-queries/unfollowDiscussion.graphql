@@ -1,0 +1,9 @@
+  mutation unfollowDiscussion($input: UnfollowDiscussionInput) {
+    unfollowDiscussion(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

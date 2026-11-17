@@ -1,0 +1,6 @@
+      query WritePhotoInfo($id: Int!) {
+        PhotoInfo(id: $id) {
+          source
+          id
+        }
+      }

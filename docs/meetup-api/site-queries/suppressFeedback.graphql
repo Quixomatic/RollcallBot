@@ -1,0 +1,8 @@
+  mutation suppressFeedback($input: SupressFeedbackInput!) {
+    suppressFeedback(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

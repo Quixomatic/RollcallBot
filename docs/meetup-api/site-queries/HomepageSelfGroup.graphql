@@ -1,0 +1,25 @@
+  fragment HomepageSelfGroup on Group {
+    __typename
+    id
+    urlname
+    name
+    status
+    groupPhoto: keyGroupPhoto {
+      id
+      baseUrl
+      source: baseUrl
+      standardUrl
+      highResUrl
+    }
+    stats {
+      memberCounts {
+        all
+      }
+    }
+    stepUpInfo {
+      organizerNominees {
+        id
+      }
+      closingDate
+    }
+  }

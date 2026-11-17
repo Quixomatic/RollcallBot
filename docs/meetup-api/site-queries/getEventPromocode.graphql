@@ -1,0 +1,8 @@
+  query getEventPromocode($eventId: ID!, $promoCode: String!, $venueId: ID) {
+    event(id: $eventId) {
+      promoCode(promoCode: $promoCode, venueId: $venueId) {
+        id
+        amount
+      }
+    }
+  }

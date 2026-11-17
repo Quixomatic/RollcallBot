@@ -1,0 +1,22 @@
+  fragment SupergroupCandidate on Group {
+    id
+    urlname
+    name
+    keyGroupPhoto {
+      id
+      highResUrl
+    }
+    stats {
+      eventRatings {
+        average
+      }
+    }
+    events(sort: DESC, filter: { status: PAST }, first: 1) {
+      edges {
+        node {
+          id
+          dateTime
+        }
+      }
+    }
+  }

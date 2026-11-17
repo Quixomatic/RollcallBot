@@ -118,7 +118,7 @@ async function run() {
   }
 
   console.log('All required auth cookies present. Safe to copy to the NAS:');
-  console.log('  /mnt/Main/Main/docker/data/rollcall/data/browser-state/state.json');
+  console.log('  /mnt/Main/Main/docker/data/rollcallbot/data/browser-state/state.json');
   console.log('');
   console.log('Your Chrome window is still open — log out or close it when done.');
 

@@ -1,0 +1,9 @@
+  mutation readConvo($convoId: ID!) {
+    markAsReadConversation(input: { convoId: $convoId }) {
+      error {
+        code
+        message
+      }
+      read
+    }
+  }

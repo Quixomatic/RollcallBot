@@ -1,0 +1,5 @@
+  fragment SubscriptionCancelPromotionDiscount on PromotionDiscount {
+    percentOff
+    adjustedAmount
+    duration
+  }

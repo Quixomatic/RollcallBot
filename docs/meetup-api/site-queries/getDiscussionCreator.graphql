@@ -1,0 +1,8 @@
+  query getDiscussionCreator($id: ID!) {
+    discussion(id: $id) {
+      id
+      createdBy {
+        id
+      }
+    }
+  }

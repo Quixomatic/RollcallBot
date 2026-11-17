@@ -1,9 +1,10 @@
-const Database = require('better-sqlite3');
+const { openDatabase } = require('./db-driver');
 const path = require('path');
 const fs = require('fs');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-const DB_PATH = path.join(DATA_DIR, 'rollcall.db');
+// ROLLCALL_DB_PATH points at another database file (used for tests).
+const DB_PATH = process.env.ROLLCALL_DB_PATH || path.join(__dirname, '..', 'data', 'rollcall.db');
+const DATA_DIR = path.dirname(DB_PATH);
 
 let db;
 
@@ -12,7 +13,7 @@ function getDb() {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    db = new Database(DB_PATH);
+    db = openDatabase(DB_PATH);
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
     initialize();
@@ -130,6 +131,16 @@ function initialize() {
   if (!commentCols.includes('parent_comment_id')) {
     db.exec('ALTER TABLE comments ADD COLUMN parent_comment_id TEXT');
   }
+
+  // v2 (GraphQL backend): Meetup's own IDs, stored alongside the existing keys.
+  // Additive only — rows written by the browser backend simply leave them NULL.
+  if (!commentCols.includes('meetup_comment_id')) {
+    db.exec('ALTER TABLE comments ADD COLUMN meetup_comment_id TEXT');
+  }
+  const rsvpCols = db.pragma('table_info(rsvps)').map((c) => c.name);
+  if (!rsvpCols.includes('member_id')) {
+    db.exec('ALTER TABLE rsvps ADD COLUMN member_id TEXT');
+  }
 }
 
 const queries = {
@@ -239,6 +250,15 @@ const queries = {
   getEvent: () => getDb().prepare(
     'SELECT * FROM events WHERE event_id = ?'
   ),
+  getEventForGuild: () => getDb().prepare(
+    'SELECT * FROM events WHERE event_id = ? AND guild_id = ?'
+  ),
+  getAllEventsForGuild: () => getDb().prepare(
+    'SELECT * FROM events WHERE guild_id = ? ORDER BY date_time ASC'
+  ),
+  getScrapeLog: () => getDb().prepare(
+    'SELECT * FROM scrape_log WHERE guild_id = ? ORDER BY id DESC LIMIT ?'
+  ),
   getEventsForGuild: () => getDb().prepare(
     'SELECT * FROM events WHERE guild_id = ? AND is_cancelled = 0 ORDER BY date_time ASC'
   ),
@@ -277,12 +297,13 @@ const queries = {
     'SELECT * FROM rsvps WHERE event_id = ? ORDER BY rsvp_status, member_name'
   ),
   upsertRsvp: () => getDb().prepare(`
-    INSERT INTO rsvps (event_id, member_name, member_url, rsvp_status, guests)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO rsvps (event_id, member_name, member_url, rsvp_status, guests, member_id)
+    VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT (event_id, member_name) DO UPDATE SET
-      member_url = excluded.member_url,
+      member_url = COALESCE(excluded.member_url, rsvps.member_url),
       rsvp_status = excluded.rsvp_status,
       guests = excluded.guests,
+      member_id = COALESCE(excluded.member_id, rsvps.member_id),
       updated_at = datetime('now')
   `),
   deleteRsvp: () => getDb().prepare(
@@ -297,8 +318,11 @@ const queries = {
     'SELECT * FROM comments WHERE event_id = ? ORDER BY posted_at ASC'
   ),
   insertComment: () => getDb().prepare(`
-    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO comments (comment_id, event_id, author_name, content, posted_at, likes, parent_comment_id, meetup_comment_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `),
+  setCommentMeetupId: () => getDb().prepare(`
+    UPDATE comments SET meetup_comment_id = ? WHERE comment_id = ? AND meetup_comment_id IS NULL
   `),
 
   // RSVP messages (for delete-and-repost)

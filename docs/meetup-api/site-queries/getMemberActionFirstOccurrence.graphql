@@ -1,0 +1,5 @@
+  query getMemberActionFirstOccurrence($action: String!) {
+    memberAction(action: $action) {
+      firstOccurrence
+    }
+  }

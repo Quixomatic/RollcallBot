@@ -1,0 +1,10 @@
+  fragment GroupHomeMember on GroupMemberEdge {
+    metadata {
+      ...CoreGroupHomeMemberMetadata
+    }
+    node {
+      ...CoreGroupHomeMember
+    }
+  }
+  ${d}
+  ${c}

@@ -1,0 +1,8 @@
+  mutation updatePrivateVenue($venueId: ID!, $lat: Float!, $lon: Float!) {
+    updatePrivateVenue(input: { venueId: $venueId, lat: $lat, lon: $lon }) {
+      errors {
+        code
+        message
+      }
+    }
+  }

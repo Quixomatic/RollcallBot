@@ -1,0 +1,6 @@
+  query getIsInCumulativeImpactTreatmentSegment {
+    self {
+      id
+      isInCumulativeImpactTreatment
+    }
+  }

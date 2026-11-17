@@ -1,0 +1,20 @@
+  mutation createEvent($input: CreateEventInput!) {
+    createEvent(input: $input) {
+      event {
+        id
+        eventUrl
+        title
+        group {
+          id
+        }
+        series {
+          id
+        }
+      }
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

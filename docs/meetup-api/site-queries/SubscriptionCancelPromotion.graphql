@@ -1,0 +1,10 @@
+  fragment SubscriptionCancelPromotion on SubscriptionPromotionWrapper {
+    planId
+    promotion {
+      name
+      discount {
+        ...SubscriptionCancelPromotionDiscount
+      }
+    }
+  }
+  ${d}

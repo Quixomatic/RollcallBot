@@ -1,0 +1,49 @@
+  query getSuggestedEvents(
+    $lat: Float!
+    $lon: Float!
+    $topicId: ID
+    $startDateRange: String
+    $endDateRange: String
+    $first: Int
+    $eventType: EventType
+    $radius: Float
+    $isHappeningNow: Boolean
+    $dataConfiguration: String
+    $indexAlias: String
+    $shouldInjectNgaEvents: Boolean
+  ) {
+    rankedEvents: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        categoryId: $topicId
+        startDateRange: $startDateRange
+        endDateRange: $endDateRange
+        eventType: $eventType
+        radius: $radius
+        isHappeningNow: $isHappeningNow
+        indexAlias: $indexAlias
+        shouldInjectNgaEvents: $shouldInjectNgaEvents
+      }
+      first: $first
+      dataConfiguration: $dataConfiguration
+    ) {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
+      edges {
+        node {
+          ...HomepageEventDetails
+        }
+        metadata {
+          recSource
+          recId
+        }
+      }
+    }
+  }
+  ${tl.N}

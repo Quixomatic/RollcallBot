@@ -1,0 +1,9 @@
+  fragment SubscriptionCancelPlan on SubscriptionProfilePlan {
+    id
+    providerPlanId
+    amount
+    currency
+    billInterval
+    billIntervalUnit
+    tier
+  }

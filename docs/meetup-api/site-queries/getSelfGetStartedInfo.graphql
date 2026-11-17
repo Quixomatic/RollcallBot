@@ -1,0 +1,18 @@
+  query getSelfGetStartedInfo {
+    self {
+      id
+      memberships(
+        filter: { status: LEADER, groupStatus: PAID }
+        sort: { sortField: CREATE_TIME, sortOrder: ASC }
+        first: 3
+      ) {
+        edges {
+          node {
+            id
+            name
+            groupApprovalStatus
+          }
+        }
+      }
+    }
+  }

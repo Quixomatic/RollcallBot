@@ -1,0 +1,48 @@
+  query getMyRsvps(
+    $first: Int
+    $after: String
+    $eventType: [EventType!]
+    $rsvpStatus: [RsvpStatus!]
+    $eventStatus: [RsvpEventStatus!]
+    $startDate: String
+    $endDate: String
+    $lat: Float
+    $lon: Float
+    $radius: Float
+  ) {
+    self {
+      id
+      upcomingEvents: rsvps(
+        first: $first
+        after: $after
+        filter: {
+          eventType: $eventType
+          rsvpStatus: $rsvpStatus
+          eventStatus: $eventStatus
+          startDate: $startDate
+          endDate: $endDate
+          lat: $lat
+          lon: $lon
+          radius: $radius
+        }
+        sort: { sortField: DATETIME, sortOrder: ASC }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            id
+            rsvpState: status
+            event {
+              ...EventDetails
+            }
+          }
+        }
+      }
+    }
+  }
+  ${c.n6}

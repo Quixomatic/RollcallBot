@@ -1,0 +1,22 @@
+  query getHomepageSelfLeaderGroups($endCursor: String, $first: Int) {
+    self {
+      leaderGroups: memberships(
+        filter: { status: LEADER }
+        sort: { sortField: LEADERSHIP_STATUS, sortOrder: DESC }
+        first: $first
+        after: $endCursor
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...HomepageSelfGroup
+          }
+        }
+        totalCount
+      }
+    }
+  }
+  ${n.g}

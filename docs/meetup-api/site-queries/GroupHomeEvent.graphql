@@ -1,0 +1,68 @@
+  fragment GroupHomeEvent on Event {
+    id
+    title
+    status
+    isSaved
+    featuredEventPhoto {
+      source: highResUrl
+      baseUrl
+      highResUrl
+      id
+    }
+    displayPhoto {
+      source: highResUrl
+      baseUrl
+      highResUrl
+      id
+    }
+    description
+    isOnline
+    eventType
+    venue {
+      id
+      name
+      address
+      city
+      state
+      country
+    }
+    isAttending
+    eventUrl
+    going {
+      totalCount
+    }
+    dateTime
+    endTime
+    isFeatured
+    group {
+      id
+      name
+      timezone
+    }
+    actions
+    isNetworkEvent
+    rsvpState
+    rsvps {
+      edges {
+        node {
+          id
+          member {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+            }
+          }
+        }
+      }
+    }
+    feeSettings {
+      currency
+      amount
+    }
+    rsvpSettings {
+      rsvpsClosed
+    }
+    socialLabels
+  }

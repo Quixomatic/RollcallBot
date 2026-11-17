@@ -1,0 +1,7 @@
+  mutation editRsvp($input: EditRsvpInput!) {
+    editRsvp(input: $input) {
+      errors {
+        code
+      }
+    }
+  }

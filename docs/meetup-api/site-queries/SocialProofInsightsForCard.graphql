@@ -1,0 +1,11 @@
+  fragment SocialProofInsightsForCard on SocialProofInsights {
+    isTrendingEvent
+    totalInterestedUsers
+    interestedUsersSample {
+      memberPhoto {
+        id
+        source: highResUrl
+        baseUrl
+      }
+    }
+  }

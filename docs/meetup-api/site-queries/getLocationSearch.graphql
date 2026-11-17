@@ -1,0 +1,33 @@
+  query getLocationSearch(
+    $query: String
+    $lat: Float
+    $lon: Float
+    $dataConfiguration: String
+    $variant: String
+    $useImprovedGeoHashIndex: Boolean
+    $sortByMaxDensity: Boolean
+    $offset: Int
+  ) {
+    result: locationSearch(
+      query: $query
+      lat: $lat
+      lon: $lon
+      dataConfiguration: $dataConfiguration
+      variant: $variant
+      useImprovedGeoHashIndex: $useImprovedGeoHashIndex
+      sortByMaxDensity: $sortByMaxDensity
+      offset: $offset
+    ) {
+      city
+      country
+      lat
+      lon
+      name
+      state
+      timeZone
+      borough
+      localizedCountryName
+      neighborhood
+      zip
+    }
+  }

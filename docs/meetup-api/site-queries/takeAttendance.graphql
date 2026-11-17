@@ -1,0 +1,7 @@
+  mutation takeAttendance($input: TakeAttendanceInput!) {
+    takeAttendance(input: $input) {
+      errors {
+        code
+      }
+    }
+  }

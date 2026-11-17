@@ -1,0 +1,51 @@
+  query groupSearch(
+    $first: Int
+    $after: String
+    $query: String!
+    $lat: Float!
+    $lon: Float!
+    $radius: Float
+    $categoryId: ID
+    $topicCategoryId: ID
+    $city: String
+    $state: String
+    $country: String
+    $zip: String
+    $dataConfiguration: String
+    $frozenOnly: Boolean
+  ) {
+    results: groupSearch(
+      first: $first
+      after: $after
+      filter: {
+        query: $query
+        lat: $lat
+        lon: $lon
+        radius: $radius
+        categoryId: $categoryId
+        topicCategoryId: $topicCategoryId
+        city: $city
+        state: $state
+        country: $country
+        zip: $zip
+        frozenOnly: $frozenOnly
+      }
+      dataConfiguration: $dataConfiguration
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+      edges {
+        node {
+          ...BuildMeetupGroupSearch
+        }
+        metadata {
+          recId
+          recSource
+        }
+      }
+    }
+  }
+  ${a.et}

@@ -1,0 +1,103 @@
+  query getMemberProfile($memberId: ID!, $isOtherMembersProfile: Boolean!) {
+    self @include(if: $isOtherMembersProfile) {
+      id
+      memberPhoto {
+        id
+        baseUrl
+      }
+      reasonsForJoining
+      lifeStages(activeOnly: true) {
+        id
+        name
+        active
+      }
+      relationshipStatus
+      relationshipStatusPublic
+      jobField
+      jobFieldPublic
+    }
+    member(id: $memberId) {
+      id
+      status
+      memberPhoto {
+        id
+        baseUrl
+      }
+      name
+      memberSubscriptionProfile {
+        trialAvailable
+      }
+      isOrganizer
+      isSuperOrganizer
+      isMemberPlusSubscriber
+      allowableActions
+      organizerGroups: memberships(first: 4, filter: { status: LEADER, leaderSubset: PRIMARY }) {
+        ...MemberProfileGroups
+      }
+      leaderGroups: memberships(first: 4, filter: { status: LEADER, leaderSubset: SECONDARY }) {
+        ...MemberProfileGroups
+      }
+      memberGroups: memberships(
+        first: 8
+        filter: { status: ACTIVE }
+        sort: { sortField: SELF_RSVP_COUNT, sortOrder: DESC }
+      ) {
+        ...MemberProfileGroups
+      }
+      topics(first: 20) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            name
+            urlkey
+          }
+        }
+      }
+      lifeStages(activeOnly: true) {
+        id
+        name
+        active
+      }
+      reasonsForJoining
+      relationshipStatus
+      relationshipStatusPublic
+      jobField
+      jobFieldPublic
+      commonInterests: commonTopics(first: 8) @include(if: $isOtherMembersProfile) {
+        totalCount
+        pageInfo {
+          hasNextPage
+        }
+        edges {
+          node {
+            id
+            name
+            urlkey
+          }
+        }
+      }
+      commonGroups(first: 4, filter: { status: [LEADER, ACTIVE, PENDING] })
+        @include(if: $isOtherMembersProfile) {
+        ...MemberProfileGroups
+      }
+      commonGroupIds: commonGroups(filter: { status: [LEADER, ACTIVE, PENDING] })
+        @include(if: $isOtherMembersProfile) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+      isMemberUnlocked
+      isFamiliarFace
+      isFriendsEligible
+      isFriendsUnlocked
+      friendshipStatus
+    }
+  }
+  ${g}

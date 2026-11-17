@@ -1,0 +1,9 @@
+  query getTemporaryMemberPreferences($names: [String!]!) {
+    self {
+      id
+      temporaryPreferences(names: $names) {
+        name
+        value
+      }
+    }
+  }

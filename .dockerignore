@@ -1,8 +1,11 @@
-node_modules
+**/node_modules
 .env
 .git
 .docs
 .plans
 .pnpm-store
-data/*.db
+data
+dashboard/dist
+tools
+docs
 *.md

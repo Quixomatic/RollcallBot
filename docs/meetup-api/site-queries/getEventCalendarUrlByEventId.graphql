@@ -1,0 +1,11 @@
+  query getEventCalendarUrlByEventId($eventId: ID!) {
+    event(id: $eventId) {
+      id
+      calendarExportUrls {
+        google
+        ical
+        outlook
+        yahoo
+      }
+    }
+  }

@@ -1,0 +1,11 @@
+  mutation createEventZoomMeeting($input: CreateEventZoomMeetingInput!) {
+    createEventZoomMeeting(input: $input) {
+      success
+      id
+      url
+      errors {
+        code
+        message
+      }
+    }
+  }

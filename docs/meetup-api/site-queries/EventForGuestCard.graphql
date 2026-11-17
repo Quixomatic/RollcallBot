@@ -1,0 +1,84 @@
+  fragment EventForGuestCard on Event {
+    id
+    title
+    eventUrl
+    eventType
+    dateTime
+    endTime
+    featuredEventPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    displayPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    isOnline
+    going {
+      totalCount
+    }
+    rsvps {
+      edges {
+        node {
+          id
+          member {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+            }
+          }
+        }
+      }
+    }
+    feeSettings {
+      amount
+      currency
+      earlyBirdDiscount {
+        id
+        amount
+        daysBefore
+        maximumQuantity
+        discountTicketsRemaining
+        promotionEnds
+      }
+    }
+    group {
+      id
+      name
+      timezone
+      urlname
+      groupPhoto {
+        id
+        baseUrl
+        highResUrl
+      }
+    }
+    venue {
+      name
+      address
+      city
+      state
+      country
+    }
+    venues {
+      id
+      earlyBirdDiscount {
+        id
+        amount
+        daysBefore
+        maximumQuantity
+      }
+      eventVenueOptions {
+        goingCount
+        feeSettings {
+          accepts
+          amount
+          currency
+        }
+      }
+    }
+  }

@@ -33,6 +33,44 @@ const DENIED = [
 
 const DENY_OVERWRITE = Object.fromEntries(DENIED.map((name) => [name, false]));
 
+// Discord only lets the bot deny permissions it holds itself, so it needs all
+// of DENIED plus ManageRoles to write the overwrite.
+const REQUIRED = ['ManageRoles', ...DENIED];
+
+// Names as they appear in Server Settings → Roles → Permissions.
+const LABELS = {
+  ManageRoles: 'Manage Roles',
+  SendMessages: 'Send Messages',
+  SendMessagesInThreads: 'Send Messages in Threads',
+  CreatePublicThreads: 'Create Public Threads',
+  CreatePrivateThreads: 'Create Private Threads',
+  SendTTSMessages: 'Send Text-to-Speech Messages',
+  SendVoiceMessages: 'Send Voice Messages',
+  SendPolls: 'Create Polls',
+  AddReactions: 'Add Reactions',
+  AttachFiles: 'Attach Files',
+  EmbedLinks: 'Embed Links',
+  UseExternalEmojis: 'Use External Emoji',
+  UseExternalStickers: 'Use External Stickers',
+  MentionEveryone: 'Mention @everyone, @here, and All Roles',
+  UseApplicationCommands: 'Use Application Commands',
+  UseExternalApps: 'Use External Apps',
+  UseEmbeddedActivities: 'Use Activities',
+  CreateInstantInvite: 'Create Invite',
+  Connect: 'Connect',
+  Speak: 'Speak',
+  Stream: 'Video',
+  UseSoundboard: 'Use Soundboard',
+  UseExternalSounds: 'Use External Sounds',
+  RequestToSpeak: 'Request to Speak',
+};
+
+/** Permissions the bot lacks (server-wide, or in a channel) to write the deny overwrite. */
+function missingBotPermissions(guild, channel = null) {
+  const perms = channel ? channel.permissionsFor(guild.members.me) : guild.members.me.permissions;
+  return perms.missing(REQUIRED).map((name) => LABELS[name] || name);
+}
+
 // Permissions checked after silencing someone to catch channels where another
 // role's allow overwrite beats our deny.
 const LEAK_CHECK = ['SendMessages', 'SendMessagesInThreads', 'AddReactions', 'Connect'];
@@ -63,6 +101,11 @@ async function applyOverwrite(channel, role) {
  * channel. Safe to re-run: channels that already have the full deny are skipped.
  */
 async function setupSilencedRole(guild) {
+  // Every overwrite would fail with a bare "Missing Permissions", so stop and
+  // say exactly what to grant instead.
+  const missing = missingBotPermissions(guild);
+  if (missing.length) return { missing };
+
   let role = findSilencedRole(guild);
   let created = false;
   if (!role) {
@@ -89,11 +132,14 @@ async function setupSilencedRole(guild) {
       if (await applyOverwrite(channel, role)) updated++;
       else unchanged++;
     } catch (err) {
-      failed.push({ channel, error: err.message });
+      // A channel overwrite can take away a permission the bot has server-wide.
+      const lacking = missingBotPermissions(guild, channel);
+      const error = lacking.length ? `${err.message} (bot lacks here: ${lacking.join(', ')})` : err.message;
+      failed.push({ channel, error });
     }
   }
 
-  return { role, created, updated, unchanged, failed };
+  return { missing: [], role, created, updated, unchanged, failed };
 }
 
 /**

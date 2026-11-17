@@ -1,0 +1,27 @@
+  query getSelfLeaderGroups($endCursor: String, $first: Int) {
+    self {
+      id
+      isOrganizer
+      memberships(
+        filter: { status: LEADER }
+        sort: { sortField: LEADERSHIP_STATUS, sortOrder: DESC }
+        first: $first
+        after: $endCursor
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...HomepageSelfGroup
+            isPrimaryOrganizer
+          }
+          metadata {
+            role
+          }
+        }
+      }
+    }
+  }
+  ${n.g}

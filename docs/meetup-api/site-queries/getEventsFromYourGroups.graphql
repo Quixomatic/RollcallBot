@@ -1,0 +1,37 @@
+  query getEventsFromYourGroups(
+    $first: Int!
+    $after: String
+    $startDate: String
+    $eventType: [EventType]
+    $lat: Float
+    $lon: Float
+    $radius: Float
+  ) {
+    self {
+      id
+      eventsFromGroups: memberEvents(
+        first: $first
+        after: $after
+        startDate: $startDate
+        eventType: $eventType
+        lat: $lat
+        lon: $lon
+        radius: $radius
+        isHosting: false
+        membershipsFilter: { groupStatus: [PAID, GRACE, FROZEN], status: [ACTIVE, LEADER] }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            ...HomepageEventDetails
+          }
+        }
+      }
+    }
+  }
+  ${a.N}

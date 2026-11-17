@@ -1,0 +1,12 @@
+  fragment EventByIdComment on EventComment {
+    ...EventCommentEdge
+    replies(first: 1000) {
+      totalCount
+      edges {
+        node {
+          ...EventCommentEdge
+        }
+      }
+    }
+  }
+  ${eU}

@@ -1,0 +1,5 @@
+  fragment Error on PayloadError {
+    code
+    message
+    field
+  }

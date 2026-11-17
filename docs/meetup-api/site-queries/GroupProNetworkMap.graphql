@@ -1,0 +1,10 @@
+  fragment GroupProNetworkMap on Group {
+    id
+    name
+    lat
+    lon
+    city
+    state
+    country
+    link
+  }

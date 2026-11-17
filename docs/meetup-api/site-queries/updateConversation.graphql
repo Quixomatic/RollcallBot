@@ -1,0 +1,28 @@
+  mutation updateConversation(
+    $convoId: ID!
+    $title: String
+    $muted: Boolean
+    $archived: Boolean
+    $removeMember: ID
+    $addedMembers: [ID!]
+  ) {
+    updateConversation(
+      input: {
+        convoId: $convoId
+        title: $title
+        muted: $muted
+        archived: $archived
+        removeMember: $removeMember
+        addedMembers: $addedMembers
+      }
+    ) {
+      conversation {
+        id
+        title
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

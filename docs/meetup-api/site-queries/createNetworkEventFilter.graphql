@@ -1,0 +1,9 @@
+  mutation createNetworkEventFilter($networkId: ID!, $filter: NetworkGroupsFilter) {
+    createNetworkEventFilter(input: { networkId: $networkId, filter: $filter }) {
+      filterId
+      errors {
+        code
+        message
+      }
+    }
+  }

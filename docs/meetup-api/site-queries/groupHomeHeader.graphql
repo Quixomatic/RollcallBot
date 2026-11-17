@@ -1,0 +1,26 @@
+  query groupHomeHeader(
+    $urlname: String!
+    $hasSimilarSection: Boolean!
+    $includePrivateInfo: Boolean! = true
+  ) {
+    groupByUrlname(urlname: $urlname) {
+      ...GroupHomeHeaderData
+      pastEvents: events(filter: { status: [PAST] }, first: 1) {
+        totalCount
+      }
+      featuredEvent @include(if: $hasSimilarSection) {
+        id
+      }
+      activeTopics @include(if: $hasSimilarSection) {
+        id
+        name
+        urlkey
+      }
+      topicCategory @include(if: $hasSimilarSection) {
+        id
+        name
+        urlkey
+      }
+    }
+  }
+  ${c}

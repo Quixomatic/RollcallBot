@@ -1,0 +1,9 @@
+  query generateAttendanceQrCode($input: GenerateAttendanceQrCodeInput!) {
+    generateAttendanceQrCode(input: $input) {
+      qrCodeData
+      errors {
+        code
+        message
+      }
+    }
+  }

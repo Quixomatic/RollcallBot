@@ -1,0 +1,8 @@
+  mutation unlikeComment($input: UnlikeCommentInput!) {
+    unlikeComment(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

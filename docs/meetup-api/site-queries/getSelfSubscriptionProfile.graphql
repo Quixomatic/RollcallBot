@@ -1,0 +1,79 @@
+  query getSelfSubscriptionProfile(
+    $promoCode: String
+    $tier: SubscriptionTier
+    $draftGroupId: ID
+    $checkoutContext: CheckoutContext
+    $pricePointIds: [ID!]
+  ) {
+    self {
+      id
+      savedStripeCards {
+        cardId
+        cardBrand
+        cardCountry
+        cardLast4
+      }
+      subscriptionProfile(
+        promoCode: $promoCode
+        tier: $tier
+        draftGroupId: $draftGroupId
+        checkoutContext: $checkoutContext
+        pricePointIds: $pricePointIds
+      ) {
+        plans {
+          id
+          amount
+          currency
+          billInterval
+          billIntervalUnit
+          isSavingsPlan
+          tier
+          description
+          providerPlanId
+          internalPlanId
+          quantity
+          minQuantity
+        }
+        currentSubscription {
+          startDate
+          renewalDate
+          trialEndDate
+          plan {
+            id
+            tier
+            billInterval
+            billIntervalUnit
+          }
+        }
+        promoCode {
+          code
+          valid
+          promotion
+          error {
+            code
+            message
+          }
+        }
+        promotions {
+          planId
+          promotion {
+            name
+            discount {
+              percentOff
+              duration
+              adjustedAmount
+              currency
+            }
+            trial {
+              duration
+              durationUnit
+              endDate
+              adjustedAmount
+              currency
+              resetsBillingCycle
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,9 @@
+  mutation addCommentReply($input: AddCommentReplyInput!) {
+    addCommentReply(input: $input) {
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

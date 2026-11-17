@@ -1,0 +1,15 @@
+  mutation registerMemberWithThirdPartyService(
+    $input: MemberRegistrationWithThirdPartyServiceInput!
+  ) {
+    registerMemberWithThirdPartyService(input: $input) {
+      member {
+        id
+        name
+        email
+      }
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${u.TH}

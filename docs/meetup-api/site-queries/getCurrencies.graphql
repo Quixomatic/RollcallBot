@@ -1,0 +1,6 @@
+  query getCurrencies {
+    currencies {
+      iso
+      description
+    }
+  }

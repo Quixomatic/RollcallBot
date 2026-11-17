@@ -1,0 +1,30 @@
+  query getAccountSettingsSelf {
+    self {
+      id
+      name
+      username
+      preferredLocale
+      email
+      bio
+      state
+      city
+      gender
+      country
+      zip
+      birthday
+      selectedTimezone
+      memberPhoto {
+        id
+        baseUrl
+      }
+      relationshipStatusPublic
+      jobFieldPublic
+      isFriendsEligible
+      profilePrivacy {
+        showGroups
+        showInterests
+        whoCanContact
+      }
+      reasonsForJoining
+    }
+  }

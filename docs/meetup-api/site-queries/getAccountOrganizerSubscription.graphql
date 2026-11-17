@@ -1,0 +1,70 @@
+  query getAccountOrganizerSubscription {
+    self {
+      id
+      organizedGroupCount
+      timezone: selectedTimezone
+      savedStripeCards {
+        cardId
+      }
+      subscriptionSummary: subscription {
+        id
+        status
+        processor
+        memberCard {
+          cardId
+          cardBrand
+          cardLast4
+        }
+        source
+        providerProductId
+      }
+      subscriptionProfile {
+        currentSubscription {
+          startDate
+          renewalDate
+          trialEndDate
+          lastPayment {
+            id
+            date
+            paidAmount
+            subtotalAmount
+            currency
+          }
+          appliedPromotion {
+            name
+            discount {
+              percentOff
+              adjustedAmount
+              currency
+              duration
+            }
+            trial {
+              duration
+              durationUnit
+              adjustedAmount
+              currency
+              endDate
+              resetsBillingCycle
+            }
+            active
+          }
+          plan {
+            id
+            amount
+            currency
+            quantity
+            billIntervalUnit
+            billInterval
+            tier
+            minQuantity
+          }
+        }
+        promotions {
+          planId
+          promotion {
+            name
+          }
+        }
+      }
+    }
+  }

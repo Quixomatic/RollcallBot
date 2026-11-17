@@ -1,0 +1,178 @@
+  fragment EventScheduleEvent on Event {
+    id
+    createdTime
+    dateTime
+    description
+    duration
+    endTime
+    eventHosts {
+      memberId
+      memberPhoto {
+        standardUrl
+        id
+      }
+      membership {
+        role
+      }
+      name
+    }
+    featuredEventPhoto {
+      standardUrl
+      id
+    }
+    feeSettings {
+      accepts
+      amount
+      currency
+      earlyBirdDiscount {
+        amount
+        daysBefore
+        maximumQuantity
+      }
+      hasPromoCodes
+      refundPolicy {
+        notes
+      }
+      required
+    }
+    promotions {
+      amount
+      endDate
+      endOffset
+      eventPromotionId
+      promoCode
+      promotionType
+      quantity
+      redeemed
+      startDate
+      venueId
+    }
+    group {
+      id
+      fundraising {
+        enabled
+      }
+    }
+    fundraising {
+      enabled
+    }
+    guestLimit
+    howToFindUs
+    isNetworkEvent
+    isEventChatEnabled
+    isEventCommentsEnabled
+    isCheckInEnabled
+    eventChatWelcomeMessage
+    eventChat {
+      id
+    }
+    externalChat {
+      platform
+      url
+    }
+    maxTickets
+    networkEvent {
+      id
+      groupCount
+      rsvpCount
+      timezone
+    }
+    rsvpQuestions {
+      questionId
+      text
+    }
+    rsvpSettings {
+      rsvpCloseTime
+      rsvpOpenTime
+    }
+    rsvpSurveySettings {
+      requiresProQuestionnaire
+      questions {
+        questionId
+        required
+      }
+    }
+    newRsvpSurveySettings: rsvpSurveySettings(newSurvey: true) {
+      requiresProQuestionnaire
+      questions {
+        ...Question
+      }
+    }
+    series {
+      description
+      endDate
+      id
+      monthlyRecurrence {
+        monthlyDayOfWeek
+        monthlyWeekOfMonth
+      }
+      weeklyRecurrence {
+        weeklyDaysOfWeek
+        weeklyInterval
+      }
+    }
+    speakerDetails {
+      description
+      name
+      photo {
+        standardUrl
+        id
+      }
+      socialNetworks {
+        service
+        url
+      }
+    }
+    status
+    title
+    topics {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+    komootUrl
+    zoomMeetingId
+    eventType
+    venue {
+      id
+      name
+      address
+      city
+      country
+      postalCode
+      state
+      venueType
+      lat
+      lon
+      eventVenueOptions {
+        howToFindUs
+        goingCount
+      }
+    }
+    venues {
+      id
+      venueType
+      eventVenueOptions {
+        feeSettings {
+          accepts
+          amount
+          currency
+          earlyBirdDiscount {
+            amount
+            daysBefore
+            discountTicketsRemaining
+            id
+            maximumQuantity
+            promotionEnds
+          }
+        }
+        guestLimit
+        howToFindUs
+        rsvpLimit
+      }
+    }
+  }
+  ${id.H5}

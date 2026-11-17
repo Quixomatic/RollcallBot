@@ -1,0 +1,8 @@
+  query getGroupsLeadCountByMemberId($memberId: ID!) {
+    member(id: $memberId) {
+      id
+      memberships(filter: { status: [LEADER] }) {
+        totalCount
+      }
+    }
+  }

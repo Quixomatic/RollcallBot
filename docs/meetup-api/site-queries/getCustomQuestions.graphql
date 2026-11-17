@@ -1,0 +1,43 @@
+  query getCustomQuestions($groupUrlname: String!, $eventId: ID!, $hasEventId: Boolean!) {
+    groupByUrlname(urlname: $groupUrlname) {
+      id
+      proRsvpSurveySettings {
+        rsvpSurveyEnabledByDefault
+        questions {
+          order
+          question {
+            ...Question
+          }
+        }
+      }
+      proNetwork {
+        id
+        rsvpSurveySettings {
+          enabledByDefault
+          questionsEnabled
+          questions {
+            order
+            question {
+              ...Question
+            }
+          }
+        }
+      }
+    }
+    event(id: $eventId) @include(if: $hasEventId) {
+      id
+      rsvpSurveySettings {
+        enabledByDefault
+        questions {
+          ...Question
+        }
+      }
+      newRsvpSurveySettings: rsvpSurveySettings(newSurvey: true) {
+        enabledByDefault
+        questions {
+          ...Question
+        }
+      }
+    }
+  }
+  ${d}

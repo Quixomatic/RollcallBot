@@ -1,0 +1,18 @@
+  query getMemberProfileTopics($topicLimit: Int, $topicAfter: String) {
+    self {
+      id
+      topics(first: $topicLimit, after: $topicAfter) {
+        pageInfo {
+          hasNextPage
+          startCursor
+          endCursor
+        }
+        edges {
+          node {
+            ...Topic
+          }
+        }
+      }
+    }
+  }
+  ${n.Is}

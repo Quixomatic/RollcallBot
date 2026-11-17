@@ -1,0 +1,13 @@
+  mutation removeDirectMessageReaction($messageId: ID!, $emoji: String!) {
+    removeDirectMessageReaction(input: { messageId: $messageId, emoji: $emoji }) {
+      reactions {
+        emoji
+        count
+        reactedByMe
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

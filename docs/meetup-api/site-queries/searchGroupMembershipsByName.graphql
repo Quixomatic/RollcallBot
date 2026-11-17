@@ -1,0 +1,29 @@
+  query searchGroupMembershipsByName(
+    $groupId: ID!
+    $filter: MembershipFilter
+    $sort: GroupMembershipSort
+    $after: String
+  ) {
+    group(id: $groupId) {
+      id
+      memberships(filter: $filter, sort: $sort, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          metadata {
+            role
+          }
+          node {
+            id
+            name
+            memberPhoto {
+              standardUrl
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,11 @@
+  mutation createEventFeeOrder($input: CreateEventFeeOrderInput!) {
+    createEventFeeOrder(input: $input) {
+      success {
+        id
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

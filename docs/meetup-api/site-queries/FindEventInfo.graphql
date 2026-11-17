@@ -1,0 +1,102 @@
+  fragment FindEventInfo on Event {
+    id
+    title
+    dateTime
+    description
+    eventType
+    eventUrl
+    isAttending
+    isSaved
+    maxTickets
+    rsvpState
+    featuredEventPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    displayPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    feeSettings {
+      accepts
+      currency
+      amount
+    }
+    group {
+      id
+      name
+      urlname
+      timezone
+      keyGroupPhoto {
+        baseUrl
+        highResUrl
+        id
+      }
+      stats {
+        eventRatings {
+          average
+          totalRatings
+        }
+      }
+    }
+    socialProofInsights {
+      isTrendingEvent
+      totalInterestedUsers
+      interestedUsersSample {
+        memberPhoto {
+          id
+          source: highResUrl
+          baseUrl
+        }
+      }
+    }
+    rsvps {
+      totalCount
+      edges {
+        node {
+          isHost
+          user: member {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+              baseUrl
+            }
+          }
+        }
+      }
+    }
+    series {
+      description
+      weeklyRecurrence {
+        weeklyDaysOfWeek
+        weeklyInterval
+      }
+      monthlyRecurrence {
+        monthlyDayOfWeek
+        monthlyWeekOfMonth
+      }
+      events(numberOfEvents: $numberOfEventsForSeries, startDate: $seriesStartDate) {
+        edges {
+          node {
+            id
+            dateTime
+            isAttending
+            group {
+              urlname
+            }
+          }
+        }
+      }
+    }
+    venue {
+      name
+      address
+      city
+      state
+      country
+    }
+  }

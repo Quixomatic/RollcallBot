@@ -1,0 +1,52 @@
+  query getYourUpcomingEvents(
+    $first: Int!
+    $after: String
+    $startDate: String
+    $status: [MembershipStatus!]
+    $isHosting: Boolean
+    $eventType: [EventType!]
+    $lat: Float
+    $lon: Float
+    $radius: Float
+    $sortField: MemberEventSortField
+    $sortOrder: SortOrder
+  ) {
+    self {
+      id
+      upcomingEvents: memberEvents(
+        first: $first
+        after: $after
+        startDate: $startDate
+        isHosting: $isHosting
+        eventType: $eventType
+        lat: $lat
+        lon: $lon
+        radius: $radius
+        sort: { sortField: $sortField, sortOrder: $sortOrder }
+        membershipsFilter: { status: $status }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          rsvpState
+          node {
+            ...EventForCard
+            ...RsvpsForCard
+            ...EventDetails
+            group {
+              membershipMetadata {
+                role
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ${c.Sv}
+  ${c.wF}
+  ${c.n6}

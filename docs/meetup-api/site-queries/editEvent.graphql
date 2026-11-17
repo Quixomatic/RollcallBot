@@ -1,0 +1,17 @@
+  mutation editEvent($input: EditEventInput!) {
+    editEvent(input: $input) {
+      event {
+        id
+        eventUrl
+        title
+        group {
+          id
+        }
+      }
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

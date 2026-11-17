@@ -1,0 +1,16 @@
+  fragment CoreGroupHomeMemberMetadata on Membership {
+    isReachable
+    joinTime
+    lastAccessTime
+    bio
+    status
+    role
+    title
+    dues {
+      status
+      paidEndDate
+      trialEndDate
+      graceEndDate
+    }
+    isGroupMemberUnlocked
+  }

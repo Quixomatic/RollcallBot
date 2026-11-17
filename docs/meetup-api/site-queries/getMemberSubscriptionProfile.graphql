@@ -1,0 +1,33 @@
+  query getMemberSubscriptionProfile($planNames: [String!]) {
+    self {
+      id
+      savedStripeCards {
+        cardId
+        cardBrand
+        cardCountry
+        cardLast4
+      }
+      memberSubscriptionProfile(planNames: $planNames) {
+        trialAvailable
+        plans {
+          id
+          amount
+          currency
+          billInterval
+          billIntervalUnit
+        }
+        promotions {
+          planId
+          promotion {
+            name
+            discount {
+              percentOff
+              duration
+              adjustedAmount
+              currency
+            }
+          }
+        }
+      }
+    }
+  }

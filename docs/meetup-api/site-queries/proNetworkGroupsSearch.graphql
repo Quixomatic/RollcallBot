@@ -1,0 +1,26 @@
+  query proNetworkGroupsSearch($networkId: ID!, $first: Int, $networkEventFilterId: ID) {
+    proNetwork(id: $networkId) {
+      id
+      groupsSearch(input: { first: $first, networkEventFilterId: $networkEventFilterId }) {
+        edges {
+          node {
+            id
+            name
+            urlname
+            timezone
+            city
+            state
+            country
+            membershipMetadata {
+              status
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        totalCount
+      }
+    }
+  }

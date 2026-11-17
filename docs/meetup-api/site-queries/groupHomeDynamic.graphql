@@ -1,0 +1,70 @@
+  query groupHomeDynamic($urlname: String!) {
+    self {
+      id
+      profilePrivacy {
+        showInterests
+      }
+    }
+    groupByUrlname(urlname: $urlname) {
+      id
+      actions
+      eventForFeedback {
+        id
+        title
+        featuredEventPhoto {
+          id
+          highResUrl
+        }
+      }
+      samplePhotos {
+        totalCount
+        edges {
+          node {
+            id
+            url
+            albumId
+            caption
+          }
+        }
+      }
+      fundraising {
+        enabled
+        setupComplete
+        partner {
+          url
+          key
+        }
+        fundraiser {
+          id
+        }
+      }
+      membershipInsights {
+        ... on IncompleteMembershipInsights {
+          recentlyJoined
+        }
+        ... on CompleteMembershipInsights {
+          recentlyJoined
+          commonInterests {
+            topics {
+              id
+              name
+            }
+          }
+        }
+        ... on SubscriberMembershipInsights {
+          commonInterests {
+            topics {
+              id
+              name
+            }
+          }
+          recentlyJoined
+          commonAge
+          commonGender
+          reasonsForJoining {
+            reason
+          }
+        }
+      }
+    }
+  }

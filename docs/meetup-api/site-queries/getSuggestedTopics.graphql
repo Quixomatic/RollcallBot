@@ -1,0 +1,11 @@
+  query getSuggestedTopics($query: String!) {
+    suggestTopics(query: $query, first: 5, excludeMemberTopics: true) {
+      edges {
+        node {
+          id
+          urlkey
+          name
+        }
+      }
+    }
+  }

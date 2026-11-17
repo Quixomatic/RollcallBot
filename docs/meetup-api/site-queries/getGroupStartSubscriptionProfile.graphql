@@ -1,0 +1,43 @@
+  query getGroupStartSubscriptionProfile(
+    $promoCode: String
+    $tier: SubscriptionTier
+    $draftGroupId: ID
+    $pricePointIds: [ID!]
+  ) {
+    self {
+      id
+      subscriptionProfile(
+        promoCode: $promoCode
+        tier: $tier
+        draftGroupId: $draftGroupId
+        pricePointIds: $pricePointIds
+      ) {
+        plans {
+          id
+          amount
+          currency
+          billInterval
+          billIntervalUnit
+        }
+        promotions {
+          planId
+          promotion {
+            name
+            discount {
+              percentOff
+              duration
+              adjustedAmount
+              currency
+            }
+            trial {
+              duration
+              durationUnit
+              endDate
+              adjustedAmount
+              currency
+            }
+          }
+        }
+      }
+    }
+  }

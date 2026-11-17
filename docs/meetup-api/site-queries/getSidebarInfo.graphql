@@ -1,0 +1,68 @@
+  query getSidebarInfo($memberId: ID!) {
+    member(id: $memberId) {
+      id
+      name
+      email
+      startDate
+      memberPhoto {
+        id
+        baseUrl
+      }
+      isOrganizer
+      isProOrganizer
+      isSuperOrganizer
+      isStarterOrganizer
+      isMemberPlusSubscriber
+      memberSubscriptionProfile {
+        trialAvailable
+      }
+      bio
+      city
+      state
+      country
+      socialNetworks {
+        url
+        service
+      }
+      allowableActions
+      reasonsForJoining
+      rsvps(filter: { eventStatus: [PAST] }) {
+        totalCount
+      }
+      memberships(
+        filter: { status: [ACTIVE, LEADER] }
+        sort: { sortOrder: DESC, sortField: EVENT_DATE }
+      ) {
+        totalCount
+      }
+      topics(first: 20) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            name
+            urlkey
+          }
+        }
+      }
+      lifeStages(activeOnly: true) {
+        id
+        name
+        active
+      }
+      relationshipStatus
+      relationshipStatusPublic
+      jobField
+      jobFieldPublic
+      isDmUnlocked
+      isMemberUnlocked
+      isFamiliarFace
+      isFriendsEligible
+      isFriendsUnlocked
+      friendshipStatus
+    }
+  }

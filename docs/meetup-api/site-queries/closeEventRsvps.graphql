@@ -1,0 +1,11 @@
+  mutation closeEventRsvps($input: CloseEventRsvpsInput!) {
+    closeEventRsvps(input: $input) {
+      event {
+        rsvpState
+      }
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${s.TH}

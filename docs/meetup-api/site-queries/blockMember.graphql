@@ -1,0 +1,11 @@
+  mutation blockMember($memberId: ID!) {
+    blockMember(input: { memberId: $memberId }) {
+      errors {
+        code
+        message
+      }
+      member {
+        id
+      }
+    }
+  }

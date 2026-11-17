@@ -1,0 +1,5 @@
+  mutation generateEventAttendeesReport($eventId: ID!) {
+    generateEventAttendeesReport(input: { eventId: $eventId }) {
+      url
+    }
+  }

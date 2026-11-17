@@ -1,0 +1,14 @@
+  fragment SubscriptionCancelSubscriptionProfile on SubscriptionProfile {
+    currentSubscription {
+      ...SubscriptionCancelCurrentSubscription
+    }
+    plans {
+      ...SubscriptionCancelPlan
+    }
+    promotions {
+      ...SubscriptionCancelPromotion
+    }
+  }
+  ${u}
+  ${c}
+  ${p}

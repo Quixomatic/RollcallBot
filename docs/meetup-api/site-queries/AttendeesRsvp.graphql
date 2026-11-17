@@ -1,0 +1,75 @@
+  fragment AttendeesRsvp on Rsvp {
+    id
+    member {
+      id
+      name
+      gender
+      allowableActions
+      memberPhoto {
+        id
+        baseUrl
+      }
+      profilePrivacy {
+        showInterests
+        whoCanContact
+      }
+      topics {
+        edges {
+          node {
+            id
+            name
+          }
+        }
+      }
+      commonTopics {
+        totalCount
+        edges {
+          node {
+            id
+            name
+          }
+        }
+      }
+      reasonsForJoining
+      isFamiliarFace
+      hasWaitlistPriority
+      noShowCount
+      eventsAttended
+      isSuperOrganizer
+    }
+    membership {
+      role
+      status
+      title
+    }
+    updated
+    isHost
+    isFirstEvent
+    status
+    payStatus
+    guestsCount
+    answer {
+      text
+    }
+    actions
+    event {
+      id
+      guestsAllowed
+      guestLimit
+      numberOfAllowedGuests
+      isAttending
+      maxTickets
+      group {
+        id
+        link
+      }
+      feeSettings {
+        amount
+      }
+    }
+    venue {
+      id
+      venueType
+    }
+    isRsvpUnlocked
+  }

@@ -1,0 +1,9 @@
+  mutation followDiscussion($input: FollowDiscussionInput) {
+    followDiscussion(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

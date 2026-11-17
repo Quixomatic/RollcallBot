@@ -1,0 +1,13 @@
+  query getCommonGroups($memberId: ID!, $first: Int, $after: String) {
+    member(id: $memberId) {
+      id
+      memberships: commonGroups(
+        first: $first
+        after: $after
+        filter: { status: [LEADER, ACTIVE, PENDING] }
+      ) {
+        ...MemberProfileGroups
+      }
+    }
+  }
+  ${g}

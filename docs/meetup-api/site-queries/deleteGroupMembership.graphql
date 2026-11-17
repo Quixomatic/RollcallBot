@@ -1,0 +1,19 @@
+  mutation deleteGroupMembership(
+    $groupId: ID!
+    $memberId: ID!
+    $block: DeleteGroupMembershipBlockAction
+    $ccOrg: Boolean
+    $comment: String
+    $hideOrgEmail: Boolean
+  ) {
+    deleteGroupMembership(
+      groupId: $groupId
+      memberId: $memberId
+      options: {
+        blockAction: $block
+        ccOrg: $ccOrg
+        comment: $comment
+        hideOrgEmail: $hideOrgEmail
+      }
+    )
+  }

@@ -1,0 +1,27 @@
+  fragment UpcomingEventDetails on Event {
+    id
+    title
+    eventUrl
+    dateTime
+    isSaved
+    isAttending
+    venue {
+      address
+      city
+      state
+      country
+    }
+    isOnline
+    eventType
+    group {
+      timezone
+    }
+    goingCount: rsvps(filter: { rsvpStatus: [YES] }) {
+      totalCount
+    }
+    maxTickets
+    tickets: rsvps(first: 3) {
+      ...TicketsConnection
+    }
+  }
+  ${w}

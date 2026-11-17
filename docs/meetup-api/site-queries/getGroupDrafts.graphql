@@ -1,0 +1,16 @@
+  query getGroupDrafts($groupUrlname: String!, $first: Int) {
+    groupByUrlname(urlname: $groupUrlname) {
+      id
+      events(status: DRAFT, sort: DESC, first: $first) {
+        totalCount
+        edges {
+          node {
+            id
+            title
+            createdTime
+            eventUrl
+          }
+        }
+      }
+    }
+  }

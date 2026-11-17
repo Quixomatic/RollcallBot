@@ -1,0 +1,6 @@
+  query getNetworkEventTimezones {
+    networkEventTimezones {
+      name
+      offset
+    }
+  }

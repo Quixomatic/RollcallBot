@@ -1,0 +1,9 @@
+  mutation updateOrganizerSubscription($input: UpdateOrganizerSubscriptionInput!) {
+    updateOrganizerSubscription(input: $input) {
+      success
+      error {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,41 @@
+  query getFundraisingSetupComplete {
+    self {
+      id
+      fundraising {
+        setupComplete
+        nextIncompleteGroup {
+          id
+          urlname
+          name
+          fundraising {
+            fundraiser {
+              id
+            }
+            partner {
+              url
+              key
+            }
+          }
+        }
+        incompleteGroups {
+          id
+          urlname
+          name
+          keyGroupPhoto {
+            id
+            baseUrl
+            highResUrl
+          }
+          fundraising {
+            fundraiser {
+              id
+            }
+            partner {
+              url
+              key
+            }
+          }
+        }
+      }
+    }
+  }

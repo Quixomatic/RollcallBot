@@ -134,6 +134,14 @@ async function getPage() {
   return ctx.newPage();
 }
 
+/** Drop the browser context without saving its cookies (a new state.json was installed). */
+async function discardContext() {
+  if (context) {
+    await context.close().catch(() => {});
+    context = null;
+  }
+}
+
 async function closeBrowser() {
   if (context) {
     await saveSession().catch(() => {});
@@ -156,5 +164,6 @@ module.exports = {
   ensureLoggedIn,
   clearSessionDead,
   saveSession,
+  discardContext,
   closeBrowser,
 };

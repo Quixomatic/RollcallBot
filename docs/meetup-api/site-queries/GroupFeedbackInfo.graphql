@@ -1,0 +1,108 @@
+  fragment GroupFeedbackInfo on Group {
+    id
+    urlname
+    groupPhoto {
+      id
+      baseUrl
+    }
+    name
+    country
+    city
+    state
+    stats {
+      eventRatings {
+        average
+        totalReviews
+        totalRatings
+        breakdown {
+          count
+          rating
+        }
+        details {
+          membersWouldAttendAgain
+          membersDisliked {
+            count
+            topic
+          }
+          membersLiked {
+            count
+            topic
+          }
+        }
+      }
+    }
+    pastEvents: events(filter: { status: [PAST] }, sort: DESC, first: 3) {
+      totalCount
+      edges {
+        node {
+          id
+          title
+          eventUrl
+          dateTime
+          displayPhoto {
+            id
+            source: highResUrl
+            baseUrl
+          }
+          feedbackSurvey {
+            attributes {
+              count
+              answerId
+            }
+            totalCount
+            totalComments
+            membersWouldAttendAgain
+            averageRating
+            totalReviews
+            totalRatings
+          }
+        }
+      }
+    }
+    eventReviews(first: $first, sort: { sortField: CREATE_DATE, sortOrder: DESC }) {
+      totalCount
+      edges {
+        node {
+          responseId
+          member {
+            id
+            name
+            memberPhoto {
+              id
+              baseUrl
+            }
+          }
+          event {
+            id
+            title
+            eventUrl
+          }
+          rating
+          createDate
+          comment
+          freeTextFeedback
+          reply {
+            eventReviewReplyId
+            createdDate
+            member {
+              id
+              name
+              memberPhoto {
+                id
+                baseUrl
+              }
+            }
+            replyText
+          }
+          details {
+            membersLiked {
+              topic
+            }
+            membersDisliked {
+              topic
+            }
+          }
+        }
+      }
+    }
+  }

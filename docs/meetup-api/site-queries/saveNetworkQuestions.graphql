@@ -1,0 +1,8 @@
+  mutation saveNetworkQuestions($networkId: ID!, $questions: [QuestionInput!]!) {
+    saveNetworkQuestions(input: { networkId: $networkId, questions: $questions }) {
+      errors {
+        code
+        message
+      }
+    }
+  }

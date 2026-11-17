@@ -1,0 +1,17 @@
+  query getProfilePhotos {
+    self {
+      id
+      profilePhotos {
+        edges {
+          node {
+            id
+            date
+            thumb
+            member
+            clean
+            highres
+          }
+        }
+      }
+    }
+  }

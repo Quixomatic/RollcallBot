@@ -1,0 +1,17 @@
+  fragment OAuthClientFragment on OAuthClient {
+    id
+    title
+    applicationUrl
+    redirectUrl
+    key
+    secret
+    status
+    signingKeys {
+      totalCount
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }

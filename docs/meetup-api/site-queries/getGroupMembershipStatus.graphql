@@ -1,0 +1,9 @@
+  query getGroupMembershipStatus($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      membershipMetadata {
+        status
+        role
+      }
+    }
+  }

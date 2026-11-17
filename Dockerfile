@@ -1,3 +1,16 @@
+# --- Dashboard UI (Vite + React), built once and copied into the runtime image ---
+FROM node:22-slim AS dashboard
+
+WORKDIR /dashboard
+RUN npm install -g pnpm@10.11.0
+
+COPY dashboard/package.json dashboard/pnpm-lock.yaml ./
+RUN pnpm install --no-frozen-lockfile
+
+COPY dashboard/ ./
+RUN pnpm build
+
+# --- Runtime ---
 FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
 WORKDIR /app
@@ -15,6 +28,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --no-frozen-lockfile --prod
 
 COPY src/ ./src/
+COPY --from=dashboard /dashboard/dist ./dashboard/dist
 
 ARG UID=1000
 ARG GID=1000
@@ -29,5 +43,8 @@ ENV PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 USER ${UID}:${GID}
 
 VOLUME ["/app/data"]
+
+# Web dashboard (enabled by DASHBOARD_PASSWORD); 6080 is noVNC for login-server.js
+EXPOSE 3000 6080
 
 CMD ["/usr/bin/node", "src/index.js"]

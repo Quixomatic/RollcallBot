@@ -1,0 +1,56 @@
+  query getEventPageReviews($groupUrlname: String!) {
+    groupByUrlname(urlname: $groupUrlname) {
+      id
+      stats {
+        eventRatings {
+          average
+          totalReviews
+        }
+      }
+      rating5WithComments: eventReviews(
+        first: 3
+        filter: { rating: 5, hasComments: true }
+        sort: { sortField: CREATE_DATE, sortOrder: DESC }
+      ) {
+        edges {
+          node {
+            ...EventPageReview
+          }
+        }
+      }
+      rating4WithComments: eventReviews(
+        first: 3
+        filter: { rating: 4, hasComments: true }
+        sort: { sortField: CREATE_DATE, sortOrder: DESC }
+      ) {
+        edges {
+          node {
+            ...EventPageReview
+          }
+        }
+      }
+      rating5NoComments: eventReviews(
+        first: 3
+        filter: { rating: 5, hasComments: false }
+        sort: { sortField: CREATE_DATE, sortOrder: DESC }
+      ) {
+        edges {
+          node {
+            ...EventPageReview
+          }
+        }
+      }
+      rating4NoComments: eventReviews(
+        first: 3
+        filter: { rating: 4, hasComments: false }
+        sort: { sortField: CREATE_DATE, sortOrder: DESC }
+      ) {
+        edges {
+          node {
+            ...EventPageReview
+          }
+        }
+      }
+    }
+  }
+  ${n$}

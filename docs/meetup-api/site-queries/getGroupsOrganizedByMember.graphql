@@ -1,0 +1,9 @@
+  query getGroupsOrganizedByMember($memberId: ID!, $first: Int, $after: String) {
+    member(id: $memberId) {
+      id
+      memberships(first: $first, after: $after, filter: { status: LEADER, leaderSubset: PRIMARY }) {
+        ...MemberProfileGroups
+      }
+    }
+  }
+  ${g}

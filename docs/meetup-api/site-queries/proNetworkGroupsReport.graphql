@@ -1,0 +1,10 @@
+  mutation proNetworkGroupsReport(
+    $networkId: ID!
+    $filter: NetworkGroupsFilter!
+    $desc: Boolean
+    $orderBy: String
+  ) {
+    proNetworkGroupsReport(networkId: $networkId, filter: $filter, desc: $desc, orderBy: $orderBy) {
+      reportKey
+    }
+  }

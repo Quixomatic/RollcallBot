@@ -1,0 +1,39 @@
+  query getUpcomingRsvps($startDate: String, $endDate: String) {
+    self {
+      id
+      upcomingEvents: rsvps(
+        first: 100
+        filter: {
+          rsvpStatus: [YES]
+          eventStatus: [UPCOMING]
+          startDate: $startDate
+          endDate: $endDate
+        }
+        sort: { sortField: DATETIME, sortOrder: ASC }
+      ) {
+        totalCount
+        edges {
+          cursor
+          node {
+            isHost
+            event {
+              id
+              eventUrl
+              title
+              dateTime
+              endTime
+              displayPhoto {
+                standardUrl
+              }
+              venue {
+                name
+                address
+                city
+                state
+              }
+            }
+          }
+        }
+      }
+    }
+  }

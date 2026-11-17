@@ -1,0 +1,9 @@
+  query getEventByIdPhotoAlbum($eventId: ID!, $number: Int!) {
+    event(id: $eventId) {
+      id
+      photoAlbum {
+        ...EventByIdPhotoAlbum
+      }
+    }
+  }
+  ${a.Uo}

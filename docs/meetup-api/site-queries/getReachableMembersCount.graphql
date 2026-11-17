@@ -1,0 +1,6 @@
+  query getReachableMembersCount($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      reachableMembers
+    }
+  }

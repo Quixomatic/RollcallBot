@@ -1,0 +1,13 @@
+  mutation bulkRemoveMembers(
+    $groupId: ID!
+    $filter: BulkDeleteGroupMembershipsFilter!
+    $options: BulkDeleteGroupMembershipsOptions!
+  ) {
+    bulkDeleteGroupMemberships(groupId: $groupId, filter: $filter, options: $options) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

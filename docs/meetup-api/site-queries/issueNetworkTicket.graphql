@@ -1,0 +1,14 @@
+  mutation issueNetworkTicket($networkId: ID!, $claim: Boolean) {
+    issueNetworkTicket(input: { networkId: $networkId, numberOfTickets: 1, claim: $claim }) {
+      errors {
+        code
+        message
+      }
+      success {
+        tickets {
+          id
+          link
+        }
+      }
+    }
+  }

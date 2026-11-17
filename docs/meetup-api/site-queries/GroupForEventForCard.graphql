@@ -1,0 +1,25 @@
+  fragment GroupForEventForCard on Group {
+    id
+    isNewGroup
+    isPrivate
+    membershipMetadata {
+      role
+    }
+    keyGroupPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    name
+    timezone
+    city
+    state
+    country
+    urlname
+    stats {
+      eventRatings {
+        average
+        totalRatings
+      }
+    }
+  }

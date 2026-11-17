@@ -1,0 +1,9 @@
+  mutation markAsReadAllConversations {
+    markAsReadAllConversations {
+      error {
+        code
+        message
+      }
+      read
+    }
+  }

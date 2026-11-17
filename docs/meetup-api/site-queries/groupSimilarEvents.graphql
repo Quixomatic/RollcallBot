@@ -1,0 +1,20 @@
+  query groupSimilarEvents(
+    $lat: Float!
+    $lon: Float!
+    $topicId: ID
+    $dataConfiguration: String
+    $takeEvents: Int = 3
+  ) {
+    recommendedEvents(
+      filter: { lat: $lat, lon: $lon, topicCategoryId: $topicId }
+      first: $takeEvents
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...GroupHomeEvent
+        }
+      }
+    }
+  }
+  ${i.xo}

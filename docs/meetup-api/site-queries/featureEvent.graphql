@@ -1,0 +1,7 @@
+  mutation featureEvent($input: FeatureEventInput!) {
+    featureEvent(input: $input) {
+      errors {
+        code
+      }
+    }
+  }

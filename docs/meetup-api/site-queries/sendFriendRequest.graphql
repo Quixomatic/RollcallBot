@@ -1,0 +1,12 @@
+  mutation sendFriendRequest($input: SendFriendRequestInput!) {
+    sendFriendRequest(input: $input) {
+      friendship {
+        id
+        status
+      }
+      errors {
+        code
+        message
+      }
+    }
+  }

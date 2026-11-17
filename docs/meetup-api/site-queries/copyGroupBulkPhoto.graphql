@@ -1,0 +1,8 @@
+  mutation copyGroupBulkPhoto($input: GroupBulkPhotoCopyInput!) {
+    copyGroupBulkPhoto(input: $input) {
+      error {
+        code
+        message
+      }
+    }
+  }

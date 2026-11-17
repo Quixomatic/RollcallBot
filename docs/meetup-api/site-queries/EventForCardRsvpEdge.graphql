@@ -1,0 +1,22 @@
+  fragment EventForCardRsvpEdge on RsvpEdge {
+    node {
+      isHost
+      user: member {
+        id
+        name
+        memberPhoto {
+          id
+          source: highResUrl
+          baseUrl
+        }
+      }
+      member {
+        id
+        memberPhoto {
+          id
+          source: highResUrl
+          baseUrl
+        }
+      }
+    }
+  }

@@ -1,0 +1,26 @@
+  fragment PaymentReceivedFromMember on PaymentReceivedFromMember {
+    paymentId
+    confirmationCode
+    date
+    paymentsCount
+    paymentType
+    paymentProcessor
+    paymentStatus
+    total {
+      income
+      currency
+    }
+    totalIncomeRefunded
+    feeAmount
+    feeAmountRefunded
+    group {
+      id
+      name
+      urlname
+    }
+    event {
+      id
+      token
+      title
+    }
+  }

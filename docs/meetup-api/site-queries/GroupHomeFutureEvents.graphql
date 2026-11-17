@@ -1,0 +1,14 @@
+  fragment GroupHomeFutureEvents on Group {
+    featuredEvent {
+      ...CoreGroupHomeEventPublic
+    }
+    upcomingEvents: events(filter: { status: [ACTIVE] }, sort: ASC, first: 4) {
+      totalCount
+      edges {
+        node {
+          ...CoreGroupHomeEventPublic
+        }
+      }
+    }
+  }
+  ${m}

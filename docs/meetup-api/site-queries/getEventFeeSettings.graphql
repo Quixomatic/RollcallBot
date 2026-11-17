@@ -1,0 +1,23 @@
+  query getEventFeeSettings($eventId: ID!, $includePaypal: Boolean!) {
+    event(id: $eventId) {
+      feeSettings {
+        accepts
+        amount
+        currency
+        required
+        paypalConfig @include(if: $includePaypal) {
+          organizerMerchantId
+          appClientId
+          platformFee {
+            feeAmount
+          }
+        }
+        refundPolicy {
+          days
+          notes
+          policies
+        }
+        hasPromoCodes
+      }
+    }
+  }

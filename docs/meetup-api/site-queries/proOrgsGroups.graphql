@@ -1,0 +1,50 @@
+  query proOrgsGroups(
+    $networkId: ID!
+    $query: String
+    $lat: Float
+    $lon: Float
+    $radius: Float
+    $country: String
+    $memberCountMin: Int
+    $memberCountMax: Int
+    $pastEventsMin: Int
+    $pastEventsMax: Int
+    $upcomingEventsMin: Int
+    $upcomingEventsMax: Int
+    $inactiveWithinDays: Int
+    $nextEventMin: DateTime
+    $nextEventMax: DateTime
+    $foundedDateMin: DateTime
+    $foundedDateMax: DateTime
+    $orgId: ID!
+  ) {
+    proNetwork(id: $networkId) {
+      id
+      groupsSearch(
+        input: {
+          first: 0
+          filter: {
+            query: $query
+            latitude: $lat
+            longitude: $lon
+            country: $country
+            radius: $radius
+            memberCountMin: $memberCountMin
+            memberCountMax: $memberCountMax
+            pastEventsMax: $pastEventsMax
+            pastEventsMin: $pastEventsMin
+            upcomingEventsMax: $upcomingEventsMax
+            upcomingEventsMin: $upcomingEventsMin
+            inactiveWithinDays: $inactiveWithinDays
+            nextEventMax: $nextEventMax
+            nextEventMin: $nextEventMin
+            foundedDateMin: $foundedDateMin
+            foundedDateMax: $foundedDateMax
+            leadershipMemberIds: [$orgId]
+          }
+        }
+      ) {
+        totalCount
+      }
+    }
+  }

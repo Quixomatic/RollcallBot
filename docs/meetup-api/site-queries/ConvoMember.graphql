@@ -1,0 +1,17 @@
+  fragment ConvoMember on Member {
+    id
+    name
+    bio
+    allowableActions
+    city
+    state
+    status
+    country
+    commonGroups(filter: { status: [LEADER, ACTIVE, PENDING] }) {
+      totalCount
+    }
+    memberPhoto {
+      id
+      highResUrl
+    }
+  }

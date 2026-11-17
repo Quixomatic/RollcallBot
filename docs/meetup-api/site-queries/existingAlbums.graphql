@@ -1,0 +1,21 @@
+  query existingAlbums($input: GroupAlbumsInput!) {
+    groupAlbums(input: $input) {
+      edges {
+        node {
+          id
+          title
+          lastOrder
+          albumPhotos(input: { first: 0 }) {
+            totalCount
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+      totalCount
+    }
+  }

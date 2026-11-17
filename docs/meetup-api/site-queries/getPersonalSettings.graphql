@@ -1,0 +1,16 @@
+  query getPersonalSettings {
+    self {
+      id
+      gender
+      birthday
+      reasonsForJoining
+      relationshipStatus
+      jobField
+      city
+      lifeStages(activeOnly: false) {
+        id
+        name
+        active
+      }
+    }
+  }

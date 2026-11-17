@@ -1,0 +1,9 @@
+  mutation deleteDirectMessage($messageId: ID!) {
+    deleteDirectMessage(input: { messageId: $messageId }) {
+      success
+      error {
+        code
+        message
+      }
+    }
+  }

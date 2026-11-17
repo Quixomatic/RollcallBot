@@ -1,0 +1,70 @@
+  query groupHome($urlname: String!, $includePrivateInfo: Boolean! = true) {
+    groupByUrlname(urlname: $urlname) {
+      ...GroupHomeHeaderData
+      description
+      video {
+        provider
+        url
+      }
+      ...GroupHomeFutureEvents
+      pastEvents: events(filter: { status: [PAST] }, sort: DESC, first: 4) {
+        totalCount
+        edges {
+          node {
+            ...CoreGroupHomeEventPublic
+          }
+        }
+      }
+      activeTopics {
+        id
+        name
+        urlkey
+      }
+      topicCategory {
+        id
+        name
+        urlkey
+      }
+      sponsors {
+        edges {
+          node {
+            id
+            name
+            description
+            url
+            logoPhoto {
+              id
+              standardUrl
+            }
+          }
+        }
+      }
+      foundedDate
+      socialNetworks {
+        identifier
+        url
+        service
+      }
+      canSeeMemberList @include(if: $includePrivateInfo)
+      memberships(first: 17, filter: { status: [ACTIVE, LEADER] }) {
+        edges {
+          node {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+            }
+          }
+        }
+      }
+      stepUpInfo {
+        organizerNominees {
+          id
+        }
+      }
+    }
+  }
+  ${i.Yh}
+  ${f}
+  ${m}

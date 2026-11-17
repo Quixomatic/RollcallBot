@@ -1,0 +1,25 @@
+  fragment EventSeries on Event {
+    series {
+      description
+      weeklyRecurrence {
+        weeklyDaysOfWeek
+        weeklyInterval
+      }
+      monthlyRecurrence {
+        monthlyDayOfWeek
+        monthlyWeekOfMonth
+      }
+      events(numberOfEvents: $numberOfEventsForSeries, startDate: $seriesStartDate) {
+        edges {
+          node {
+            id
+            dateTime
+            isAttending
+            group {
+              urlname
+            }
+          }
+        }
+      }
+    }
+  }

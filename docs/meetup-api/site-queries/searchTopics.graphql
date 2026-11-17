@@ -1,0 +1,10 @@
+  query searchTopics($suggestedName: String!) {
+    suggestTopics(query: $suggestedName) {
+      edges {
+        node {
+          ...Topic
+        }
+      }
+    }
+  }
+  ${a.Is}

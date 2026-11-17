@@ -1,0 +1,31 @@
+  fragment GroupDiscussion on Discussion {
+    id
+    createdBy {
+      id
+      name
+      memberPhoto {
+        id
+        thumbUrl
+      }
+      isSuperOrganizer
+      isMemberPlusSubscriber
+    }
+    groupMember {
+      role
+    }
+    createdAt
+    body
+    isFollowing
+    isLiked
+    hasBeenEdited
+    likesCount
+    comments {
+      edges {
+        cursor
+        node {
+          ...GroupDiscussionComment
+        }
+      }
+    }
+  }
+  ${u}

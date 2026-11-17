@@ -1,0 +1,19 @@
+  query getMemberSubscription {
+    self {
+      id
+      memberSubscription {
+        ...MemberSubscriptionDetails
+        appliedPromotion {
+          name
+          discount {
+            percentOff
+            adjustedAmount
+            currency
+            duration
+          }
+          active
+        }
+      }
+    }
+  }
+  ${a.c_}

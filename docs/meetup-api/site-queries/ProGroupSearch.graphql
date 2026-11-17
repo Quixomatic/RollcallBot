@@ -1,0 +1,44 @@
+  fragment ProGroupSearch on Group {
+    id
+    name
+    link
+    description
+    link
+    city
+    state
+    country
+    status
+    isPrivate
+    isNewGroup
+    keyGroupPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    groupPhoto: keyGroupPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    stats {
+      memberCounts {
+        all
+      }
+      eventRatings {
+        average
+        totalRatings
+      }
+    }
+    sampleMembers: memberships(first: 3, filter: { status: [ACTIVE, LEADER] }) {
+      edges {
+        node {
+          id
+          name
+          memberPhoto {
+            id
+            baseUrl
+          }
+        }
+      }
+    }
+  }

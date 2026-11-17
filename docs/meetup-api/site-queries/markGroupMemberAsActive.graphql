@@ -1,0 +1,9 @@
+  mutation markGroupMemberAsActive($groupId: ID!) {
+    markGroupMemberAsActive(groupId: $groupId) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

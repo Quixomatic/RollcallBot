@@ -1,0 +1,8 @@
+  mutation reverifyMember($input: ReverifyMemberInput!) {
+    reverifyMember(input: $input) {
+      error {
+        ...Error
+      }
+    }
+  }
+  ${n.TH}

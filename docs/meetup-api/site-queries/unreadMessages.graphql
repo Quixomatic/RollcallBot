@@ -1,0 +1,6 @@
+  query unreadMessages {
+    conversations {
+      totalCount
+      hasUnreadConversations
+    }
+  }

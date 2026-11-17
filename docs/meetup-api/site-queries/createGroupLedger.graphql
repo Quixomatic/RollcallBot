@@ -1,0 +1,12 @@
+  mutation createGroupLedger($input: CreateGroupLedgerInput!) {
+    createGroupLedger(input: $input) {
+      ledger {
+        id
+        createdDate
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

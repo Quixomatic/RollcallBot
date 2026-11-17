@@ -1,0 +1,9 @@
+  mutation likeDiscussion($input: LikeDiscussionInput) {
+    likeDiscussion(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,106 @@
+  query getEventInsights($eventId: ID!) {
+    self {
+      id
+      profilePrivacy {
+        showInterests
+      }
+    }
+    event(id: $eventId) {
+      id
+      attendeeInsights {
+        ... on IncompleteAttendeeInsights {
+          firstTimers
+          hasInterests
+          commonInterests {
+            topics {
+              id
+              name
+            }
+          }
+          ageRange {
+            min
+            max
+          }
+          genderStats {
+            __typename
+            ... on BalancedGender {
+              balanced
+            }
+            ... on ExactGenderPercentages {
+              female
+              male
+              other
+            }
+            ... on MostCommonGender {
+              gender
+              minPercentage
+            }
+          }
+        }
+        ... on MemberAttendeeInsights {
+          firstTimers
+          hasInterests
+          commonInterests {
+            topics {
+              id
+              name
+            }
+          }
+          ageRange {
+            min
+            max
+          }
+          genderStats {
+            __typename
+            ... on BalancedGender {
+              balanced
+            }
+            ... on ExactGenderPercentages {
+              female
+              male
+              other
+            }
+            ... on MostCommonGender {
+              gender
+              minPercentage
+            }
+          }
+        }
+        ... on SubscriberAttendeeInsights {
+          commonInterests {
+            topics {
+              id
+              name
+            }
+          }
+          firstTimers
+          hasInterests
+          commonAge
+          commonGender
+          ageRange {
+            min
+            max
+          }
+          genderStats {
+            __typename
+            ... on BalancedGender {
+              balanced
+            }
+            ... on ExactGenderPercentages {
+              female
+              male
+              other
+            }
+            ... on MostCommonGender {
+              gender
+              minPercentage
+            }
+          }
+          reasonsForJoining {
+            reason
+            count
+          }
+        }
+      }
+    }
+  }

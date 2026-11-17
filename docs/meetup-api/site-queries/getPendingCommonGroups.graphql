@@ -1,0 +1,38 @@
+  query getPendingCommonGroups($memberId: ID!, $groupIds: [ID!], $first: Int, $after: String) {
+    member(id: $memberId) {
+      id
+      pendingCommonGroups: memberships(
+        first: $first
+        after: $after
+        filter: { groupIds: $groupIds, status: [PENDING] }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          metadata {
+            role
+            title
+            joinTime
+            lastAccessTime
+            status
+            eventsAttended
+            rsvpStats {
+              noShowCount
+            }
+          }
+          node {
+            id
+            urlname
+            name
+            keyGroupPhoto {
+              id
+              baseUrl
+            }
+          }
+        }
+      }
+    }
+  }

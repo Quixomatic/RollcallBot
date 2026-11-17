@@ -1,0 +1,8 @@
+  mutation submitFeedback($input: SubmitFeedbackInput!) {
+    submitFeedback(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

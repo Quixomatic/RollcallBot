@@ -1,0 +1,5 @@
+  query getGroupId($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+    }
+  }

@@ -1,0 +1,10 @@
+  query getPendingFriendRequest($memberId: ID!) {
+    friendRequests(first: 1, filter: { direction: SENT, status: [PENDING], memberId: $memberId }) {
+      edges {
+        node {
+          id
+          status
+        }
+      }
+    }
+  }

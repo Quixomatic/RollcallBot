@@ -1,0 +1,30 @@
+  query getGroupMembers(
+    $urlname: String!
+    $name: String
+    $after: String
+    $status: [MembershipStatus!]!
+    $sortField: GroupMembershipSortField!
+    $sortOrder: SortOrder!
+    $lastActiveBeforeDate: String
+  ) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      canSeeMemberList
+      memberships(
+        filter: { status: $status, name: $name, lastActiveBeforeDate: $lastActiveBeforeDate }
+        sort: { sortField: $sortField, sortOrder: $sortOrder }
+        after: $after
+        first: 20
+      ) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          ...GroupHomeMember
+        }
+      }
+    }
+  }
+  ${m}

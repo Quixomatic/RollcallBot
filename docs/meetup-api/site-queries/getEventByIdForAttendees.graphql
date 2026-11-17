@@ -1,0 +1,12 @@
+  query getEventByIdForAttendees(
+    $eventId: ID!
+    $first: Int
+    $after: String
+    $filter: RsvpFilter
+    $sort: RsvpSort
+  ) {
+    event(id: $eventId) {
+      ...EventByIdForAttendees
+    }
+  }
+  ${i.Pr}

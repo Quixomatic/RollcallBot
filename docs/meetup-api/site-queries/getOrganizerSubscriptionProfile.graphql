@@ -1,0 +1,29 @@
+  query getOrganizerSubscriptionProfile($promoCode: String, $pricePointIds: [ID!]) {
+    self {
+      id
+      subscriptionProfile(promoCode: $promoCode, pricePointIds: $pricePointIds) {
+        plans {
+          id
+          amount
+          billInterval
+        }
+        promotions {
+          planId
+          promotion {
+            name
+            discount {
+              percentOff
+              duration
+              adjustedAmount
+            }
+            trial {
+              duration
+              durationUnit
+              endDate
+              adjustedAmount
+            }
+          }
+        }
+      }
+    }
+  }

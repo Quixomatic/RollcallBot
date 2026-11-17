@@ -1,0 +1,9 @@
+  mutation updateDiscussionPreference($input: UpdateCanPostDiscussionInput) {
+    updateCanPostDiscussions(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

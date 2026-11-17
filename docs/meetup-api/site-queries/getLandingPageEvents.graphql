@@ -1,0 +1,21 @@
+  query getLandingPageEvents(
+    $query: String!
+    $lat: Float!
+    $lon: Float!
+    $eventType: EventType!
+    $first: Int!
+    $dataConfiguration: String
+  ) {
+    eventSearch(
+      filter: { query: $query, lat: $lat, lon: $lon, eventType: $eventType }
+      first: $first
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...LandingPageEvent
+        }
+      }
+    }
+  }
+  ${g}

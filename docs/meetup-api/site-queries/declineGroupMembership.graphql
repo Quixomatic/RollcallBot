@@ -1,0 +1,7 @@
+  mutation declineGroupMembership($input: DeclineGroupMembershipInput!) {
+    declineGroupMembership(input: $input) {
+      errors {
+        message
+      }
+    }
+  }

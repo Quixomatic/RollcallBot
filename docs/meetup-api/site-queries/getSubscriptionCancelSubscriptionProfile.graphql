@@ -1,0 +1,23 @@
+  query getSubscriptionCancelSubscriptionProfile(
+    $promoCode: String
+    $proPricePointIds: [ID!]
+    $standardPricePointIds: [ID!]
+    $tier: SubscriptionTier
+  ) {
+    self {
+      id
+      subscriptionProfile(promoCode: $promoCode, pricePointIds: $proPricePointIds, tier: $tier) {
+        ...SubscriptionCancelSubscriptionProfile
+      }
+      defaultSubscriptionProfile: subscriptionProfile(
+        promoCode: $promoCode
+        pricePointIds: $standardPricePointIds
+      ) {
+        ...SubscriptionCancelSubscriptionProfile
+      }
+      subscription {
+        id
+      }
+    }
+  }
+  ${f}

@@ -1,0 +1,8 @@
+  mutation removeHosts($input: UpdateHostsInput!) {
+    removeHosts(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

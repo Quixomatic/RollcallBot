@@ -1,0 +1,29 @@
+  fragment TicketsConnection on RsvpConnection {
+    count: totalCount
+    edges {
+      node {
+        id
+        isHost
+        user: member {
+          id
+          name
+          memberPhoto {
+            id
+            baseUrl
+            highResUrl
+            source: highResUrl
+          }
+        }
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            baseUrl
+            highResUrl
+            source: highResUrl
+          }
+        }
+      }
+    }
+  }

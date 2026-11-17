@@ -1,0 +1,10 @@
+  fragment Sponsor on Sponsor {
+    id
+    logoPhoto {
+      id
+      standardUrl
+    }
+    name
+    description
+    url
+  }

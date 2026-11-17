@@ -1,0 +1,9 @@
+  mutation leaveConversation($convoId: ID!) {
+    leaveConversation(input: { convoId: $convoId }) {
+      error {
+        code
+        message
+      }
+      leave
+    }
+  }

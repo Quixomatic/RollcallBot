@@ -1,0 +1,16 @@
+  mutation login($input: LoginInput!) {
+    login(input: $input) {
+      verificationRequired
+      memberId
+      reverifyToken
+      blockSeverity
+      session {
+        accessToken
+        refreshToken
+      }
+      error {
+        ...Error
+      }
+    }
+  }
+  ${o.TH}

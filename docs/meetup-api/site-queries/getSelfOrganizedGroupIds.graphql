@@ -1,0 +1,19 @@
+  query getSelfOrganizedGroupIds($first: Int, $after: String) {
+    self {
+      id
+      selfOrganizedGroups: memberships(first: $first, after: $after, filter: { status: LEADER }) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            membershipMetadata {
+              role
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { scrapeComments } = require('../services/meetup-comments');
-const { extractEventDetails, dismissMeetupPlusPopup } = require('../utils/selectors');
-const { getPage } = require('../services/scraper');
+const { getBackend } = require('../services/backend');
 const notifier = require('../services/notifier');
 
 module.exports = {
@@ -19,15 +17,11 @@ module.exports = {
     const eventUrl = interaction.options.getString('url');
 
     try {
-      // Get event details
-      const page = await getPage();
-      await page.goto(eventUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await dismissMeetupPlusPopup(page);
-      const details = await extractEventDetails(page);
-      await page.close();
+      const backend = getBackend();
+      const details = await backend.getEventDetails(eventUrl);
 
       // Get comments — treat ALL as new (don't check DB)
-      const comments = await scrapeComments(eventUrl);
+      const comments = await backend.getComments(eventUrl);
 
       const event = {
         event_id: eventUrl.match(/events\/(\d+)/)?.[1] || 'test',

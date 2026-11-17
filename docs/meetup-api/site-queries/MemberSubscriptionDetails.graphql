@@ -1,0 +1,26 @@
+  fragment MemberSubscriptionDetails on MemberSubscription {
+    subscriptionId
+    status
+    startDate
+    renewDate
+    endDate
+    pauseStartDate
+    pauseEndDate
+    provider
+    trialEndDate
+    lastPayment {
+      id
+      date
+      currency
+      paidAmount
+      subtotalAmount
+    }
+    plan {
+      id
+      amount
+      currency
+      billInterval
+      billIntervalUnit
+    }
+    tier
+  }

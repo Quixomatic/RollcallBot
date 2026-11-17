@@ -1,0 +1,48 @@
+  query getConversation($convoId: ID!, $after: String) {
+    conversations(filter: { convoId: $convoId }) {
+      totalCount
+      edges {
+        node {
+          ...ConversationFragment
+          msgs: messages(after: $after, sortOrder: DESC, first: 20) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            edges {
+              node {
+                id
+                text
+                kind
+                isEdited
+                isDeleted
+                reactions {
+                  emoji
+                  count
+                  reactedByMe
+                }
+                deletionReason
+                member {
+                  ...ConvoMember
+                }
+                created
+                updated
+                read
+              }
+            }
+          }
+          members {
+            ...ConvoMember
+          }
+          activeConvoMembers {
+            eventRole
+            member {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+  ${p}
+  ${c}

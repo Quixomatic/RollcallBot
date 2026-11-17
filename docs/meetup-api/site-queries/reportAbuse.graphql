@@ -1,0 +1,8 @@
+  mutation reportAbuse($input: ReportAbuseInput!) {
+    reportAbuse(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

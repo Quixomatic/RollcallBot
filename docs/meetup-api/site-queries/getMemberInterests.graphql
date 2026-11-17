@@ -1,0 +1,18 @@
+  query getMemberInterests($memberId: ID!, $first: Int, $after: String) {
+    member(id: $memberId) {
+      id
+      topics(first: $first, after: $after) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            name
+            urlkey
+          }
+        }
+      }
+    }
+  }

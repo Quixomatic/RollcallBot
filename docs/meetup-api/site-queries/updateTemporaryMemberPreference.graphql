@@ -1,0 +1,8 @@
+  mutation updateTemporaryMemberPreference($input: UpdateTemporaryMemberPreferenceInput!) {
+    updateTemporaryMemberPreference(input: $input) {
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${n.TH}

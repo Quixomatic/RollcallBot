@@ -1,0 +1,7 @@
+  mutation updateGroupMemberRole($input: UpdateGroupMembershipRoleInput!) {
+    updateGroupMembershipRole(input: $input) {
+      errors {
+        message
+      }
+    }
+  }

@@ -1,0 +1,12 @@
+  mutation removeFriend($input: FriendRequestActionInput!) {
+    removeFriend(input: $input) {
+      friendship {
+        id
+        status
+      }
+      errors {
+        code
+        message
+      }
+    }
+  }

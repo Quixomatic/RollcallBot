@@ -1,0 +1,13 @@
+  mutation saveUnifiedEvent($eventId: ID!) {
+    saveEvent(input: { eventId: $eventId }) {
+      errors {
+        code
+        field
+        message
+      }
+      event {
+        ...SavedEvent
+      }
+    }
+  }
+  ${o.WP}

@@ -1,0 +1,9 @@
+  query requireCaptcha($captchaType: CaptchaType) {
+    requireCaptcha(captchaType: $captchaType) {
+      requireCaptcha
+      error {
+        ...Error
+      }
+    }
+  }
+  ${R.TH}

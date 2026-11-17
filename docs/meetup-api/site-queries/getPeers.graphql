@@ -1,0 +1,19 @@
+  query getPeers($name: String!, $after: String) {
+    peers(input: { filter: { name: $name }, first: 50, after: $after }) {
+      totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+      }
+      edges {
+        cursor
+        node {
+          ...ConvoMember
+          isDmUnlocked
+        }
+      }
+    }
+  }
+  ${ep.EL}

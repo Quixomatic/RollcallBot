@@ -1,0 +1,10 @@
+  mutation sendMemberEmail($input: SendMemberEmailInput!) {
+    sendMemberEmail(input: $input) {
+      success
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

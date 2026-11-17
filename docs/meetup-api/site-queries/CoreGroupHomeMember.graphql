@@ -1,0 +1,13 @@
+  fragment CoreGroupHomeMember on Member {
+    id
+    name
+    startDate
+    allowableActions
+    memberPhoto {
+      id
+      source: highResUrl
+    }
+    isOrganizer
+    isDmUnlocked
+    isSuperOrganizer
+  }

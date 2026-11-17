@@ -1,0 +1,18 @@
+  query getEventSeriesById($eventId: ID!, $numberOfEvents: Int!, $seriesStartDate: Date!) {
+    event(id: $eventId) {
+      series {
+        events(numberOfEvents: $numberOfEvents, startDate: $seriesStartDate) {
+          edges {
+            node {
+              id
+              dateTime
+              isAttending
+              group {
+                urlname
+              }
+            }
+          }
+        }
+      }
+    }
+  }

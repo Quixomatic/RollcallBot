@@ -1,0 +1,35 @@
+  query getYourMemberEvents(
+    $first: Int!
+    $after: String
+    $isHosting: Boolean
+    $eventStatus: [EventStatus!]
+    $startDate: String
+    $sort: MemberEventSort
+    $membershipsFilter: MembershipsFilter
+  ) {
+    self {
+      id
+      memberEvents(
+        first: $first
+        after: $after
+        isHosting: $isHosting
+        eventStatus: $eventStatus
+        startDate: $startDate
+        membershipsFilter: $membershipsFilter
+        sort: $sort
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            ...HomepageEventDetails
+          }
+        }
+      }
+    }
+  }
+  ${tl.N}

@@ -1,0 +1,21 @@
+  query getGroupDiscussions($urlname: String!, $first: Int, $after: String) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      actions
+      canPostDiscussions
+      discussions(first: $first, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            ...GroupDiscussion
+          }
+        }
+      }
+    }
+  }
+  ${p}

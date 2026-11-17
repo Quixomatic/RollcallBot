@@ -1,0 +1,45 @@
+  query getAttendanceHistory(
+    $groupId: ID!
+    $memberId: ID!
+    $first: Int
+    $after: String
+    $eventStatus: [RsvpEventStatus!] = [UPCOMING, PAST]
+    $startDate: String
+  ) {
+    member(id: $memberId) {
+      id
+      rsvps(
+        first: $first
+        after: $after
+        filter: {
+          rsvpStatus: [YES, ATTENDED, EXCUSED_ABSENCE, NO, NO_SHOW, WAITLIST]
+          eventStatus: $eventStatus
+          startDate: $startDate
+          groupId: $groupId
+        }
+        sort: { sortField: DATETIME, sortOrder: DESC }
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            id
+            status
+            event {
+              id
+              title
+              eventUrl
+              dateTime
+              status
+              featuredEventPhoto {
+                baseUrl
+                highResUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }

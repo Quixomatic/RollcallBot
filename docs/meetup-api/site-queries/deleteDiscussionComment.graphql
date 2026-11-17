@@ -1,0 +1,9 @@
+  mutation deleteDiscussionComment($input: DeleteDiscussionCommentInput) {
+    deleteDiscussionComment(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

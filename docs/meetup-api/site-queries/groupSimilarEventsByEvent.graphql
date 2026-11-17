@@ -1,0 +1,10 @@
+  query groupSimilarEventsByEvent($eventId: ID!, $dataConfiguration: String, $takeEvents: Int = 3) {
+    similarEvents(first: $takeEvents, eventId: $eventId, dataConfiguration: $dataConfiguration) {
+      edges {
+        node {
+          ...GroupHomeEvent
+        }
+      }
+    }
+  }
+  ${i.xo}

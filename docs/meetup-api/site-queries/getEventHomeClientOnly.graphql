@@ -1,0 +1,6 @@
+  query getEventHomeClientOnly($eventId: ID!) {
+    event(id: $eventId) {
+      ...EventHomeClientOnly
+    }
+  }
+  ${u}

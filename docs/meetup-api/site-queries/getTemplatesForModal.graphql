@@ -1,0 +1,25 @@
+  query getTemplatesForModal($urlname: ID, $after: String) {
+    proNetwork(urlname: $urlname) {
+      id
+      eventTemplates(input: { statuses: [ACTIVE], first: 20, after: $after }) {
+        edges {
+          node {
+            id
+            name
+            title
+            description
+            lastModified
+            hostsWhere
+            venue {
+              id
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        totalCount
+      }
+    }
+  }

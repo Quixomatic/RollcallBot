@@ -1,0 +1,10 @@
+  query termsDueByLocation($input: TermsDueByLocationInput!) {
+    termsDueByLocation(input: $input) {
+      termsDue {
+        id
+        kind
+        required
+        accepted
+      }
+    }
+  }

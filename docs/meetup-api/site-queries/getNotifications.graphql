@@ -1,0 +1,34 @@
+  query getNotifications {
+    self {
+      id
+      name
+      notifications {
+        totalCount
+        edges {
+          node {
+            id
+            kind
+            category
+            text
+            link
+            updatedAt
+            important
+            read
+            clicked
+            photo {
+              id
+              baseUrl
+            }
+            photoType
+            target {
+              type
+              eventId
+              groupId
+              memberId
+              preferenceName
+            }
+          }
+        }
+      }
+    }
+  }

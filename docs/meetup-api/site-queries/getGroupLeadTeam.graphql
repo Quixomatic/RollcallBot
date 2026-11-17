@@ -1,0 +1,14 @@
+  query getGroupLeadTeam($groupId: ID!) {
+    group(id: $groupId) {
+      id
+      name
+      memberships(filter: { status: LEADER }, first: 50) {
+        edges {
+          node {
+            ...ConvoMember
+          }
+        }
+      }
+    }
+  }
+  ${ep.EL}

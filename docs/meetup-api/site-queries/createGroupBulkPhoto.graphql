@@ -1,0 +1,9 @@
+  mutation createGroupBulkPhoto($input: MemberProfilePhotoCreateInput!) {
+    createGroupBulkPhoto(input: $input) {
+      uploadUrl
+      imagePath
+      photo {
+        id
+      }
+    }
+  }

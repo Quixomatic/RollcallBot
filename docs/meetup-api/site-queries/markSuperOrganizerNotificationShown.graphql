@@ -1,0 +1,3 @@
+  mutation markSuperOrganizerNotificationShown($superOrganizerAwardId: Int!) {
+    markSuperOrganizerNotificationShown(superOrganizerAwardId: $superOrganizerAwardId)
+  }

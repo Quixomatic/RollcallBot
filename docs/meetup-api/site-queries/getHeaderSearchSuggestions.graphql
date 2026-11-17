@@ -1,0 +1,9 @@
+  query getHeaderSearchSuggestions($query: String!) {
+    suggestTopics(query: $query, first: 6) {
+      edges {
+        node {
+          name
+        }
+      }
+    }
+  }

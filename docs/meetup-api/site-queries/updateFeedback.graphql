@@ -1,0 +1,8 @@
+  mutation updateFeedback($input: UpdateFeedbackInput!) {
+    updateFeedback(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

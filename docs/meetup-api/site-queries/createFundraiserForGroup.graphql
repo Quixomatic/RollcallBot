@@ -1,0 +1,14 @@
+  mutation createFundraiserForGroup($input: CreateGroupFundraiserInput!) {
+    createGroupFundraiser(input: $input) {
+      fundraiser {
+        id
+        goal
+        totalDonors
+        totalRaised
+      }
+      errors {
+        code
+        message
+      }
+    }
+  }

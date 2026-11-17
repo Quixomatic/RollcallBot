@@ -1,0 +1,36 @@
+  query getOrganizerSubscription {
+    self {
+      id
+      subscriptionProfile {
+        currentSubscription {
+          startDate
+          renewalDate
+          trialEndDate
+          appliedPromotion {
+            name
+            discount {
+              percentOff
+              adjustedAmount
+              duration
+            }
+            trial {
+              duration
+              durationUnit
+              adjustedAmount
+              endDate
+              resetsBillingCycle
+            }
+          }
+          plan {
+            id
+            amount
+            quantity
+            billIntervalUnit
+            billInterval
+            tier
+            minQuantity
+          }
+        }
+      }
+    }
+  }

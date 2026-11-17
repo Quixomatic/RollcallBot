@@ -1,0 +1,14 @@
+  query getSupergroupCandidates {
+    self {
+      id
+      memberships(filter: { status: LEADER }, sort: { sortOrder: DESC, sortField: EVENT_DATE }) {
+        totalCount
+        edges {
+          node {
+            ...SupergroupCandidate
+          }
+        }
+      }
+    }
+  }
+  ${d}

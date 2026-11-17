@@ -1,0 +1,43 @@
+  query getConversations($status: ConversationStatus, $after: String) {
+    conversations(filter: { status: $status }, after: $after) {
+      totalCount
+      pageInfo {
+        hasPreviousPage
+        hasNextPage
+        startCursor
+        endCursor
+      }
+      edges {
+        cursor
+        node {
+          ...ConversationFragment
+          lastMessage: messages(first: 1) {
+            edges {
+              node {
+                id
+                text
+                isEdited
+                isDeleted
+                reactions {
+                  emoji
+                  count
+                  reactedByMe
+                }
+                deletionReason
+                read
+                member {
+                  id
+                  name
+                }
+              }
+            }
+          }
+          members {
+            ...ConvoMember
+          }
+        }
+      }
+    }
+  }
+  ${p}
+  ${c}

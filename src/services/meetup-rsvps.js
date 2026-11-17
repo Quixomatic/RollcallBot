@@ -55,7 +55,10 @@ function detectRsvpChanges(eventId, scrapedRsvps) {
     }
 
     // Upsert
-    queries.upsertRsvp().run(eventId, scraped.member_name, scraped.member_url || null, scraped.rsvp_status, scraped.guests || 0);
+    queries.upsertRsvp().run(
+      eventId, scraped.member_name, scraped.member_url || null, scraped.rsvp_status, scraped.guests || 0,
+      scraped.member_id || null
+    );
   }
 
   // Detect removed RSVPs

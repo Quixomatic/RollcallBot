@@ -1,0 +1,9 @@
+  query getProNetworkPaymentStatusByGroup($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      proNetwork {
+        id
+        paymentModel
+      }
+    }
+  }

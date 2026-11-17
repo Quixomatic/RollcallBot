@@ -1,0 +1,6 @@
+  query getEventScheduleGroupByUrlname($groupUrlname: String!) {
+    groupByUrlname(urlname: $groupUrlname) {
+      ...EventScheduleGroup
+    }
+  }
+  ${ix}

@@ -1,0 +1,63 @@
+  query recommendedEventsWithSeries(
+    $lat: Float!
+    $lon: Float!
+    $categoryId: ID
+    $topicCategoryId: ID
+    $startDateRange: String
+    $endDateRange: String
+    $first: Int
+    $after: String
+    $eventType: EventType
+    $radius: Float
+    $isHappeningNow: Boolean
+    $isStartingSoon: Boolean
+    $sortField: RecommendedEventsSortField
+    $numberOfEventsForSeries: Int
+    $seriesStartDate: Date
+    $doConsolidateEvents: Boolean
+    $doPromotePaypalEvents: Boolean
+    $indexAlias: String
+    $dataConfiguration: String
+    $shouldInjectNgaEvents: Boolean
+    $rsvpCountRange: RsvpCountRange
+  ) {
+    result: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        categoryId: $categoryId
+        topicCategoryId: $topicCategoryId
+        startDateRange: $startDateRange
+        endDateRange: $endDateRange
+        eventType: $eventType
+        radius: $radius
+        isHappeningNow: $isHappeningNow
+        isStartingSoon: $isStartingSoon
+        doConsolidateEvents: $doConsolidateEvents
+        doPromotePaypalEvents: $doPromotePaypalEvents
+        indexAlias: $indexAlias
+        shouldInjectNgaEvents: $shouldInjectNgaEvents
+        rsvpCountRange: $rsvpCountRange
+      }
+      first: $first
+      after: $after
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+      edges {
+        node {
+          ...FindEventInfo
+        }
+        metadata {
+          recId
+          recSource
+        }
+      }
+    }
+  }
+  ${a.Af}

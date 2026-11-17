@@ -1,0 +1,7 @@
+  mutation updateGroupDuesExemptionStatus($input: UpdateGroupDuesExemptionStatusInput!) {
+    updateGroupDuesExemptionStatus(input: $input) {
+      error {
+        message
+      }
+    }
+  }

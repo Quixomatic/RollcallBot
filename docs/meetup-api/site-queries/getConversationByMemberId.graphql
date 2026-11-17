@@ -1,0 +1,10 @@
+  query getConversationByMemberId($memberId: Int!) {
+    conversations(filter: { memberId: $memberId }) {
+      edges {
+        node {
+          id
+          type
+        }
+      }
+    }
+  }

@@ -1,0 +1,19 @@
+  query getRecentGroupVenues($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      venues(first: 6) {
+        edges {
+          node {
+            id
+            name
+            address
+            city
+            country
+            state
+            lat
+            lon
+          }
+        }
+      }
+    }
+  }

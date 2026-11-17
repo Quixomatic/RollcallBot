@@ -1,0 +1,15 @@
+  mutation updateNetworkTies(
+    $status: ProNetworkTieStatus!
+    $groupsFilter: NetworkGroupsFilter!
+    $networkId: ID!
+  ) {
+    updateProNetworkTieStatus(
+      input: { status: $status, groupsFilter: $groupsFilter, networkId: $networkId }
+    ) {
+      errors {
+        code
+        message
+      }
+      success
+    }
+  }

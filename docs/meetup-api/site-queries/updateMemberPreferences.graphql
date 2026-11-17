@@ -1,0 +1,8 @@
+  mutation updateMemberPreferences($preferences: [PreferenceInput!]!) {
+    updateMemberPreferences(input: { preferences: $preferences }) {
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${n.TH}

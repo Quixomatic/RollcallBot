@@ -1,0 +1,12 @@
+  mutation refreshTokensMutation {
+    refreshTokens {
+      session {
+        accessToken
+        refreshToken
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,21 @@
+  query getMembersCounts($urlname: String!, $getReachableCount: Boolean!) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      allMembers: memberships(filter: { status: [ACTIVE, LEADER] }, first: 0) {
+        totalCount
+      }
+      leadershipMembers: memberships(filter: { status: [LEADER] }, first: 0) {
+        totalCount
+      }
+      blockedMembers: memberships(filter: { status: [BLOCKED] }, first: 0) {
+        totalCount
+      }
+      pendingMembers: memberships(filter: { status: [PENDING] }, first: 0) {
+        totalCount
+      }
+      duesMembers: memberships(filter: { status: [PENDING_PAYMENT] }, first: 0) {
+        totalCount
+      }
+      reachableMembers @include(if: $getReachableCount)
+    }
+  }

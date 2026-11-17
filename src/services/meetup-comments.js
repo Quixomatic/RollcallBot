@@ -51,24 +51,56 @@ async function scrapeComments(eventUrl) {
   return comments;
 }
 
+const normalizeText = (s) => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
 /**
  * Detect new comments for an event.
  * Returns array of new comments not yet in the database.
+ *
+ * Both backends key comments by md5(author:content). The GraphQL backend also
+ * supplies Meetup's comment ID and creation time, which catch two cases the
+ * hash alone gets wrong:
+ *   - an edited comment keeps its Meetup ID, so it isn't re-posted as new;
+ *   - after switching from the browser backend, text that rendered slightly
+ *     differently in the DOM still matches by normalized text, and anything
+ *     created before the last comment we stored for this event was already
+ *     visible to an earlier poll, so it is recorded silently, not re-posted.
  */
 function detectNewComments(eventId, scrapedComments) {
   const newComments = [];
+  const stored = queries.getCommentsForEvent().all(eventId);
+  const storedIds = new Set(stored.map((c) => c.comment_id));
+  const storedMeetupIds = new Set(stored.map((c) => c.meetup_comment_id).filter(Boolean));
+  const storedText = new Set(stored.map((c) => `${normalizeText(c.author_name)}\0${normalizeText(c.content)}`));
+  const lastStoredAt = stored.reduce((max, c) => {
+    const t = Date.parse(`${c.first_seen_at}Z`); // SQLite stores UTC without a zone
+    return isNaN(t) ? max : Math.max(max, t);
+  }, 0);
+
+  const insert = (comment) => queries.insertComment().run(
+    comment.comment_id, eventId, comment.author_name, comment.content, comment.posted_at,
+    comment.likes || 0, comment.parent_comment_id || null, comment.meetup_comment_id || null
+  );
 
   for (const comment of scrapedComments) {
-    const exists = queries.getCommentsForEvent().all(eventId)
-      .some((c) => c.comment_id === comment.comment_id);
-
-    if (!exists) {
-      newComments.push(comment);
-      queries.insertComment().run(
-        comment.comment_id, eventId, comment.author_name, comment.content, comment.posted_at,
-        comment.likes || 0, comment.parent_comment_id || null
-      );
+    if (storedIds.has(comment.comment_id)) {
+      if (comment.meetup_comment_id) queries.setCommentMeetupId().run(comment.meetup_comment_id, comment.comment_id);
+      continue;
     }
+
+    if (comment.meetup_comment_id) {
+      const created = Date.parse(comment.created || '');
+      const alreadySeen = storedMeetupIds.has(comment.meetup_comment_id)
+        || storedText.has(`${normalizeText(comment.author_name)}\0${normalizeText(comment.content)}`)
+        || (lastStoredAt > 0 && !isNaN(created) && created < lastStoredAt);
+      if (alreadySeen) {
+        insert(comment); // record under this key so later polls match directly
+        continue;
+      }
+    }
+
+    newComments.push(comment);
+    insert(comment);
   }
 
   return newComments;

@@ -1,0 +1,26 @@
+  query getProNetworkEventGroups($eventId: ID!, $first: Int, $after: String) {
+    event(id: $eventId) {
+      networkEvent {
+        groups(first: $first, after: $after) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+          edges {
+            node {
+              id
+              name
+              urlname
+              timezone
+              city
+              state
+              country
+              membershipMetadata {
+                status
+              }
+            }
+          }
+        }
+      }
+    }
+  }

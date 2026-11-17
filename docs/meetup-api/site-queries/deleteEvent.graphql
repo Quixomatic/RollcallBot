@@ -1,0 +1,10 @@
+  mutation deleteEvent($input: DeleteEventInput!) {
+    deleteEvent(input: $input) {
+      success
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

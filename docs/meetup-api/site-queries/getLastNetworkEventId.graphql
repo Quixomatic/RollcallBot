@@ -1,0 +1,20 @@
+  query getLastNetworkEventId($networkId: ID!, $groupId: ID!) {
+    networkEventSearch(
+      input: {
+        desc: true
+        filter: { groups: [$groupId] }
+        first: 1
+        networkId: $networkId
+        sort: "create_time"
+      }
+    ) {
+      totalCount
+      edges {
+        cursor
+        node {
+          id
+          eventIds
+        }
+      }
+    }
+  }

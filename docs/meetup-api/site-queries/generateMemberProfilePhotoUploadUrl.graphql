@@ -1,0 +1,13 @@
+  mutation generateMemberProfilePhotoUploadUrl($input: MemberProfilePhotoCreateInput!) {
+    createMemberProfilePhoto(input: $input) {
+      photo {
+        id
+      }
+      uploadUrl
+      imagePath
+      error {
+        code
+        message
+      }
+    }
+  }

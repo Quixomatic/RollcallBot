@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder } = require('discord.js');
 const { queries } = require('../database');
-const { scrapeRsvps, detectRsvpChanges } = require('../services/meetup-rsvps');
-const { extractEventDetails, dismissMeetupPlusPopup } = require('../utils/selectors');
-const { getPage } = require('../services/scraper');
+const { getBackend } = require('../services/backend');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,15 +20,9 @@ module.exports = {
     const timezone = settings?.timezone || 'America/New_York';
 
     try {
-      // Get event details
-      const page = await getPage();
-      await page.goto(eventUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      await dismissMeetupPlusPopup(page);
-      const details = await extractEventDetails(page);
-      await page.close();
-
-      // Get RSVPs
-      let rsvps = await scrapeRsvps(eventUrl);
+      const backend = getBackend();
+      const details = await backend.getEventDetails(eventUrl);
+      let rsvps = await backend.getRsvps(eventUrl);
       if (settings?.bot_meetup_name) {
         rsvps = rsvps.filter((r) => r.member_name !== settings.bot_meetup_name);
       }

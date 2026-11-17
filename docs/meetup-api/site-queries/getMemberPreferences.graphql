@@ -1,0 +1,11 @@
+  query getMemberPreferences($names: [String!]!) {
+    self {
+      id
+      isOrganizer
+      isProOrganizer
+      preferences(names: $names) {
+        name
+        value
+      }
+    }
+  }

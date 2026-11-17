@@ -1,0 +1,22 @@
+  query eventByIdComments($eventId: ID!, $after: String, $first: Int, $sortOrder: SortOrder) {
+    event(id: $eventId) {
+      id
+      comments(after: $after, first: $first, sortOrder: $sortOrder) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            ...EventByIdComment
+            likers {
+              totalCount
+            }
+          }
+        }
+      }
+    }
+  }
+  ${eq}

@@ -1,0 +1,3 @@
+      fragment LocalReactionEventMessage on MemberMessage {
+        id
+      }

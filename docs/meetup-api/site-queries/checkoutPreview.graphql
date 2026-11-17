@@ -1,0 +1,31 @@
+  query checkoutPreview($input: CheckoutPreviewInput!) {
+    checkoutPreview(input: $input) {
+      ipCountry
+      selfDeclaredCountry
+      billingCountry
+      taxCountry
+      ipAddress
+      orderDate
+      productTaxCode
+      baseAmount
+      taxAmount
+      totalAmount
+      taxRate
+      taxMode
+      taxName
+      reverseCharge
+      b2bNumberNames
+      b2bTaxNames
+      validationErrors {
+        regionRequired
+        zipRequired
+        zipInvalidFormat
+        zipInvalidForRegion
+        unknown
+        taxIds {
+          formatInvalid
+          invalid
+        }
+      }
+    }
+  }

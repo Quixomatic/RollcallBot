@@ -1,0 +1,14 @@
+  query getMemberGroups($memberId: ID!, $first: Int, $after: String) {
+    member(id: $memberId) {
+      id
+      memberships(
+        first: $first
+        after: $after
+        filter: { status: ACTIVE }
+        sort: { sortField: SELF_RSVP_COUNT, sortOrder: DESC }
+      ) {
+        ...MemberProfileGroups
+      }
+    }
+  }
+  ${g}

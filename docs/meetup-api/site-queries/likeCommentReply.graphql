@@ -1,0 +1,8 @@
+  mutation likeCommentReply($input: LikeCommentReplyInput!) {
+    likeCommentReply(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

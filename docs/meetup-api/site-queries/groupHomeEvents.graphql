@@ -1,0 +1,7 @@
+  query groupHomeEvents($urlname: String!, $includePrivateInfo: Boolean! = true) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      ...GroupHomeFutureEvents
+    }
+  }
+  ${f}

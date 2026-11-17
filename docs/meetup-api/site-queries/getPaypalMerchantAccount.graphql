@@ -1,0 +1,19 @@
+  query getPaypalMerchantAccount {
+    self {
+      id
+      paypalSettings {
+        eventFee {
+          enabled
+          paypalMerchantAccount {
+            id
+            status
+            email
+            requirements {
+              name
+              status
+            }
+          }
+        }
+      }
+    }
+  }

@@ -1,0 +1,24 @@
+  query getYourEventsSaved(
+    $first: Int!
+    $sort: SortOrder
+    $filter: SavedEventsFilter
+    $after: String
+  ) {
+    self {
+      id
+      savedEvents(first: $first, sort: $sort, filter: $filter, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            ...HomepageEventDetails
+          }
+        }
+      }
+    }
+  }
+  ${a.N}

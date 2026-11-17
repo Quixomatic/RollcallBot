@@ -1,0 +1,7 @@
+  mutation approveGroupMembership($input: ApproveGroupMembershipInput!) {
+    approveGroupMembership(input: $input) {
+      errors {
+        message
+      }
+    }
+  }

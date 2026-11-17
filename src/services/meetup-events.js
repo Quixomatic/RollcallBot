@@ -64,8 +64,15 @@ async function scrapeEvents(groupUrl, guildId) {
 /**
  * Compare scraped events against stored state, detect changes.
  * Returns { newEvents, updatedEvents, cancelledEvents }
+ *
+ * Options:
+ *   inferCancellations — treat a stored event missing from the scrape as
+ *     cancelled. The browser backend needs this (it has no other signal).
+ *     The GraphQL backend passes false: there an event is only ever cancelled
+ *     when Meetup itself reports status 'CANCELLED' for it, which the poller
+ *     confirms by looking up every event that drops out of the listing.
  */
-function detectEventChanges(scrapedEvents, guildId) {
+function detectEventChanges(scrapedEvents, guildId, { inferCancellations = true } = {}) {
   const changes = { newEvents: [], updatedEvents: [], cancelledEvents: [], isFirstRun: false };
   const storedEvents = queries.getEventsForGuild().all(guildId);
   const storedMap = new Map(storedEvents.map((e) => [e.event_id, e]));
@@ -78,6 +85,16 @@ function detectEventChanges(scrapedEvents, guildId) {
 
   for (const scraped of scrapedEvents) {
     const stored = storedMap.get(scraped.event_id);
+
+    if (scraped.status === 'CANCELLED') {
+      // Never upsert a cancelled event: upsertEvent clears is_cancelled.
+      if (stored) {
+        changes.cancelledEvents.push(stored);
+        queries.cancelEvent().run(stored.event_id);
+      }
+      continue;
+    }
+
     if (!stored) {
       changes.newEvents.push(scraped);
     } else {
@@ -105,6 +122,8 @@ function detectEventChanges(scrapedEvents, guildId) {
   // the entire table in one pass, so bail out instead and let the next poll
   // decide. A genuinely empty group is indistinguishable here, but it costs
   // nothing to wait for a scrape that actually returned data.
+  if (!inferCancellations) return changes;
+
   if (scrapedEvents.length === 0 && storedEvents.length > 0) {
     console.warn(
       `[meetup-events] Scrape returned 0 events but ${storedEvents.length} are stored — ` +

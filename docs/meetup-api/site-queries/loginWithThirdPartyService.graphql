@@ -1,0 +1,8 @@
+  mutation loginWithThirdPartyService($input: LoginWithThirdPartyServiceInput!) {
+    loginWithThirdPartyService(input: $input) {
+      error {
+        ...Error
+      }
+    }
+  }
+  ${o.TH}

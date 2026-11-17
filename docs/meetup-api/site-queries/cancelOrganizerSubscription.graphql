@@ -1,0 +1,9 @@
+  mutation cancelOrganizerSubscription($input: CancelOrganizerSubscriptionInput!) {
+    cancelOrganizerSubscription(input: $input) {
+      error {
+        code
+        message
+      }
+      success
+    }
+  }

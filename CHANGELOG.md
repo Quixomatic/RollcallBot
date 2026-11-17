@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-17
+
+### Added
+- **Web dashboard** (Vite + React + TypeScript, TanStack Router and Query, shadcn/ui on Tailwind v4), served by the bot on port 3000 when `DASHBOARD_PASSWORD` is set. Single admin password with a signed httpOnly cookie and login rate limiting.
+  - **Overview:** Meetup session and token, active backend, poller state with next full/quick poll times, the next event per server, recent scrape errors, and a Poll now button.
+  - **Events:** every tracked event with going (incl. guests) / waitlist / not-going / comment counts and live-polling status. Each event has its own page with the RSVP lists, comment threads, a read-only **Live from Meetup** tab that highlights anything not yet stored, event details and reminders sent, and **Rescan now** / **Post RSVP summary** actions that report exactly what changed.
+  - **API health:** runs the `api-check` suite from the browser, plus the scrape history.
+  - **Meetup session:** logged-in account, token status, manual refresh, and **upload of a new `state.json`**. Uploads are verified live against Meetup (renewing an expired access token with the uploaded refresh token if needed) before replacing anything; the previous session is backed up and polling resumes. Re-login is now: export locally, drop the file on the dashboard.
+  - **Logs:** live tail of the bot's output with level filter and search.
+  - **Settings:** everything `/config` sets, with Discord channel pickers and the same validation.
+- `pnpm run dev`: local dry run of the real poller, backend and dashboard with a stand-in Discord client that records posts instead of sending them (shown on a **Discord outbox** page with embeds rendered Discord-style) and a separate `data/dev.db`.
+- The Docker image builds the dashboard in a separate stage and exposes port 3000.
+- **GraphQL backend (now the default).** Rollcall reads events, RSVPs and comments from Meetup's GraphQL API (`/gql2`, the API meetup.com's own web app uses) over plain HTTP, instead of loading and scraping pages in a headless browser. A full poll takes well under a second and polling no longer launches a browser at all. Playwright is still used to log in.
+- `MEETUP_BACKEND` setting: `graphql` (default) or `browser`. The original Playwright scraper is kept intact as a fallback. Both backends share the session file, produce the same stored keys (event IDs, RSVP member names, comment hashes) and the same location strings, so switching in either direction never re-posts comments or reports false changes.
+- Automatic token refresh. Meetup's access token lasts 1 hour; the client renews it with the 1-year refresh token through `/refresh-token` (the same flow meetup.com uses), proactively before expiry and on an `access_token_expired` error, and writes the new tokens back to `state.json`. An `access_token_invalid` response pauses polling with a clear re-login message, as before.
+- `pnpm run api-check` (`node src/api-check.js`): runs every query the bot uses against the live API and names the exact operation, field path or enum value that changed if Meetup alters something. Compares RSVP lists against Meetup's own counters. `--refresh` tests token renewal, `--parity <event>` diffs the browser and GraphQL backends on one event, `--report` writes an HTML page of everything returned.
+- `docs/meetup-api/`: endpoints, auth and refresh flow, error classifications, every operation and field Rollcall uses with its mapping, and a snapshot of all 346 GraphQL operations and fragments meetup.com's frontend ships (`site-queries/`), indexed with the persisted-query hashes and variables observed live.
+- `tools/meetup-capture/`: records meetup.com's network traffic while running the scrape flows, and regenerates the `site-queries` snapshot so `git diff` shows exactly what Meetup changed.
+- RSVPs store Meetup member IDs (`rsvps.member_id`) and comments store Meetup comment IDs (`comments.meetup_comment_id`). Both are additive columns; existing data is untouched.
+- Pinned comments are fetched explicitly and merged in, and show a `📌 Pinned` tag in the Discord comment post, next to the like count (GraphQL backend).
+- `/status` shows which backend is active.
+
+### Changed
+- Scheduled polls, `/poll` and dashboard actions share one lock, so a manual poll can no longer overlap a scheduled one (`/poll` reports "already running" instead).
+- The database falls back to Node's built-in `node:sqlite` when the native `better-sqlite3` module can't load (local development on a different Node version). Docker always uses `better-sqlite3`.
+- With the GraphQL backend an event is only ever reported cancelled when Meetup itself returns `status: CANCELLED` for it. Every stored event that drops out of the listing is looked up by ID: still active → kept (date/venue changes reported as updates), cancelled → announced once, deleted outright → hidden without a post, lookup failed → left alone. The browser backend keeps inferring cancellation from absence, since it has no way to look an event up.
+- The event listing (GraphQL backend) now honours `/config horizon`, fetching exactly the window from 3 hours ago to the horizon.
+- RSVP lists keep Meetup's order for each tab, including the waitlist's queue order.
+- An edited comment is no longer re-posted as new (matched by Meetup comment ID).
+
+### Fixed
+- RSVP lists are exact. A parity check against the browser scraper found it listing the bot account's own header avatar on every attendee tab and missing people on long tabs when lazy loading stopped early. GraphQL lists match Meetup's own yes/waitlist/no counters, guests included.
+- The pinned comment is no longer read twice.
+- Member names with stray whitespace in Meetup's data are trimmed.
+- `export-session.js` and the README pointed at the wrong NAS data folder (`rollcall/data` instead of `rollcallbot/data`).
+- `/silence setup` now checks the bot's own permissions before touching any channel and lists exactly which ones to grant, using the names shown in Discord's role settings. Previously it tried every channel and reported a bare "Missing Permissions" on each. Per-channel failures also name the permissions a channel overwrite takes away from the bot.
+
 ## [1.0.30] - 2026-09-30
 
 ### Added

@@ -1,0 +1,9 @@
+  mutation unlikeDiscussion($input: UnlikeDiscussionInput) {
+    unlikeDiscussion(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,5 @@
+  mutation updateGroup($input: GroupMutation!, $chapterId: ID!) {
+    updateGroup(input: $input, chapterId: $chapterId) {
+      id
+    }
+  }

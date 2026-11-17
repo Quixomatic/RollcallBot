@@ -1,0 +1,32 @@
+  query suggestVenues(
+    $query: String!
+    $lat: Float!
+    $lon: Float!
+    $first: Int
+    $newSearch: Boolean
+    $radius: Float
+  ) {
+    suggestVenues(
+      query: $query
+      lat: $lat
+      lon: $lon
+      first: $first
+      newSearch: $newSearch
+      radius: $radius
+    ) {
+      edges {
+        node {
+          id
+          name
+          address
+          city
+          country
+          postalCode
+          state
+          venueType
+          lat
+          lon
+        }
+      }
+    }
+  }

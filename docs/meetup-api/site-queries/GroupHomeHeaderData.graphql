@@ -1,0 +1,106 @@
+  fragment GroupHomeHeaderData on Group {
+    id
+    name
+    urlname
+    timezone
+    isPrivate
+    organizer {
+      id
+      name
+      email
+      memberPhoto {
+        id
+        source: highResUrl
+      }
+      isStarterOrganizer @include(if: $includePrivateInfo)
+      isSuperOrganizer
+    }
+    stats {
+      memberCounts {
+        all
+        leadership
+        pending
+      }
+      eventRatings {
+        average
+        total
+      }
+    }
+    lat
+    lon
+    joinMode
+    isMember @include(if: $includePrivateInfo)
+    status
+    city
+    state
+    country
+    groupPhoto: keyGroupPhoto {
+      id
+      source: highResUrl
+    }
+    proNetwork {
+      id
+      urlname
+      name
+      logo {
+        id
+        source: highResUrl
+      }
+      groups {
+        totalCount
+      }
+    }
+    isPrimaryOrganizer
+    canSeeMemberList @include(if: $includePrivateInfo)
+    membershipMetadata @include(if: $includePrivateInfo) {
+      status
+      role
+      dues {
+        status
+        trialEndDate
+        paidEndDate
+        graceEndDate
+      }
+      preferences(names: ["member_connection_availability"]) {
+        name
+        value
+      }
+    }
+    draftEvents: events(filter: { status: [DRAFT] }, first: 1) {
+      totalCount
+    }
+    needsQuestions
+    needsPhoto
+    questions {
+      id
+      question
+      sort
+    }
+    memberDuesSettingsUrl
+    duesSettings {
+      amount
+      paymentType
+      currency
+      interval
+      feeDescription
+      trialPeriodDays
+    }
+    canAddPhotos @include(if: $includePrivateInfo)
+    calendarFeeds {
+      rss
+      ical
+      icalWeb
+      rsvpRss
+    }
+    welcomeBlurb
+    organizerStartTime
+    leaders: memberships(filter: { status: LEADER }, first: 50) {
+      edges {
+        node {
+          id
+          name
+          isSuperOrganizer
+        }
+      }
+    }
+  }

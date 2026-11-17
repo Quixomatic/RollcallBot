@@ -1,0 +1,78 @@
+  fragment HomepageEventDetails on Event {
+    id
+    title
+    dateTime
+    duration
+    endTime
+    eventType
+    isSaved
+    rsvpState
+    eventUrl
+    isAttending
+    maxTickets
+    socialLabels
+    featuredEventPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    displayPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    group {
+      id
+      name
+      urlname
+      timezone
+      keyGroupPhoto {
+        id
+        baseUrl
+        highResUrl
+      }
+      stats {
+        eventRatings {
+          average
+          totalRatings
+        }
+      }
+    }
+    howToFindUs
+    venues {
+      id
+      eventVenueOptions {
+        goingCount
+        howToFindUs
+      }
+    }
+    venue {
+      name
+      address
+      city
+      state
+      country
+    }
+    rsvp {
+      venue {
+        venueType
+      }
+    }
+    rsvps {
+      totalCount
+      edges {
+        node {
+          isHost
+          user: member {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+              baseUrl
+            }
+          }
+        }
+      }
+    }
+  }

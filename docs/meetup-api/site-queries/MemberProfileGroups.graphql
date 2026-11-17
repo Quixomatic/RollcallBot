@@ -1,0 +1,26 @@
+  fragment MemberProfileGroups on MemberGroupConnection {
+    totalCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      metadata {
+        role
+        title
+        status
+        eventsAttended
+        eventsHosted
+      }
+      node {
+        id
+        urlname
+        name
+        isPrivate
+        keyGroupPhoto {
+          id
+          baseUrl
+        }
+      }
+    }
+  }

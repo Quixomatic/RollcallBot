@@ -1,0 +1,10 @@
+  query getDiscountPercentage {
+    self {
+      id
+      subscriptionProfile {
+        bestPromotionDiscount {
+          percentOff
+        }
+      }
+    }
+  }

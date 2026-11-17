@@ -1,0 +1,24 @@
+  query getGroupOrganizerEvents(
+    $urlname: String!
+    $limit: Int!
+    $startDate: String
+    $membershipsFilter: MembershipsFilter
+  ) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      organizer {
+        id
+        isStarterOrganizer
+        memberEvents(
+          eventStatus: [ACTIVE, PAST]
+          membershipsFilter: $membershipsFilter
+          isHosting: true
+          first: $limit
+          startDate: $startDate
+          sort: { sortField: CTIME, sortOrder: ASC }
+        ) {
+          totalCount
+        }
+      }
+    }
+  }

@@ -1,0 +1,11 @@
+  mutation createConversation($members: [ID!]!) {
+    createConversation(input: { members: $members }) {
+      conversation {
+        id
+      }
+      error {
+        code
+        field
+      }
+    }
+  }

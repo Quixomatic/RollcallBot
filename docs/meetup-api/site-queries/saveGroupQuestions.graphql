@@ -1,0 +1,8 @@
+  mutation saveGroupQuestions($groupId: ID!, $questions: [QuestionInput!]!) {
+    saveGroupQuestions(input: { groupId: $groupId, questions: $questions }) {
+      errors {
+        code
+        message
+      }
+    }
+  }

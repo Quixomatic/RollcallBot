@@ -1,0 +1,7 @@
+  mutation respondToSentimentSurvey($input: SentimentSurveyResponseInput!) {
+    submitSentimentSurveyResponse(input: $input) {
+      errors {
+        message
+      }
+    }
+  }

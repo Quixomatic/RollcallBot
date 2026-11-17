@@ -1,0 +1,13 @@
+  mutation checkSiftVerificationCode($input: CheckSiftVerificationCodeInput!) {
+    checkSiftVerificationCode(input: $input) {
+      session {
+        accessToken
+        refreshToken
+      }
+      status
+      error {
+        ...Error
+      }
+    }
+  }
+  ${o.TH}

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const { pollGuild } = require('../services/poller');
-const { clearSessionDead } = require('../services/scraper');
+const { pollGuildNow, PollerBusyError } = require('../services/poller');
+const { getBackend } = require('../services/backend');
 const { queries } = require('../database');
 
 module.exports = {
@@ -23,11 +23,12 @@ module.exports = {
     await interaction.editReply({ content: 'Polling now...' });
 
     try {
-      clearSessionDead(); // Reset session flag in case it was marked dead
-      await pollGuild(client, guildId, settings);
+      getBackend().clearSessionDead(); // Reset session flag (and re-read state.json) in case it was marked dead
+      await pollGuildNow(client, guildId, 'manual poll (/poll)');
       await interaction.editReply({ content: 'Poll cycle complete.' });
     } catch (err) {
-      await interaction.editReply({ content: `Poll error: ${err.message}` });
+      const msg = err instanceof PollerBusyError ? `${err.message} — try again in a moment.` : `Poll error: ${err.message}`;
+      await interaction.editReply({ content: msg });
     }
   },
 };

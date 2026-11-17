@@ -1,0 +1,8 @@
+  fragment Question on RsvpSurveySettingsQuestion {
+    id
+    questionType
+    text
+    required
+    options
+    questionRequired
+  }

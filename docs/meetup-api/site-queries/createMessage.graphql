@@ -1,0 +1,30 @@
+  mutation createMessage($convoId: ID!, $text: String!) {
+    sendDirectMessage(input: { convoId: $convoId, text: $text }) {
+      message {
+        id
+        text
+        kind
+        isEdited
+        isDeleted
+        reactions {
+          emoji
+          count
+          reactedByMe
+        }
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        created
+        updated
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

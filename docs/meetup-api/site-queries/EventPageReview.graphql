@@ -1,0 +1,14 @@
+  fragment EventPageReview on EventReview {
+    responseId
+    rating
+    freeTextFeedback
+    createDate
+    member {
+      id
+      name
+      memberPhoto {
+        id
+        baseUrl
+      }
+    }
+  }

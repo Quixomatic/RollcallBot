@@ -1,0 +1,22 @@
+  mutation rsvpToEvent($input: RsvpInput!) {
+    rsvp(input: $input) {
+      rsvp {
+        id
+        status
+        guestsCount
+        isHost
+        payStatus
+        answer {
+          text
+        }
+        venue {
+          venueType
+        }
+      }
+      errors {
+        code
+        field
+        message
+      }
+    }
+  }

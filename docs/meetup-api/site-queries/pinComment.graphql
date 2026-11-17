@@ -1,0 +1,8 @@
+  mutation pinComment($input: PinCommentInput!) {
+    pinComment(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

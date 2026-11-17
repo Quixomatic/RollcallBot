@@ -1,0 +1,8 @@
+  mutation updateLifeStages($input: UpdateLifeStagesInput!) {
+    updateLifeStages(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

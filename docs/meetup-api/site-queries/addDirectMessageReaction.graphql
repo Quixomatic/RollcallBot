@@ -1,0 +1,13 @@
+  mutation addDirectMessageReaction($messageId: ID!, $emoji: String!) {
+    addDirectMessageReaction(input: { messageId: $messageId, emoji: $emoji }) {
+      reactions {
+        emoji
+        count
+        reactedByMe
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

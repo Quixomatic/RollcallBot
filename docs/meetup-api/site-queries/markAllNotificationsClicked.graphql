@@ -1,0 +1,8 @@
+  mutation markAllNotificationsClicked {
+    markAllNotificationsClicked {
+      errors {
+        code
+        message
+      }
+    }
+  }

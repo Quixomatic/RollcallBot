@@ -1,0 +1,10 @@
+  query getLastSentimentSurveyResponse {
+    self {
+      id
+      sentimentSurveyLastResponse {
+        responseCode
+        responseTime
+        surveyVersion
+      }
+    }
+  }

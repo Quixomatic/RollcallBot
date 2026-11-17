@@ -1,0 +1,6 @@
+  query getForceOnboardingSelfData {
+    self {
+      joinTime: startDate
+      isMemberPlusSubscriber
+    }
+  }

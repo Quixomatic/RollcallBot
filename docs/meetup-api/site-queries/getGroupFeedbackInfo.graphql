@@ -1,0 +1,6 @@
+  query getGroupFeedbackInfo($groupUrlname: String!, $first: Int) {
+    groupByUrlname(urlname: $groupUrlname) {
+      ...GroupFeedbackInfo
+    }
+  }
+  ${c}

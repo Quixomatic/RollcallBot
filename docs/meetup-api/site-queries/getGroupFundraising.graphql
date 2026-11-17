@@ -1,0 +1,13 @@
+  query getGroupFundraising($groupUrlname: String!) {
+    groupByUrlname(urlname: $groupUrlname) {
+      id
+      fundraising {
+        enabled
+        fundraiser {
+          crowdfundStatus {
+            payments
+          }
+        }
+      }
+    }
+  }

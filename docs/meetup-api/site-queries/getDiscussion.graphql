@@ -1,0 +1,6 @@
+  query getDiscussion($discussionId: ID!) {
+    discussion(id: $discussionId) {
+      ...GroupDiscussion
+    }
+  }
+  ${p}

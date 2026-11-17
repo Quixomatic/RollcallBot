@@ -1,0 +1,29 @@
+  query getFundraiserForGroup($groupId: ID!) {
+    group(id: $groupId) {
+      id
+      fundraising {
+        enabled
+        setupComplete
+        partner {
+          url
+          key
+        }
+        fundraiser {
+          id
+          goal
+          totalDonors
+          totalRaised
+          beneficiary {
+            category
+            purpose
+          }
+          description
+          crowdfundStatus {
+            bank
+            payments
+            personal
+          }
+        }
+      }
+    }
+  }

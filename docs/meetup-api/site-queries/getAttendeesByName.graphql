@@ -1,0 +1,25 @@
+  query getAttendeesByName(
+    $id: ID!
+    $first: Int
+    $after: String
+    $query: String!
+    $status: [RsvpStatus!]
+  ) {
+    event(id: $id) {
+      id
+      token
+      rsvpSearch(first: $first, after: $after, filter: { query: $query, status: $status }) {
+        edges {
+          node {
+            ...AttendeesRsvp
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          endCursor
+        }
+      }
+    }
+  }
+  ${e1.z3}

@@ -1,0 +1,11 @@
+  fragment NewGroupSearch on Group {
+    id
+    name
+    link
+    urlname
+    foundedDate
+    groupPhoto {
+      id
+      baseUrl
+    }
+  }

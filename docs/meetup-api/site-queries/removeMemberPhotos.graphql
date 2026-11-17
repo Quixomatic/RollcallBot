@@ -1,0 +1,8 @@
+  mutation removeMemberPhotos($input: RemoveMemberPhotosInput!) {
+    removeMemberPhotos(input: $input) {
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${s.TH}

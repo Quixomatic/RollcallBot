@@ -1,0 +1,21 @@
+  fragment ConversationFragment on Conversation {
+    id
+    type
+    eventId
+    isClosed
+    photo {
+      id
+      baseUrl
+      highResUrl
+    }
+    title
+    hasLeft
+    muted
+    hasUnreadMessages
+    archived
+    lastMessageDate
+    created
+    creator {
+      id
+    }
+  }

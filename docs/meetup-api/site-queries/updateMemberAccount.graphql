@@ -1,0 +1,8 @@
+  mutation updateMemberAccount($input: UpdateMemberAccountInput!) {
+    updateMemberAccount(input: $input) {
+      errors {
+        ...Error
+      }
+    }
+  }
+  ${a.TH}

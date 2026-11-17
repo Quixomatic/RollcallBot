@@ -1,0 +1,8 @@
+  query getFeedbackForEvent($eventId: ID!) {
+    feedbackForEvent(eventId: $eventId) {
+      completed
+      completionDate
+      confirmedAttendance
+      memberSuppressed
+    }
+  }

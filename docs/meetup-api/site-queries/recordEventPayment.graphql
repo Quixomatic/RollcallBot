@@ -1,0 +1,9 @@
+  mutation recordEventPayment($input: RecordEventPaymentInput!) {
+    recordEventPayment(input: $input) {
+      errors {
+        code
+        message
+      }
+      confirmationCode
+    }
+  }

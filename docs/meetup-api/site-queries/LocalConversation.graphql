@@ -1,0 +1,10 @@
+      fragment LocalConversation on Conversation {
+        id
+        msgs: messages(after: $after, sortOrder: DESC, first: 20) {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }

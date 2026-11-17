@@ -1,0 +1,9 @@
+  mutation updateDiscussion($input: UpdateDiscussionInput) {
+    updateDiscussion(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

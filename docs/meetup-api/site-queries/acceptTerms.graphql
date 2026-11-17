@@ -1,0 +1,8 @@
+  mutation acceptTerms($input: AcceptTermsInput!) {
+    acceptTerms(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

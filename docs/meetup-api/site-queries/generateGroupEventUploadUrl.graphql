@@ -1,0 +1,10 @@
+  mutation generateGroupEventUploadUrl($input: GroupEventPhotoCreateInput!) {
+    createGroupEventPhoto(input: $input) {
+      albumId
+      uploadUrl
+      photo {
+        id
+      }
+      imagePath
+    }
+  }

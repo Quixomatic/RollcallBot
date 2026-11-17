@@ -1,0 +1,3 @@
+  mutation saveSubscriptionCancelReasons($input: SaveSubscriptionCancelReasonsInput!) {
+    saveSubscriptionCancelReasons(input: $input)
+  }

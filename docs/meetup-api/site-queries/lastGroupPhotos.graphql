@@ -1,0 +1,24 @@
+  query lastGroupPhotos($groupId: ID!) {
+    groupAlbums(input: { groupId: $groupId, sort: { sortBy: DATE_CREATED, sortOrder: DESC } }) {
+      edges {
+        node {
+          title
+          id
+          event {
+            title
+            id
+          }
+          eventId
+          photoCount
+          albumPhotos(input: { sort: { sortBy: DATE, sortOrder: DESC } }) {
+            edges {
+              node {
+                url
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }

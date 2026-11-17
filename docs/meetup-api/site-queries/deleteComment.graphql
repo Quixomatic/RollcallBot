@@ -1,0 +1,9 @@
+  mutation deleteComment($input: DeleteCommentInput!) {
+    deleteComment(input: $input) {
+      errors {
+        code
+        message
+        field
+      }
+    }
+  }

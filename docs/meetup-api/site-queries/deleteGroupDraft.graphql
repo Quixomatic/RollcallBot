@@ -1,0 +1,3 @@
+  mutation deleteGroupDraft($id: String!) {
+    deleteGroupDraft(input: { token: $id })
+  }

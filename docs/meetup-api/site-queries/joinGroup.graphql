@@ -1,0 +1,12 @@
+  mutation joinGroup($input: JoinGroupInput!) {
+    joinGroup(input: $input) {
+      membership {
+        role
+        status
+      }
+      errors {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,20 @@
+  query getSavedEventsDates {
+    self {
+      id
+      name
+      savedEvents(first: 20) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            id
+            dateTime
+          }
+        }
+      }
+    }
+  }

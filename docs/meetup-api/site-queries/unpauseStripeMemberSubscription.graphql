@@ -1,0 +1,8 @@
+  mutation unpauseStripeMemberSubscription {
+    unpauseStripeMemberSubscription {
+      error {
+        code
+        message
+      }
+    }
+  }

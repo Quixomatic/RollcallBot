@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { queries } = require('../database');
 const { version } = require('../../package.json');
+const { getBackend } = require('../services/backend');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,6 +27,7 @@ module.exports = {
       .addFields(
         { name: 'Version', value: `v${version}`, inline: true },
         { name: 'Uptime', value: uptimeStr, inline: true },
+        { name: 'Meetup Backend', value: getBackend().name, inline: true },
         { name: 'Meetup Group', value: settings?.meetup_group_url || 'Not configured', inline: false },
         {
           name: 'Last Scrape',

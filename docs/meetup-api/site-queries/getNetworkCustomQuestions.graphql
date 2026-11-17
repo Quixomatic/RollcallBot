@@ -1,0 +1,16 @@
+  query getNetworkCustomQuestions($networkId: ID!) {
+    proNetwork(id: $networkId) {
+      id
+      rsvpSurveySettings {
+        enabledByDefault
+        questionsEnabled
+        questions {
+          order
+          question {
+            ...Question
+          }
+        }
+      }
+    }
+  }
+  ${d}

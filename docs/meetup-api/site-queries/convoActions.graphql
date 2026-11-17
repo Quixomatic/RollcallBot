@@ -1,0 +1,130 @@
+  subscription convoActions {
+    conversationActions {
+      __typename
+      ... on ConversationMemberBlock {
+        conversationId
+        blockee {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        blocker {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+      }
+      ... on ConversationMemberLeave {
+        conversationId
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+      }
+      ... on ConversationMemberUnblock {
+        conversationId
+        blockee {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        blocker {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+      }
+      ... on ConversationMessage {
+        id
+        conversationId
+        kind
+        location {
+          lat
+          lon
+        }
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        text
+        updated
+      }
+      ... on ConversationMessageReaction {
+        conversationId
+        id
+        member {
+          id
+        }
+        emoji
+        action
+        count
+      }
+      ... on ConversationMessageEdit {
+        id
+        conversationId
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        editText: text
+        updated
+      }
+      ... on ConversationMessageDelete {
+        id
+        conversationId
+        deletionReason
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+      }
+      ... on ConversationStart {
+        conversationId
+        members {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+      }
+      ... on ConversationArchive {
+        conversationId
+      }
+      ... on ConversationUnarchive {
+        conversationId
+      }
+      ... on ConversationMessageRead {
+        conversationId
+      }
+    }
+  }

@@ -1,0 +1,100 @@
+  fragment CoreGroupHomeEvent on Event {
+    id
+    title
+    eventUrl
+    description
+    isSaved
+    group {
+      id
+      name
+      timezone
+      keyGroupPhoto {
+        id
+        baseUrl
+        highResUrl
+      }
+    }
+    creatorMember {
+      id
+    }
+    eventHosts {
+      memberId
+    }
+    feeSettings {
+      accepts
+      currency
+      amount
+    }
+    venue {
+      id
+      name
+      address
+      city
+      state
+      country
+    }
+    dateTime
+    createdTime
+    endTime
+    going {
+      totalCount
+    }
+    isAttending
+    isOnline
+    eventType
+    status
+    series {
+      __typename
+      description
+      weeklyRecurrence {
+        weeklyDaysOfWeek
+        weeklyInterval
+      }
+      monthlyRecurrence {
+        monthlyDayOfWeek
+        monthlyWeekOfMonth
+      }
+    }
+    featuredEventPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    displayPhoto {
+      id
+      baseUrl
+      highResUrl
+    }
+    rsvpState
+    rsvps(first: 5) {
+      totalCount
+      edges {
+        node {
+          id
+          member {
+            id
+            name
+            memberPhoto {
+              id
+              source: highResUrl
+            }
+          }
+        }
+      }
+    }
+    maxTickets
+    actions
+    rsvpSettings {
+      rsvpsClosed
+    }
+    isNetworkEvent
+    networkEvent {
+      rsvpCount
+      groupCount
+    }
+    socialLabels
+    socialProofInsights {
+      ...SocialProofInsightsForGroupHome
+    }
+  }
+  ${u}

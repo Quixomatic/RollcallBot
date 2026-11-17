@@ -1,0 +1,6 @@
+  query getSupergroupCandidate($urlname: String!) {
+    groupByUrlname(urlname: $urlname) {
+      ...SupergroupCandidate
+    }
+  }
+  ${d}

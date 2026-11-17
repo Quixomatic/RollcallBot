@@ -1,0 +1,15 @@
+  query getFriendshipStatus($memberId: ID!) {
+    friendRequests(first: 1, filter: { status: [PENDING, ACCEPTED], memberId: $memberId }) {
+      edges {
+        node {
+          id
+          status
+          createdAt
+          sender {
+            id
+            name
+          }
+        }
+      }
+    }
+  }

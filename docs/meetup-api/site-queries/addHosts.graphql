@@ -1,0 +1,8 @@
+  mutation addHosts($input: UpdateHostsInput!) {
+    addHosts(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

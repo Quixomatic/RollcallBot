@@ -1,0 +1,26 @@
+  query getAttendeesByIdForEventAttendees(
+    $eventId: ID!
+    $first: Int
+    $after: String
+    $filter: RsvpFilter
+    $sort: RsvpSort
+  ) {
+    event(id: $eventId) {
+      id
+      rsvps(first: $first, after: $after, filter: $filter, sort: $sort) {
+        edges {
+          node {
+            isRsvpUnlocked
+            member {
+              id
+              name
+              memberPhoto {
+                id
+                baseUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }

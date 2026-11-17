@@ -1,0 +1,62 @@
+  fragment EventDetails on Event {
+    id
+    title
+    dateTime
+    duration
+    endTime
+    going {
+      totalCount
+    }
+    featuredEventPhoto {
+      id
+      highResUrl
+      baseUrl
+    }
+    displayPhoto {
+      id
+      highResUrl
+      baseUrl
+    }
+    eventType
+    group {
+      id
+      name
+      urlname
+      isPrimaryOrganizer
+      link
+      isPrivate
+      city
+      state
+      country
+      timezone
+      keyGroupPhoto {
+        id
+        source: highResUrl
+      }
+      stats {
+        eventRatings {
+          average
+          totalRatings
+        }
+      }
+    }
+    isSaved
+    hosts: eventHosts {
+      id: memberId
+      name
+    }
+    eventUrl
+    isAttending
+    maxTickets
+    venue {
+      name
+      address
+      city
+      state
+      country
+    }
+    rsvps {
+      totalCount
+    }
+    socialLabels
+  }

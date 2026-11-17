@@ -1,0 +1,6 @@
+  query getNewConvoMember($memberId: ID!) {
+    member(id: $memberId) {
+      ...ConvoMember
+    }
+  }
+  ${ep.EL}

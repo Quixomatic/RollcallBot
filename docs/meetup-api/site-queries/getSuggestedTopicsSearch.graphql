@@ -1,0 +1,11 @@
+  query getSuggestedTopicsSearch($query: String!) {
+    suggestTopics(query: $query) {
+      edges {
+        node {
+          id
+          name
+          urlkey
+        }
+      }
+    }
+  }

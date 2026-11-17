@@ -1,0 +1,49 @@
+  query groupAlbum($albumId: ID!, $photoInput: AlbumPhotosInput) {
+    photoAlbum(albumId: $albumId) {
+      id
+      title
+      groupId
+      photoCount
+      creationDate
+      recentActivity
+      lastOrder
+      thumb {
+        id
+        url
+      }
+      event {
+        id
+        dateTime
+        eventUrl
+      }
+      contributors {
+        totalCount
+        edges {
+          node {
+            id
+            name
+            memberPhoto {
+              id
+              thumbUrl
+            }
+          }
+        }
+      }
+      albumPhotos(input: $photoInput) {
+        totalCount
+        edges {
+          cursor
+          node {
+            ...AlbumPhoto
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+      }
+    }
+  }
+  ${l.sm}

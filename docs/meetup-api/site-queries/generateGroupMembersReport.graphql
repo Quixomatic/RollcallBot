@@ -1,0 +1,5 @@
+  mutation generateGroupMembersReport($groupId: ID!) {
+    generateGroupMembersReport(input: { groupId: $groupId }) {
+      url
+    }
+  }

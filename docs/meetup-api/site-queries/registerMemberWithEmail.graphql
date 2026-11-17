@@ -1,0 +1,14 @@
+  mutation registerMemberWithEmail($input: MemberRegistrationWithEmailInput!) {
+    registerMemberWithEmail(input: $input) {
+      reverifyToken
+      member {
+        id
+        name
+        email
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

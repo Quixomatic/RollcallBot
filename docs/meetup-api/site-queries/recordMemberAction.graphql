@@ -1,0 +1,8 @@
+  mutation recordMemberAction($input: RecordMemberActionInput!) {
+    recordMemberAction(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

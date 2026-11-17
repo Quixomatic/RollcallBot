@@ -1,0 +1,9 @@
+  query getZoomAuthorization {
+    self {
+      id
+      zoomAuthorization {
+        authorizationUrl
+        isAuthorized
+      }
+    }
+  }

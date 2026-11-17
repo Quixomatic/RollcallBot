@@ -1,0 +1,11 @@
+  query getMemberCalendarExportUrls {
+    self {
+      id
+      calendarExportUrls {
+        google
+        ical
+        outlook
+        rss
+      }
+    }
+  }

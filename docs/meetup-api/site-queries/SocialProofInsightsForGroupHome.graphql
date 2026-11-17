@@ -1,0 +1,11 @@
+  fragment SocialProofInsightsForGroupHome on SocialProofInsights {
+    isTrendingEvent
+    totalInterestedUsers
+    interestedUsersSample {
+      memberPhoto {
+        id
+        baseUrl
+        highResUrl
+      }
+    }
+  }

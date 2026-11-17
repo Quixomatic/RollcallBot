@@ -1,0 +1,12 @@
+  query getEventChatEventUrl($eventId: ID!) {
+    event(id: $eventId) {
+      eventUrl
+      status
+      eventHosts {
+        member {
+          id
+        }
+      }
+      rsvpState
+    }
+  }

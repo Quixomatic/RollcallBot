@@ -1,0 +1,16 @@
+  fragment SavedEvent on Event {
+    ...EventDetails
+    description
+    venue {
+      id
+      address
+      city
+      state
+      country
+      lat
+      lat
+      lon
+      name
+    }
+  }
+  ${i}

@@ -1,0 +1,23 @@
+  query getSelfPendingGroups($endCursor: String, $first: Int) {
+    self {
+      id
+      isOrganizer
+      memberships(
+        filter: { status: [PENDING, PENDING_PAYMENT], groupStatus: [PAID, GRACE] }
+        sort: { sortOrder: DESC }
+        first: $first
+        after: $endCursor
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...HomepageSelfGroup
+          }
+        }
+      }
+    }
+  }
+  ${i.g}

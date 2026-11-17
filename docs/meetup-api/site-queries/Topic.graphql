@@ -1,0 +1,5 @@
+  fragment Topic on Topic {
+    urlkey
+    id
+    name
+  }

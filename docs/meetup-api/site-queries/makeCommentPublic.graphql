@@ -1,0 +1,8 @@
+  mutation makeCommentPublic($input: MakeCommentPublicInput!) {
+    makeCommentPublic(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

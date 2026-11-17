@@ -1,0 +1,55 @@
+  query getEventsForLoggedOutHomepage(
+    $lat: Float!
+    $lon: Float!
+    $firstPhysical: Int!
+    $firstOnline: Int!
+    $startDateRangePhysical: String
+    $endDateRangePhysical: String
+    $startDateRangeOnline: String
+    $endDateRangeOnline: String
+    $onlineRadius: Float
+    $physicalRadius: Float
+    $onlineSortField: RecommendedEventsSortField
+    $physicalSortField: RecommendedEventsSortField
+    $dataConfiguration: String
+  ) {
+    physicalEvents: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        startDateRange: $startDateRangePhysical
+        endDateRange: $endDateRangePhysical
+        eventType: PHYSICAL
+        radius: $physicalRadius
+      }
+      first: $firstPhysical
+      sort: { sortField: $physicalSortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    onlineEvents: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        startDateRange: $startDateRangeOnline
+        endDateRange: $endDateRangeOnline
+        eventType: ONLINE
+        radius: $onlineRadius
+      }
+      first: $firstOnline
+      sort: { sortField: $onlineSortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+  }
+  ${f.E8}

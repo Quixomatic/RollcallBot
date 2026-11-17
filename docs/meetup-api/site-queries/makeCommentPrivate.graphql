@@ -1,0 +1,8 @@
+  mutation makeCommentPrivate($input: MakeCommentPrivateInput!) {
+    makeCommentPrivate(input: $input) {
+      errors {
+        code
+        message
+      }
+    }
+  }

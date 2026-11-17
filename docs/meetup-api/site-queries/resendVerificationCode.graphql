@@ -1,0 +1,3 @@
+  mutation resendVerificationCode($input: ResendVerificationCodeInput!) {
+    resendVerificationCode(input: $input)
+  }

@@ -1,0 +1,131 @@
+  query getSelf {
+    self {
+      id
+      subscription {
+        status
+        processor
+      }
+      adsData {
+        groupTopicCategories {
+          name
+          defaultTopic {
+            id
+          }
+        }
+        groupTopics {
+          name
+        }
+      }
+      organizedGroupCount
+      encryptedMemberId: encryptedMemberIds {
+        googleAnalytics
+      }
+      name
+      email
+      username
+      gender
+      joinTime: startDate
+      memberPhotoUrl
+      isOrganizer
+      subscriptionProfile {
+        currentSubscription {
+          appliedPromotion {
+            name
+          }
+          trialEndDate
+          startDate
+          status
+          plan {
+            id
+            tier
+          }
+        }
+      }
+      subscription {
+        processor
+      }
+      memberPhoto {
+        id
+        source: highResUrl
+        baseUrl
+      }
+      adminProNetworks {
+        id
+        urlname
+        name
+        paymentModel
+        primaryAdmin {
+          id
+        }
+      }
+      isLeader
+      lat
+      lon
+      city
+      state
+      zip
+      country
+      preferredLocale
+      uiFeatures
+      isQL
+      isNew
+      highestCurrentRole
+      hasAcceptedLatestTerms
+      timezone: selectedTimezone
+      bestPromotion: subscriptionProfile {
+        discount: bestPromotionDiscount {
+          percentOff
+        }
+      }
+      isProOrganizer
+      isProPrimaryOrganizer
+      isSuperOrganizer
+      canCreateOAuthClient
+      pendingSuperOrganizerNotifications
+      isMemberPlusSubscriber
+      phoneNumberE164
+      notifications {
+        unreadCount
+      }
+      paypalSettings {
+        eventFee {
+          enabled
+          paypalMerchantAccount {
+            status
+          }
+          availablePaymentProducts
+        }
+      }
+      reasonsForJoining
+      terms {
+        termsDue {
+          id
+          kind
+          required
+        }
+      }
+      memberSubscriptionProfile {
+        trialAvailable
+      }
+      zoomAuthorization {
+        authorizationUrl
+        isAuthorized
+      }
+      hasWaitlistPriority
+      isStarterOrganizer
+      topics(first: 20) {
+        edges {
+          node {
+            id
+            name
+          }
+        }
+      }
+      relationshipStatus
+      relationshipStatusPublic
+      jobField
+      jobFieldPublic
+      isFriendsEligible
+      isFriendsUnlocked
+    }
+  }

@@ -1,0 +1,50 @@
+  query getYourDraftEvents(
+    $first: Int!
+    $after: String
+    $startDate: String
+    $status: [MembershipStatus!]
+    $lat: Float
+    $lon: Float
+    $radius: Float
+    $sortField: MemberEventSortField
+    $sortOrder: SortOrder
+  ) {
+    self {
+      id
+      draftEvents: memberEvents(
+        first: $first
+        after: $after
+        startDate: $startDate
+        isHosting: true
+        eventStatus: DRAFT
+        lat: $lat
+        lon: $lon
+        radius: $radius
+        sort: { sortField: $sortField, sortOrder: $sortOrder }
+        membershipsFilter: { status: $status }
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          rsvpState
+          node {
+            ...EventForCard
+            ...RsvpsForCard
+            ...EventDetails
+            group {
+              membershipMetadata {
+                role
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ${c.Sv}
+  ${c.wF}
+  ${c.n6}

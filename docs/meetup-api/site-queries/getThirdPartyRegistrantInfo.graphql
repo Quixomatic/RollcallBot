@@ -1,0 +1,18 @@
+  query getThirdPartyRegistrantInfo($input: ThirdPartyRegistrantInfoInput!) {
+    thirdPartyRegistrantInfo(input: $input) {
+      email
+      name
+      idToken
+      refreshToken
+      status
+      registrationChallenge {
+        required
+        provider
+        siteKey
+      }
+      error {
+        ...Error
+      }
+    }
+  }
+  ${e$.TH}

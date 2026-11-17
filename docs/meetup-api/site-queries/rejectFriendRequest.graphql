@@ -1,0 +1,12 @@
+  mutation rejectFriendRequest($input: FriendRequestActionInput!) {
+    rejectFriendRequest(input: $input) {
+      friendship {
+        id
+        status
+      }
+      errors {
+        code
+        message
+      }
+    }
+  }

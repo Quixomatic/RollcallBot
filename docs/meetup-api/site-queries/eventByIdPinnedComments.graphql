@@ -1,0 +1,12 @@
+  query eventByIdPinnedComments($eventId: ID!) {
+    event(id: $eventId) {
+      id
+      pinnedComments {
+        ...EventByIdComment
+        likers {
+          totalCount
+        }
+      }
+    }
+  }
+  ${eq}

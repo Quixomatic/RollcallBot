@@ -1,0 +1,21 @@
+  query getSavedEvents($sort: SortOrder, $filter: SavedEventsFilter, $first: Int!, $after: String) {
+    self {
+      id
+      name
+      savedEvents(sort: $sort, filter: $filter, first: $first, after: $after) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          rsvpState
+          node {
+            ...SavedEvent
+          }
+        }
+      }
+    }
+  }
+  ${c.WP}

@@ -1,0 +1,6 @@
+  query myFeedback($eventId: ID!) {
+    myFeedback(eventId: $eventId) {
+      eventId
+      rating
+    }
+  }

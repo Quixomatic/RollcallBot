@@ -1,0 +1,84 @@
+  fragment EventByIdForAttendees on Event {
+    id
+    attendanceForecast {
+      lowerBound
+      expected
+      upperBound
+      rsvpCount
+      confidenceLevel
+      dataQuality
+      historicalEventCount
+      historicalRsvpCount
+      modelVersion
+    }
+    title
+    eventUrl
+    dateTime
+    endTime
+    status
+    eventType
+    eventHosts {
+      memberId
+    }
+    rsvpQuestions {
+      text
+    }
+    actions
+    guestLimit
+    maxTickets
+    rsvpSettings {
+      rsvpCloseTime
+      rsvpOpenTime
+    }
+    venue {
+      name
+      address
+    }
+    venues {
+      id
+      venueType
+      eventVenueOptions {
+        goingCount
+        rsvpLimit
+        guestLimit
+      }
+    }
+    canSeeAttendees
+    isCheckInEnabled
+    rsvps(first: $first, after: $after, filter: $filter, sort: $sort) {
+      totalCount
+      yesCount
+      noCount
+      waitlistCount
+      attendedCount
+      noShowCount
+      absentCount
+      edges {
+        node {
+          ...AttendeesRsvp
+        }
+      }
+      pageInfo {
+        hasPreviousPage
+        hasNextPage
+        endCursor
+      }
+    }
+    group {
+      id
+      isPrivate
+      isMember
+      isPrimaryOrganizer
+      membershipMetadata {
+        role
+      }
+      link
+      urlname
+      starterTierMaxRsvpLimit
+      organizer {
+        id
+        isStarterOrganizer
+      }
+    }
+  }
+  ${s}

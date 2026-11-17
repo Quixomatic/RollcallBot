@@ -1,0 +1,22 @@
+          fragment LocalMemberMessage on MemberMessage {
+            id
+            text
+            reactions {
+              emoji
+              count
+              reactedByMe
+            }
+            isEdited
+            isDeleted
+            kind
+            conversationId
+            member {
+              id
+              name
+              memberPhoto {
+                id
+                highResUrl
+              }
+            }
+            updated
+          }

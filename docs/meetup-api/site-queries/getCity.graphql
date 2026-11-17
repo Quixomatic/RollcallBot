@@ -1,0 +1,12 @@
+  query getCity($country: String!, $state: String, $slug: String!) {
+    city: city(slug: $slug, state: $state, country: $country) {
+      city
+      state
+      country
+      timezone
+      region1
+      region2
+      lat
+      lon
+    }
+  }

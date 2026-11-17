@@ -1,0 +1,9 @@
+  mutation unsaveUnifiedEvent($eventId: ID!) {
+    unsaveEvent(input: { eventId: $eventId }) {
+      errors {
+        code
+        field
+        message
+      }
+    }
+  }

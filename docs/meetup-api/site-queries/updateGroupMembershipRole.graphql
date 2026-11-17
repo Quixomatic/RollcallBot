@@ -1,0 +1,8 @@
+  mutation updateGroupMembershipRole($groupId: ID!, $memberId: ID!, $role: Role!) {
+    updateGroupMembershipRole(input: { groupId: $groupId, memberId: $memberId, role: $role }) {
+      errors {
+        code
+        message
+      }
+    }
+  }

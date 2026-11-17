@@ -1,0 +1,38 @@
+  query getPastGroupEvents(
+    $urlname: String!
+    $after: String
+    $afterDateTime: DateTime
+    $beforeDateTime: DateTime
+    $title: String
+  ) {
+    groupByUrlname(urlname: $urlname) {
+      id
+      organizer {
+        id
+        isStarterOrganizer
+      }
+      events(
+        filter: {
+          status: [ACTIVE, PAST, CANCELLED]
+          afterDateTime: $afterDateTime
+          beforeDateTime: $beforeDateTime
+          title: $title
+        }
+        sort: DESC
+        first: 10
+        after: $after
+      ) {
+        totalCount
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        edges {
+          node {
+            ...CoreGroupHomeEvent
+          }
+        }
+      }
+    }
+  }
+  ${s.Aj}

@@ -43,7 +43,17 @@ module.exports = {
     switch (sub) {
       case 'setup': {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-        const { role, created, updated, unchanged, failed } = await setupSilencedRole(guild);
+        const { missing, role, created, updated, unchanged, failed } = await setupSilencedRole(guild);
+        if (missing.length) {
+          console.log(`[silence] ${guildName}: setup aborted — bot missing ${missing.join(', ')}`);
+          await interaction.editReply({
+            content: [
+              'The bot can only deny permissions it has itself. Grant its role these in **Server Settings → Roles → Permissions**, then re-run `/silence setup`:',
+              ...missing.map((name) => `- ${name}`),
+            ].join('\n'),
+          });
+          return;
+        }
         console.log(`[silence] ${guildName}: setup — role ${created ? 'created' : 'exists'}, ${updated} channels updated, ${unchanged} unchanged, ${failed.length} failed`);
 
         const lines = [

@@ -1,0 +1,176 @@
+  query getNewCityPageData(
+    $lat: Float!
+    $lon: Float!
+    $firstEventsInLocation: Int!
+    $firstTodayEvents: Int!
+    $firstThisWeekendEvents: Int!
+    $firstTopicalEventsMusic: Int!
+    $firstTopicalEventsSocial: Int!
+    $firstTopicalEventsOutdoor: Int!
+    $firstTopicalEventsSports: Int!
+    $topicalTopicCategoryMusic: ID
+    $topicalTopicCategorySocial: ID
+    $topicalTopicCategoryOutdoor: ID
+    $topicalTopicCategorySports: ID
+    $startDateRange: String
+    $todayEnd: String
+    $thisWeekendStart: String
+    $thisWeekendEnd: String
+    $sortField: RecommendedEventsSortField
+    $popularGroupsFirst: Int!
+    $groupSearchRadius: Int!
+    $dataConfiguration: String
+  ) {
+    eventsInLocation: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        startDateRange: $startDateRange
+        eventType: PHYSICAL
+        doConsolidateEvents: true
+      }
+      first: $firstEventsInLocation
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    todayEvents: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        startDateRange: $startDateRange
+        endDateRange: $todayEnd
+        eventType: PHYSICAL
+        doConsolidateEvents: true
+      }
+      first: $firstTodayEvents
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    thisWeekendEvents: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        startDateRange: $thisWeekendStart
+        endDateRange: $thisWeekendEnd
+        eventType: PHYSICAL
+        doConsolidateEvents: true
+      }
+      first: $firstThisWeekendEvents
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    popularGroups: recommendedGroups(
+      filter: { lat: $lat, lon: $lon, radius: $groupSearchRadius }
+      first: $popularGroupsFirst
+      ignoreNewGroups: true
+    ) {
+      edges {
+        node {
+          ...PopularGroupSearch
+          keyGroupPhoto {
+            id
+            baseUrl
+          }
+          city
+          state
+          country
+        }
+      }
+    }
+    topicalEventsMusic: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        eventType: PHYSICAL
+        startDateRange: $startDateRange
+        topicCategoryId: $topicalTopicCategoryMusic
+        doConsolidateEvents: true
+      }
+      first: $firstTopicalEventsMusic
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    topicalEventsSocial: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        eventType: PHYSICAL
+        startDateRange: $startDateRange
+        topicCategoryId: $topicalTopicCategorySocial
+        doConsolidateEvents: true
+      }
+      first: $firstTopicalEventsSocial
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    topicalEventsOutdoor: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        eventType: PHYSICAL
+        startDateRange: $startDateRange
+        topicCategoryId: $topicalTopicCategoryOutdoor
+        doConsolidateEvents: true
+      }
+      first: $firstTopicalEventsOutdoor
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+    topicalEventsSports: recommendedEvents(
+      filter: {
+        lat: $lat
+        lon: $lon
+        eventType: PHYSICAL
+        startDateRange: $startDateRange
+        topicCategoryId: $topicalTopicCategorySports
+        doConsolidateEvents: true
+      }
+      first: $firstTopicalEventsSports
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      edges {
+        node {
+          ...EventForGuestCard
+        }
+      }
+    }
+  }
+  ${S.E8}
+  ${S.hK}

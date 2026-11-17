@@ -1,0 +1,15 @@
+  mutation createVenue($input: CreateVenueInput!) {
+    createVenue(input: $input) {
+      errors {
+        code
+        message
+      }
+      venue {
+        ...VenueDetails
+      }
+      didYouMean {
+        ...VenueDetails
+      }
+    }
+  }
+  ${rh}

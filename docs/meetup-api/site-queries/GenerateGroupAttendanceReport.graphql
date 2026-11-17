@@ -1,0 +1,5 @@
+  mutation GenerateGroupAttendanceReport($input: GenerateGroupAttendanceReportInput!) {
+    generateGroupAttendanceReport(input: $input) {
+      url
+    }
+  }

@@ -1,0 +1,24 @@
+  fragment EventCommentEdge on EventComment {
+    id
+    eventId
+    text
+    created
+    likeCount
+    link
+    member {
+      id
+      name
+      isOrganizer
+      isMemberPlusSubscriber
+      memberPhoto {
+        baseUrl
+        id
+      }
+    }
+    inReplyTo
+    reportLink
+    isLiked
+    isPinned
+    isPrivate
+    allowedActions
+  }

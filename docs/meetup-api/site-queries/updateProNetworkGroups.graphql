@@ -1,0 +1,14 @@
+  mutation updateProNetworkGroups(
+    $networkId: ID!
+    $groupsFilter: NetworkGroupsFilter!
+    $updateParams: NetworkGroupsUpdateParams!
+  ) {
+    updateProNetworkGroups(
+      input: { networkId: $networkId, groupsFilter: $groupsFilter, updateParams: $updateParams }
+    ) {
+      errors {
+        code
+        message
+      }
+    }
+  }

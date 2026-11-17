@@ -1,0 +1,11 @@
+  query getPlatformFeeForEvent($eventId: ID!, $quantity: Int, $venueId: ID, $promoCode: String) {
+    event(id: $eventId) {
+      feeSettings {
+        paypalConfig {
+          platformFee {
+            feeAmount(quantity: $quantity, venueId: $venueId, promoCode: $promoCode)
+          }
+        }
+      }
+    }
+  }

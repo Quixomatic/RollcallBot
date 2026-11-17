@@ -1,0 +1,31 @@
+  mutation editDirectMessage($messageId: ID!, $text: String!) {
+    editDirectMessage(input: { messageId: $messageId, text: $text }) {
+      message {
+        id
+        text
+        kind
+        isEdited
+        isDeleted
+        reactions {
+          emoji
+          count
+          reactedByMe
+        }
+        created
+        updated
+        member {
+          id
+          name
+          memberPhoto {
+            id
+            highResUrl
+          }
+        }
+        convoId
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

@@ -1,0 +1,9 @@
+  mutation deleteEventZoomMeeting($input: DeleteEventZoomMeetingInput!) {
+    deleteEventZoomMeeting(input: $input) {
+      success
+      errors {
+        code
+        message
+      }
+    }
+  }

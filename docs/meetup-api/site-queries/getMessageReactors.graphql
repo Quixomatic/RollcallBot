@@ -1,0 +1,32 @@
+  query getMessageReactors(
+    $messageId: ID!
+    $emoji: String
+    $first: Int!
+    $after: String
+    $includeTotalCount: Boolean!
+  ) {
+    conversationMessage(id: $messageId) {
+      id
+      reactors(emoji: $emoji, first: $first, after: $after) {
+        totalCount @include(if: $includeTotalCount)
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            emojis
+            member {
+              id
+              name
+              memberPhoto {
+                id
+                highResUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }

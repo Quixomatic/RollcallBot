@@ -5,3 +5,5 @@ data/
 .plans/
 .pnpm-store/
 .claude/
+dashboard/dist/
+*.tsbuildinfo

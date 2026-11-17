@@ -1,0 +1,53 @@
+  query getRecommendedGroups(
+    $lat: Float!
+    $lon: Float!
+    $categoryId: ID
+    $topicCategoryId: ID
+    $first: Int
+    $after: String
+    $radius: Int
+    $visibility: GroupVisibility
+    $indexAlias: String
+    $frozenOnly: Boolean
+    $topicsList: [ID!]
+    $ignoreNewGroups: Boolean
+    $boostNewGroup: Boolean
+    $distanceDecayRate: Float
+    $topicMatchMode: TopicMatchMode
+  ) {
+    results: recommendedGroups(
+      filter: {
+        lat: $lat
+        lon: $lon
+        categoryId: $categoryId
+        topicCategoryId: $topicCategoryId
+        radius: $radius
+        visibility: $visibility
+        indexAlias: $indexAlias
+        frozenOnly: $frozenOnly
+        topicsList: $topicsList
+        boostNewGroup: $boostNewGroup
+        distanceDecayRate: $distanceDecayRate
+        topicMatchMode: $topicMatchMode
+      }
+      after: $after
+      first: $first
+      ignoreNewGroups: $ignoreNewGroups
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+      edges {
+        node {
+          ...BuildMeetupGroupSearch
+        }
+        metadata {
+          recId
+          recSource
+        }
+      }
+    }
+  }
+  ${a.et}

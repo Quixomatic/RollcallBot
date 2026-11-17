@@ -1,0 +1,26 @@
+  query getFriendUpcomingEvents($memberId: ID!) {
+    member(id: $memberId) {
+      id
+      attendingEvents {
+        totalCount
+        edges {
+          node {
+            id
+            title
+            dateTime
+            eventUrl
+            displayPhoto {
+              standardUrl
+            }
+            group {
+              name
+              timezone
+            }
+            rsvps(first: 0) {
+              totalCount
+            }
+          }
+        }
+      }
+    }
+  }

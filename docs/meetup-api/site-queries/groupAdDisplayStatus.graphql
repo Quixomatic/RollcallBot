@@ -1,0 +1,5 @@
+  query groupAdDisplayStatus($input: GroupAdDisplayStatusInput!) {
+    groupAdDisplayStatus(input: $input) {
+      isDisplayed
+    }
+  }

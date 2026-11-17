@@ -1,0 +1,194 @@
+  fragment EventHomeClientOnly on Event {
+    id
+    attendanceForecast {
+      lowerBound
+      expected
+      upperBound
+      rsvpCount
+      confidenceLevel
+      dataQuality
+      historicalEventCount
+      historicalRsvpCount
+      modelVersion
+    }
+    isSaved
+    isAttending
+    going {
+      totalCount
+    }
+    token
+    venues {
+      id
+      eventVenueOptions {
+        rsvpLimit
+        guestLimit
+        goingCount
+        howToFindUs
+        feeSettings {
+          amount
+          accepts
+          currency
+        }
+      }
+      earlyBirdDiscount {
+        id
+        amount
+        daysBefore
+        maximumQuantity
+        discountTicketsRemaining
+        promotionEnds
+      }
+    }
+    feeSettings {
+      earlyBirdDiscount {
+        promotionEnds
+      }
+    }
+    rsvpSurveySettings {
+      requiresProQuestionnaire
+      questions {
+        questionId
+        text
+        type
+        required
+        characterLimit
+        id
+        questionType
+        options
+      }
+    }
+    newRsvpSurveySettings: rsvpSurveySettings(newSurvey: true) {
+      requiresProQuestionnaire
+      questions {
+        ...Question
+      }
+    }
+    rsvpQuestions {
+      questionId
+      text
+    }
+    rsvp {
+      id
+      guestsCount
+      isHost
+      payStatus
+      venue {
+        venueType
+      }
+    }
+    howToFindUs
+    actions
+    isEventCommentsEnabled
+    isCheckInEnabled
+    eventChat {
+      id
+      activeConvoMembers {
+        member {
+          id
+        }
+        eventRole
+      }
+      messages(first: 20) {
+        totalCount
+        edges {
+          node {
+            id
+            text
+            reactions {
+              emoji
+              count
+              reactedByMe
+            }
+            created
+            updated
+            member {
+              id
+              name
+              memberPhoto {
+                id
+                baseUrl
+              }
+            }
+          }
+        }
+      }
+    }
+    eventChatWelcomeMessage
+    rsvpState
+    fundraising {
+      enabled
+    }
+    networkEvent {
+      rsvpCount
+      groupCount
+    }
+    creatorMember {
+      id
+      memberPhoto {
+        id
+        baseUrl
+      }
+      name
+    }
+    group {
+      id
+      isPrimaryOrganizer
+      isMember
+      lat
+      lon
+      membershipMetadata {
+        status
+        role
+      }
+      memberPhoto {
+        id
+        baseUrl
+      }
+      fundraising {
+        enabled
+        fundraiser {
+          id
+        }
+      }
+      stats {
+        eventRatings {
+          total
+          average
+        }
+      }
+      organizer {
+        id
+        paypalSettings {
+          eventFee {
+            enabled
+            paypalMerchantAccount {
+              id
+              status
+            }
+          }
+        }
+        isStarterOrganizer
+      }
+      membershipMetadata {
+        role
+        status
+      }
+      proNetwork {
+        id
+        urlname
+        name
+        link
+        isMemberEmailShared: isProEmailShared
+      }
+      isMember
+    }
+    socialLabels
+    rsvpState
+    rsvp {
+      id
+      answer {
+        text
+      }
+    }
+  }
+  ${a.H5}

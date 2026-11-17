@@ -1,0 +1,17 @@
+  query getGroupGetStartedInfo($groupId: ID!) {
+    group(id: $groupId) {
+      id
+      name
+      urlname
+      welcomeBlurb
+      events(filter: { status: [PAST, ACTIVE] }) {
+        totalCount
+      }
+      keyGroupPhoto {
+        id
+      }
+      membershipMetadata {
+        bio
+      }
+    }
+  }

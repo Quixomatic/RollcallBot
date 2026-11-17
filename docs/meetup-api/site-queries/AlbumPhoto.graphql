@@ -1,0 +1,16 @@
+  fragment AlbumPhoto on AlbumPhoto {
+    id
+    orderId
+    url
+    caption
+    date
+    isVertical
+    member {
+      id
+      name
+      memberPhoto {
+        id
+        thumbUrl
+      }
+    }
+  }

@@ -1,0 +1,6 @@
+  query getEventScheduleEventById($eventId: ID!) {
+    event(id: $eventId) {
+      ...EventScheduleEvent
+    }
+  }
+  ${im}

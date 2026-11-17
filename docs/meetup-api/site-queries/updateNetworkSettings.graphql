@@ -1,0 +1,10 @@
+  mutation updateNetworkSettings($input: UpdateNetworkSettingsInput!) {
+    updateNetworkSettings(input: $input) {
+      success
+      errors {
+        code
+        field
+        message
+      }
+    }
+  }

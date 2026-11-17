@@ -1,0 +1,22 @@
+  query getHomepageSelfActiveGroups($endCursor: String, $first: Int) {
+    self {
+      activeGroups: memberships(
+        filter: { status: ACTIVE, groupStatus: [PAID, GRACE, FROZEN] }
+        sort: { sortOrder: DESC }
+        first: $first
+        after: $endCursor
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...HomepageSelfGroup
+          }
+        }
+        totalCount
+      }
+    }
+  }
+  ${tl.g}

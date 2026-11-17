@@ -1,0 +1,9 @@
+  fragment EventByIdPhotoAlbum on EventPhotoAlbum {
+    id
+    photoCount
+    photoSample(number: $number) {
+      id
+      baseUrl
+      highResUrl
+    }
+  }

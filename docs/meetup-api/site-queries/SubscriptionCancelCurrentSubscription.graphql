@@ -1,0 +1,15 @@
+  fragment SubscriptionCancelCurrentSubscription on CurrentSubscription {
+    renewalDate
+    trialEndDate
+    appliedPromotion {
+      name
+      active
+      trial {
+        endDate
+      }
+    }
+    plan {
+      ...SubscriptionCancelPlan
+    }
+  }
+  ${c}

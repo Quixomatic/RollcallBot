@@ -1,0 +1,9 @@
+  mutation createDiscussion($input: CreateDiscussionInput) {
+    createDiscussion(input: $input) {
+      discussionId
+      errors {
+        code
+        message
+      }
+    }
+  }

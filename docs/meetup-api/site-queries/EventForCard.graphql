@@ -1,0 +1,50 @@
+  fragment EventForCard on Event {
+    dateTime
+    description
+    eventType
+    eventUrl
+    featuredEventPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    displayPhoto {
+      baseUrl
+      highResUrl
+      id
+    }
+    feeSettings {
+      accepts
+      currency
+      amount
+    }
+    id
+    isAttending
+    isOnline
+    isSaved
+    covidPrecautions {
+      venueType
+    }
+    group {
+      ...GroupForEventForCard
+    }
+    maxTickets
+    rsvpState
+    title
+    venue {
+      id
+      name
+      lat
+      lon
+      address
+      city
+      state
+      country
+    }
+    socialLabels
+    socialProofInsights {
+      ...SocialProofInsightsForCard
+    }
+  }
+  ${f}
+  ${h}

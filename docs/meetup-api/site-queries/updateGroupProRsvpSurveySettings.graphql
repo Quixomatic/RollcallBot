@@ -1,0 +1,10 @@
+  mutation updateGroupProRsvpSurveySettings($groupId: ID!, $networkId: ID!, $enabled: Boolean!) {
+    updateGroupProRsvpSurveySettings(
+      input: { groupId: $groupId, networkId: $networkId, enabledByDefault: $enabled }
+    ) {
+      errors {
+        code
+        message
+      }
+    }
+  }

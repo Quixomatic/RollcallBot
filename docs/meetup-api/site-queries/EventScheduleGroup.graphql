@@ -1,0 +1,53 @@
+  fragment EventScheduleGroup on Group {
+    id
+    name
+    timezone
+    urlname
+    lat
+    lon
+    activeTopics {
+      id
+      name
+    }
+    topicCategory {
+      id
+      name
+      urlkey
+    }
+    proNetwork(filter: { status: [ACTIVE, DELISTED] }) {
+      id
+      name
+      urlname
+      paymentModel
+      eventTemplates(input: { statuses: ACTIVE }) {
+        totalCount
+      }
+    }
+    proRsvpSurveySettings {
+      rsvpSurveyEnabledByDefault
+    }
+    feeCurrency {
+      iso
+    }
+    paypalEnabled
+    isPrimaryOrganizer
+    organizer {
+      id
+      name
+      highestCurrentRole
+      memberPhoto {
+        standardUrl
+      }
+      isStarterOrganizer
+    }
+    lastEvent: events(sort: DESC, status: PAST, first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    isInCumulativeImpactTreatment
+    starterTierMaxRsvpLimit
+    isEventChatAvailable
+  }

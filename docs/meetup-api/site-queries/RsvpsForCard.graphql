@@ -1,0 +1,9 @@
+  fragment RsvpsForCard on Event {
+    rsvps {
+      totalCount
+      edges {
+        ...EventForCardRsvpEdge
+      }
+    }
+  }
+  ${d}

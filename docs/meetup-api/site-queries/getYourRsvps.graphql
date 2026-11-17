@@ -1,0 +1,33 @@
+  query getYourRsvps(
+    $first: Int!
+    $after: String
+    $eventStatus: [RsvpEventStatus!]
+    $rsvpStatus: [RsvpStatus!]
+    $sort: RsvpSort
+  ) {
+    self {
+      id
+      rsvps(
+        first: $first
+        after: $after
+        filter: { eventStatus: $eventStatus, rsvpStatus: $rsvpStatus }
+        sort: $sort
+      ) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            id
+            event {
+              ...HomepageEventDetails
+            }
+          }
+        }
+      }
+    }
+  }
+  ${tl.N}

@@ -1,0 +1,70 @@
+  query eventSearchWithSeries(
+    $query: String!
+    $lat: Float!
+    $lon: Float!
+    $startDateRange: DateTime
+    $endDateRange: DateTime
+    $eventType: EventType
+    $radius: Float
+    $isHappeningNow: Boolean
+    $isStartingSoon: Boolean
+    $categoryId: ID
+    $topicCategoryId: ID
+    $city: String
+    $state: String
+    $country: String
+    $zip: String
+    $sortField: KeywordSortField
+    $first: Int
+    $after: String
+    $numberOfEventsForSeries: Int
+    $seriesStartDate: Date
+    $doConsolidateEvents: Boolean
+    $dataConfiguration: String
+    $rsvpCountRange: RsvpCountRange
+  ) {
+    results: eventSearch(
+      filter: {
+        query: $query
+        lat: $lat
+        lon: $lon
+        startDateRange: $startDateRange
+        endDateRange: $endDateRange
+        eventType: $eventType
+        radius: $radius
+        isHappeningNow: $isHappeningNow
+        isStartingSoon: $isStartingSoon
+        categoryId: $categoryId
+        topicCategoryId: $topicCategoryId
+        city: $city
+        state: $state
+        country: $country
+        zip: $zip
+        doConsolidateEvents: $doConsolidateEvents
+        rsvpCountRange: $rsvpCountRange
+      }
+      first: $first
+      after: $after
+      sort: { sortField: $sortField }
+      dataConfiguration: $dataConfiguration
+    ) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+      edges {
+        node {
+          ...FindEventInfo
+          group {
+            isNewGroup
+          }
+        }
+        metadata {
+          recId
+          recSource
+        }
+      }
+    }
+  }
+  ${a.Af}

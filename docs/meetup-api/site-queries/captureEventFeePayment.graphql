@@ -1,0 +1,11 @@
+  mutation captureEventFeePayment($input: CaptureEventFeePaymentInput!) {
+    captureEventFeePayment(input: $input) {
+      success {
+        id
+      }
+      error {
+        code
+        message
+      }
+    }
+  }

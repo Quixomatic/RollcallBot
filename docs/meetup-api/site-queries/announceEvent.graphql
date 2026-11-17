@@ -1,0 +1,11 @@
+  mutation announceEvent($eventId: ID!) {
+    announceEvent(input: { eventId: $eventId }) {
+      errors {
+        code
+        message
+      }
+      event {
+        id
+      }
+    }
+  }

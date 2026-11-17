@@ -1,0 +1,61 @@
+  query getRecentEventForFeedback($filter: RsvpFilter) {
+    homePrompt {
+      ... on PostEventFeedbackPrompt {
+        recentEventForFeedback {
+          event {
+            id
+            title
+            dateTime
+            eventUrl
+            feeSettings {
+              amount
+            }
+            eventHosts {
+              memberId
+            }
+            displayPhoto {
+              id
+              source: highResUrl
+              baseUrl
+            }
+            group {
+              id
+              urlname
+              name
+              duesSettings {
+                amount
+              }
+              membershipMetadata {
+                status
+              }
+            }
+            memberConnectionSelectionWindow
+            fundraising {
+              enabled
+            }
+            rsvps(filter: $filter, first: 6, sort: { sortOrder: DESC }) {
+              totalPotentialConnectionsCount
+              edges {
+                node {
+                  member {
+                    id
+                    name
+                    isOrganizer
+                    isMemberPlusSubscriber
+                    memberPhoto {
+                      id
+                      baseUrl
+                      highResUrl
+                    }
+                  }
+                  venue {
+                    venueType
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

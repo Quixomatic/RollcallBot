@@ -1,0 +1,8 @@
+  query hasUserRsvps {
+    self {
+      id
+      rsvps(first: 1) {
+        totalCount
+      }
+    }
+  }

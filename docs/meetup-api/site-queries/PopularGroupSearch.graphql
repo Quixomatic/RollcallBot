@@ -1,0 +1,10 @@
+  fragment PopularGroupSearch on Group {
+    id
+    name
+    link
+    stats {
+      memberCounts {
+        all
+      }
+    }
+  }

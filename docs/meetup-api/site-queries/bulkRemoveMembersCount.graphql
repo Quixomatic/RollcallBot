@@ -1,0 +1,8 @@
+  query bulkRemoveMembersCount($groupId: ID!, $filter: MembershipFilter) {
+    group(id: $groupId) {
+      id
+      memberships(filter: $filter) {
+        totalCount
+      }
+    }
+  }

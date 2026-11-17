@@ -1,0 +1,8 @@
+  query getYesRsvpsCount($startDate: String, $endDate: String) {
+    self {
+      id
+      rsvps(filter: { rsvpStatus: [YES], startDate: $startDate, endDate: $endDate }) {
+        totalCount
+      }
+    }
+  }

@@ -1,0 +1,12 @@
+  fragment VenueDetails on Venue {
+    id
+    name
+    address
+    city
+    country
+    postalCode
+    state
+    venueType
+    lat
+    lon
+  }

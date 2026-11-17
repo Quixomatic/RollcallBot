@@ -1,0 +1,7 @@
+  mutation unfeatureEvent($input: UnfeatureEventInput!) {
+    unfeatureEvent(input: $input) {
+      errors {
+        code
+      }
+    }
+  }

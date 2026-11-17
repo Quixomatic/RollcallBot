@@ -1,0 +1,24 @@
+  fragment GroupsPageGroup2 on Group {
+    id
+    name
+    link
+    city
+    urlname
+    state
+    country
+    timezone
+    urlname
+    groupPhoto: keyGroupPhoto {
+      id
+      baseUrl
+    }
+    organizer {
+      id
+    }
+    stepUpInfo {
+      organizerNominees {
+        id
+      }
+      closingDate
+    }
+  }
