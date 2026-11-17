@@ -392,6 +392,24 @@ function createApi(client, { outbox = null } = {}) {
     res.json({ ok: true, self: result.self, backup });
   }));
 
+  // ---- Docs ----
+  const docs = require('./docs');
+  router.get('/docs', wrap(async (req, res) => res.json({ guide: docs.guidePages().map(({ slug, title }) => ({ slug, title })) })));
+  router.get('/docs/guide/:slug', wrap(async (req, res) => {
+    const page = docs.guidePage(req.params.slug);
+    if (!page) throw httpError(404, 'No such guide page');
+    res.json(page);
+  }));
+  router.get('/docs/commands', wrap(async (req, res) => res.json(docs.commandReference())));
+  router.get('/docs/api', wrap(async (req, res) => res.json({ markdown: docs.apiGuide() })));
+  router.get('/docs/api/queries', wrap(async (req, res) => res.json(docs.rollcallQueries())));
+  router.get('/docs/api/site', wrap(async (req, res) => res.json(docs.siteOperations())));
+  router.get('/docs/api/site/:name', wrap(async (req, res) => {
+    const text = docs.siteOperation(req.params.name);
+    if (text == null) throw httpError(404, 'No such operation in the snapshot');
+    res.json({ name: req.params.name, text });
+  }));
+
   // Result of the last scheduled (daily) API check, and when the next one runs.
   router.get('/health/last', wrap(async (req, res) => {
     const { lastApiHealth } = require('../services/alerts');

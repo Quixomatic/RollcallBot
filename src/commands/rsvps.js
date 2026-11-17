@@ -26,13 +26,15 @@ module.exports = {
 
     const formatMember = (r) => r.guests > 0 ? `${r.member_name} (+${r.guests})` : r.member_name;
     const formatList = (list) => list.length > 0 ? list.map(formatMember).join(', ') : 'None';
+    // Count people, guests included — the same total the RSVP posts and Meetup show.
+    const people = (list) => list.reduce((n, r) => n + 1 + (r.guests || 0), 0);
 
     const embed = new EmbedBuilder()
       .setTitle(`RSVPs: ${match.title}`)
       .setURL(match.url)
       .addFields(
-        { name: `Going (${going.length})`, value: formatList(going) },
-        { name: `Waitlist (${waitlist.length})`, value: formatList(waitlist) },
+        { name: `Going (${people(going)})`, value: formatList(going) },
+        { name: `Waitlist (${people(waitlist)})`, value: formatList(waitlist) },
         { name: `Not Going (${notGoing.length})`, value: formatList(notGoing) },
       )
       .setColor(0x00AE86);

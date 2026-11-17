@@ -124,6 +124,7 @@ Set `DASHBOARD_PASSWORD` and the bot serves a dashboard on port 3000 (`DASHBOARD
 - **Meetup session** — who the bot is logged in as, **Remote login** (a real Chrome next to the bot, streamed into the page, to log in and solve the captcha), and **upload a new `state.json`** (verified against Meetup before it's installed)
 - **Logs** — live tail of the bot's output
 - **Settings** — everything `/config` does, with channel pickers
+- **Docs** — the user guide (`docs/guide/`), a Discord command reference generated from the live command definitions plus notes from `docs/commands/`, and the Meetup API reference
 
 It uses a single admin password and a signed, httpOnly cookie. It's plain HTTP: keep it on your LAN or put it behind a reverse proxy / VPN rather than exposing the port to the internet.
 

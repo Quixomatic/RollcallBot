@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2026-11-17
+
+### Added
+- **Docs in the dashboard** (sidebar → Docs):
+  - **Guide:** getting started, setup & deployment, what gets posted and when (polling cadence, every channel), using the dashboard, the Meetup session and logging in again, backends, and troubleshooting.
+  - **Discord commands:** a reference generated from the commands the bot actually registers (options, limits, required permissions), plus usage notes and examples for each command, with a page per command.
+  - **Meetup API:** the API guide, Rollcall's own queries (read from the running code, with a copy button), and a searchable browser for all 346 of meetup.com's operations with their full text, the variables seen live, and links between fragments.
+  - The pages are Markdown files in `docs/guide/` and `docs/commands/`, so they read the same on GitHub; links between pages work in both places. A test checks that every command is documented and that no link points at a missing page.
+
+### Fixed
+- `/rsvps` counted Going and Waitlist by members only; it now includes guests, matching the RSVP posts and Meetup.
+
 ## [2.0.3] - 2026-11-17
 
 ### Added

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTheme } from 'next-themes'
 import {
-  Activity, CalendarDays, ClipboardList, KeyRound, LayoutDashboard, LogOut, Menu, Monitor, Moon, Send, Settings, Sun, Terminal, X,
+  Activity, BookOpen, CalendarDays, ClipboardList, KeyRound, LayoutDashboard, LogOut, Menu, Monitor, Moon, Send, Settings, Sun, Terminal, X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -89,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <NavItem to="/logs" icon={Terminal} label="Logs" onClick={close} />
         {overview?.dryRun && <NavItem to="/outbox" icon={Send} label="Discord outbox" onClick={close} />}
         {guildId && <NavItem to="/g/$guildId/settings" params={{ guildId }} icon={Settings} label="Settings" onClick={close} />}
+        <NavItem to="/docs" icon={BookOpen} label="Docs" onClick={close} />
       </nav>
 
       <div className="mt-auto space-y-3">

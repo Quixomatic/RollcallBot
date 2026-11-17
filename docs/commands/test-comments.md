@@ -1,0 +1,1 @@
+Fetches all comments for any Meetup event URL and posts them **in the channel you run it in**, formatted exactly like the comments channel (threads, pinned and like tags). Nothing is stored, and it doesn't change which Discord post the real comments belong to.

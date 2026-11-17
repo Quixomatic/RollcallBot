@@ -34,6 +34,7 @@ RUN if [ "$(dpkg --print-architecture)" = "amd64" ]; then \
     else echo "Skipping Google Chrome (not amd64)"; fi
 
 COPY src/ ./src/
+COPY docs/ ./docs/
 COPY --from=dashboard /dashboard/dist ./dashboard/dist
 
 ARG UID=1000

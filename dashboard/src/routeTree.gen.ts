@@ -12,11 +12,20 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppDocsRouteImport } from './routes/_app/docs'
 import { Route as AppHealthRouteImport } from './routes/_app/health'
 import { Route as AppLogsRouteImport } from './routes/_app/logs'
 import { Route as AppOutboxRouteImport } from './routes/_app/outbox'
 import { Route as AppSessionRouteImport } from './routes/_app/session'
+import { Route as AppDocsIndexRouteImport } from './routes/_app/docs.index'
+import { Route as AppDocsSlugRouteImport } from './routes/_app/docs.$slug'
+import { Route as AppDocsApiIndexRouteImport } from './routes/_app/docs.api.index'
+import { Route as AppDocsApiQueriesRouteImport } from './routes/_app/docs.api.queries'
+import { Route as AppDocsCommandsIndexRouteImport } from './routes/_app/docs.commands.index'
+import { Route as AppDocsCommandsNameRouteImport } from './routes/_app/docs.commands.$name'
 import { Route as AppGGuildIdSettingsRouteImport } from './routes/_app/g.$guildId.settings'
+import { Route as AppDocsApiSiteIndexRouteImport } from './routes/_app/docs.api.site.index'
+import { Route as AppDocsApiSiteNameRouteImport } from './routes/_app/docs.api.site.$name'
 import { Route as AppGGuildIdEventsIndexRouteImport } from './routes/_app/g.$guildId.events.index'
 import { Route as AppGGuildIdEventsEventIdRouteImport } from './routes/_app/g.$guildId.events.$eventId'
 
@@ -32,6 +41,11 @@ const LoginRoute = LoginRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocsRoute = AppDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHealthRoute = AppHealthRouteImport.update({
@@ -54,10 +68,50 @@ const AppSessionRoute = AppSessionRouteImport.update({
   path: '/session',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDocsIndexRoute = AppDocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsSlugRoute = AppDocsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsApiIndexRoute = AppDocsApiIndexRouteImport.update({
+  id: '/api/',
+  path: '/api/',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsApiQueriesRoute = AppDocsApiQueriesRouteImport.update({
+  id: '/api/queries',
+  path: '/api/queries',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsCommandsIndexRoute = AppDocsCommandsIndexRouteImport.update({
+  id: '/commands/',
+  path: '/commands/',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsCommandsNameRoute = AppDocsCommandsNameRouteImport.update({
+  id: '/commands/$name',
+  path: '/commands/$name',
+  getParentRoute: () => AppDocsRoute,
+} as any)
 const AppGGuildIdSettingsRoute = AppGGuildIdSettingsRouteImport.update({
   id: '/g/$guildId/settings',
   path: '/g/$guildId/settings',
   getParentRoute: () => AppRoute,
+} as any)
+const AppDocsApiSiteIndexRoute = AppDocsApiSiteIndexRouteImport.update({
+  id: '/api/site/',
+  path: '/api/site/',
+  getParentRoute: () => AppDocsRoute,
+} as any)
+const AppDocsApiSiteNameRoute = AppDocsApiSiteNameRouteImport.update({
+  id: '/api/site/$name',
+  path: '/api/site/$name',
+  getParentRoute: () => AppDocsRoute,
 } as any)
 const AppGGuildIdEventsIndexRoute = AppGGuildIdEventsIndexRouteImport.update({
   id: '/g/$guildId/events/',
@@ -74,12 +128,21 @@ const AppGGuildIdEventsEventIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
+  '/docs': typeof AppDocsRouteWithChildren
   '/health': typeof AppHealthRoute
   '/logs': typeof AppLogsRoute
   '/outbox': typeof AppOutboxRoute
   '/session': typeof AppSessionRoute
+  '/docs/$slug': typeof AppDocsSlugRoute
+  '/docs/': typeof AppDocsIndexRoute
+  '/docs/api/queries': typeof AppDocsApiQueriesRoute
+  '/docs/commands/$name': typeof AppDocsCommandsNameRoute
   '/g/$guildId/settings': typeof AppGGuildIdSettingsRoute
+  '/docs/api/': typeof AppDocsApiIndexRoute
+  '/docs/commands/': typeof AppDocsCommandsIndexRoute
+  '/docs/api/site/$name': typeof AppDocsApiSiteNameRoute
   '/g/$guildId/events/$eventId': typeof AppGGuildIdEventsEventIdRoute
+  '/docs/api/site/': typeof AppDocsApiSiteIndexRoute
   '/g/$guildId/events/': typeof AppGGuildIdEventsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -89,21 +152,38 @@ export interface FileRoutesByTo {
   '/outbox': typeof AppOutboxRoute
   '/session': typeof AppSessionRoute
   '/': typeof AppIndexRoute
+  '/docs/$slug': typeof AppDocsSlugRoute
+  '/docs': typeof AppDocsIndexRoute
+  '/docs/api/queries': typeof AppDocsApiQueriesRoute
+  '/docs/commands/$name': typeof AppDocsCommandsNameRoute
   '/g/$guildId/settings': typeof AppGGuildIdSettingsRoute
+  '/docs/api': typeof AppDocsApiIndexRoute
+  '/docs/commands': typeof AppDocsCommandsIndexRoute
+  '/docs/api/site/$name': typeof AppDocsApiSiteNameRoute
   '/g/$guildId/events/$eventId': typeof AppGGuildIdEventsEventIdRoute
+  '/docs/api/site': typeof AppDocsApiSiteIndexRoute
   '/g/$guildId/events': typeof AppGGuildIdEventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/docs': typeof AppDocsRouteWithChildren
   '/_app/health': typeof AppHealthRoute
   '/_app/logs': typeof AppLogsRoute
   '/_app/outbox': typeof AppOutboxRoute
   '/_app/session': typeof AppSessionRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/docs/$slug': typeof AppDocsSlugRoute
+  '/_app/docs/': typeof AppDocsIndexRoute
+  '/_app/docs/api/queries': typeof AppDocsApiQueriesRoute
+  '/_app/docs/commands/$name': typeof AppDocsCommandsNameRoute
   '/_app/g/$guildId/settings': typeof AppGGuildIdSettingsRoute
+  '/_app/docs/api/': typeof AppDocsApiIndexRoute
+  '/_app/docs/commands/': typeof AppDocsCommandsIndexRoute
+  '/_app/docs/api/site/$name': typeof AppDocsApiSiteNameRoute
   '/_app/g/$guildId/events/$eventId': typeof AppGGuildIdEventsEventIdRoute
+  '/_app/docs/api/site/': typeof AppDocsApiSiteIndexRoute
   '/_app/g/$guildId/events/': typeof AppGGuildIdEventsIndexRoute
 }
 export interface FileRouteTypes {
@@ -111,12 +191,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/docs'
     | '/health'
     | '/logs'
     | '/outbox'
     | '/session'
+    | '/docs/$slug'
+    | '/docs/'
+    | '/docs/api/queries'
+    | '/docs/commands/$name'
     | '/g/$guildId/settings'
+    | '/docs/api/'
+    | '/docs/commands/'
+    | '/docs/api/site/$name'
     | '/g/$guildId/events/$eventId'
+    | '/docs/api/site/'
     | '/g/$guildId/events/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -126,20 +215,37 @@ export interface FileRouteTypes {
     | '/outbox'
     | '/session'
     | '/'
+    | '/docs/$slug'
+    | '/docs'
+    | '/docs/api/queries'
+    | '/docs/commands/$name'
     | '/g/$guildId/settings'
+    | '/docs/api'
+    | '/docs/commands'
+    | '/docs/api/site/$name'
     | '/g/$guildId/events/$eventId'
+    | '/docs/api/site'
     | '/g/$guildId/events'
   id:
     | '__root__'
     | '/_app'
     | '/login'
+    | '/_app/docs'
     | '/_app/health'
     | '/_app/logs'
     | '/_app/outbox'
     | '/_app/session'
     | '/_app/'
+    | '/_app/docs/$slug'
+    | '/_app/docs/'
+    | '/_app/docs/api/queries'
+    | '/_app/docs/commands/$name'
     | '/_app/g/$guildId/settings'
+    | '/_app/docs/api/'
+    | '/_app/docs/commands/'
+    | '/_app/docs/api/site/$name'
     | '/_app/g/$guildId/events/$eventId'
+    | '/_app/docs/api/site/'
     | '/_app/g/$guildId/events/'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/docs': {
+      id: '/_app/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof AppDocsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/health': {
       id: '/_app/health'
       path: '/health'
@@ -199,12 +312,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSessionRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/docs/': {
+      id: '/_app/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof AppDocsIndexRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/$slug': {
+      id: '/_app/docs/$slug'
+      path: '/$slug'
+      fullPath: '/docs/$slug'
+      preLoaderRoute: typeof AppDocsSlugRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/api/': {
+      id: '/_app/docs/api/'
+      path: '/api'
+      fullPath: '/docs/api/'
+      preLoaderRoute: typeof AppDocsApiIndexRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/api/queries': {
+      id: '/_app/docs/api/queries'
+      path: '/api/queries'
+      fullPath: '/docs/api/queries'
+      preLoaderRoute: typeof AppDocsApiQueriesRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/commands/': {
+      id: '/_app/docs/commands/'
+      path: '/commands'
+      fullPath: '/docs/commands/'
+      preLoaderRoute: typeof AppDocsCommandsIndexRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/commands/$name': {
+      id: '/_app/docs/commands/$name'
+      path: '/commands/$name'
+      fullPath: '/docs/commands/$name'
+      preLoaderRoute: typeof AppDocsCommandsNameRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
     '/_app/g/$guildId/settings': {
       id: '/_app/g/$guildId/settings'
       path: '/g/$guildId/settings'
       fullPath: '/g/$guildId/settings'
       preLoaderRoute: typeof AppGGuildIdSettingsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/docs/api/site/': {
+      id: '/_app/docs/api/site/'
+      path: '/api/site'
+      fullPath: '/docs/api/site/'
+      preLoaderRoute: typeof AppDocsApiSiteIndexRouteImport
+      parentRoute: typeof AppDocsRoute
+    }
+    '/_app/docs/api/site/$name': {
+      id: '/_app/docs/api/site/$name'
+      path: '/api/site/$name'
+      fullPath: '/docs/api/site/$name'
+      preLoaderRoute: typeof AppDocsApiSiteNameRouteImport
+      parentRoute: typeof AppDocsRoute
     }
     '/_app/g/$guildId/events/': {
       id: '/_app/g/$guildId/events/'
@@ -223,7 +392,33 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppDocsRouteChildren {
+  AppDocsSlugRoute: typeof AppDocsSlugRoute
+  AppDocsIndexRoute: typeof AppDocsIndexRoute
+  AppDocsApiQueriesRoute: typeof AppDocsApiQueriesRoute
+  AppDocsCommandsNameRoute: typeof AppDocsCommandsNameRoute
+  AppDocsApiIndexRoute: typeof AppDocsApiIndexRoute
+  AppDocsCommandsIndexRoute: typeof AppDocsCommandsIndexRoute
+  AppDocsApiSiteNameRoute: typeof AppDocsApiSiteNameRoute
+  AppDocsApiSiteIndexRoute: typeof AppDocsApiSiteIndexRoute
+}
+
+const AppDocsRouteChildren: AppDocsRouteChildren = {
+  AppDocsSlugRoute: AppDocsSlugRoute,
+  AppDocsIndexRoute: AppDocsIndexRoute,
+  AppDocsApiQueriesRoute: AppDocsApiQueriesRoute,
+  AppDocsCommandsNameRoute: AppDocsCommandsNameRoute,
+  AppDocsApiIndexRoute: AppDocsApiIndexRoute,
+  AppDocsCommandsIndexRoute: AppDocsCommandsIndexRoute,
+  AppDocsApiSiteNameRoute: AppDocsApiSiteNameRoute,
+  AppDocsApiSiteIndexRoute: AppDocsApiSiteIndexRoute,
+}
+
+const AppDocsRouteWithChildren =
+  AppDocsRoute._addFileChildren(AppDocsRouteChildren)
+
 interface AppRouteChildren {
+  AppDocsRoute: typeof AppDocsRouteWithChildren
   AppHealthRoute: typeof AppHealthRoute
   AppLogsRoute: typeof AppLogsRoute
   AppOutboxRoute: typeof AppOutboxRoute
@@ -235,6 +430,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppDocsRoute: AppDocsRouteWithChildren,
   AppHealthRoute: AppHealthRoute,
   AppLogsRoute: AppLogsRoute,
   AppOutboxRoute: AppOutboxRoute,
